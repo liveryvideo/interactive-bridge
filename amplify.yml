@@ -1,0 +1,6 @@
+version: 0.1
+frontend:
+  artifacts:
+    baseDirectory: /
+    files:
+      - '**/*'
