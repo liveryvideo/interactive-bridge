@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="Description"
+      content="Interactive Layer for Ex Machina Group Livery (https://www.liveryvideo.com/)."
+    />
+    <base href="/" />
+
+    <title>Livery Interactive Layer</title>
+
+    <style>
+      * {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 8px;
+        /* background: rgba(245, 245, 245, 0.728); */
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body,
+      html {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      a.logo {
+        display: inline-block;
+        padding: 4px;
+        background: #222;
+        box-shadow: 0 0 2px 2px #222;
+        opacity: 0.25;
+      }
+
+      a.logo:active,
+      a.logo:hover {
+        opacity: 1;
+      }
+
+      .logo img {
+        width: 117px;
+      }
+
+      #getSDKValues {
+        border: 1px solid red;
+        height: 50%;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .valueBox {
+        border: 1px solid grey;
+        background-color: rgba(245, 245, 245, 0.913);
+        height: 50%;
+        padding: 5px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+    </style>
+    <script type="module" src="./build/index.js"></script>
+  </head>
+  <body>
+    <livery-interactive></livery-interactive>
+    <!-- <form action="" onsubmit="sendTestMessage(event)">
+      Enter name:
+      <textarea id="message" name="message" rows="10" cols="50"></textarea>
+      <input type="submit" value="Submit" />
+    </form>
+
+    <script>
+      // eslint-disable-next-line no-unused-vars
+      function sendTestMessage(e) {
+        e.preventDefault();
+        window.postMessage({ type: 'testmsg' }, '*');
+        console.log('ℹ️Sending test message: ', e.target.value);
+      }
+    </script> -->
+
+    <div id="getSDKValues">
+      <div class="valueBox">
+        <h2 id="latency">Latency</h2>
+        <button onclick="getLatency()">Get Latency</button>
+      </div>
+      <div class="valueBox">
+        <h2 id="orientation">Orientation</h2>
+        <button onclick="subscribeOrientation()">Subscribe Orientation</button>
+      </div>
+    </div>
+
+    <script>
+      const liveryInteractive = document.querySelector('livery-interactive');
+
+      // eslint-disable-next-line no-unused-vars
+      async function getLatency() {
+        document.querySelector(
+          '#latency',
+        ).innerText = await liveryInteractive.getLatency();
+      }
+
+      // eslint-disable-next-line no-unused-vars
+      function subscribeOrientation() {
+        liveryInteractive.subscribeOrientation((e) => {
+          document.querySelector('#orientation').innerText = e;
+        });
+      }
+    </script>
+
+    <!-- <a
+      class="logo"
+      href="https://www.liveryvideo.com"
+      rel="external"
+      target="_blank"
+    >
+      <img src="demo/assets/logo.png" />
+    </a> -->
+  </body>
+</html>
