@@ -1,8 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import { customElement, LitElement, property, html } from 'lit-element';
-import { uuid } from './util/uuid';
 
-import LiveryBridgeInteractive from './LiveryBridgeInteractive';
+import { LiveryBridge } from '../LiveryBridge';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -12,12 +11,16 @@ declare global {
 
 @customElement('livery-interactive')
 export class LiveryInteractive extends LitElement {
-  bridge: LiveryBridgeInteractive;
+  bridge: LiveryBridge;
 
   constructor() {
     super();
 
-    this.bridge = new LiveryBridgeInteractive();
+    this.bridge = new LiveryBridge(
+      window.parent,
+      window.parent.location.href,
+      '0.0.1',
+    );
   }
 
   public getLatency(): Promise<number> {

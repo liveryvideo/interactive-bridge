@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any --- MessageEvent returns an any object. The maps we use also use any, as multiple data types are allowed. */
 
-import { uuid } from './util/uuid';
+import { uuid } from './livery-interactive/util/uuid';
 
 export interface LiveryMessage {
   id?: string;
@@ -44,7 +44,7 @@ export interface ResolveReject {
   resolve: (value: any) => void;
 }
 
-export abstract class LiveryBridge {
+export class LiveryBridge {
   protected deferredMap: Map<string, ResolveReject>;
 
   protected handshakeComplete: boolean;
@@ -53,13 +53,23 @@ export abstract class LiveryBridge {
 
   protected listenerMap: Map<string, (value: any) => void>;
 
-  abstract version: string;
+  protected targetWindow: Window;
 
-  constructor() {
+  protected targetWindowUrl: string;
+
+  protected version: string;
+
+  constructor(targetWindow: Window, targetWindowUrl: string, version: string) {
     this.deferredMap = new Map<string, ResolveReject>();
     this.listenerMap = new Map<string, (value: any) => void>();
 
     this.handshakeComplete = false;
+
+    this.targetWindow = targetWindow;
+    this.targetWindowUrl = targetWindowUrl;
+    this.version = version;
+
+    this.init();
   }
 
   static isCommandMessage(object: LiveryMessage): object is CommandMessage {
@@ -141,10 +151,15 @@ export abstract class LiveryBridge {
     return this.sendCommand<string>(name, id, arg);
   }
 
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  protected handleCommand(message: CommandMessage) {
+    // TODO:implement
+  }
+
   protected handleHandshake(message: HandshakeMessage) {
     if (message.version !== this.version) {
       this.sendReject(message.id, new Error('Versions do not correspond.'));
-    } else if (message.id !== this.handshakeId) {
+    } else {
       const resolveReject = this.deferredMap.get(this.handshakeId);
       if (resolveReject) {
         resolveReject.reject(new Error('Received new handshake.'));
@@ -155,6 +170,7 @@ export abstract class LiveryBridge {
   }
 
   protected handleMessage(message: LiveryMessage) {
+    console.log('ℹ️[Livery-Interactive] Incoming Message:', message);
     if (LiveryBridge.isHandshakeMessage(message)) {
       this.handleHandshake(message);
       return;
@@ -251,6 +267,11 @@ export abstract class LiveryBridge {
     });
   }
 
+  protected sendMessage(message: LiveryMessage) {
+    console.log('ℹ️[Livery-Interactive] Outgoing Message:', message);
+    this.targetWindow.postMessage(message, this.targetWindowUrl);
+  }
+
   protected sendReject(id: string, error: Error) {
     const message: RejectMessage = {
       isLivery: true,
@@ -271,8 +292,4 @@ export abstract class LiveryBridge {
     };
     this.sendMessage(messagse);
   }
-
-  protected abstract handleCommand(message: CommandMessage): void;
-
-  protected abstract sendMessage(message: LiveryMessage): void;
 }
