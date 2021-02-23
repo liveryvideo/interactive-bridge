@@ -166,7 +166,6 @@ export class LiveryBridge {
       }
       this.sendResolve(message.id, this.version);
     }
-    this.handshakeComplete = true;
   }
 
   protected handleMessage(message: LiveryMessage) {
@@ -258,6 +257,7 @@ export class LiveryBridge {
     return new Promise<void>((resolve, reject) => {
       this.deferredMap.set(id, {
         resolve: () => {
+          console.log('ℹ️handshake complete');
           resolve();
         },
         reject: (error: Error) => {

@@ -16,11 +16,7 @@ export class LiveryInteractive extends LitElement {
   constructor() {
     super();
 
-    this.bridge = new LiveryBridge(
-      window.parent,
-      window.parent.location.href,
-      '0.0.1',
-    );
+    this.bridge = new LiveryBridge(window.parent, '*', '0.0.1');
   }
 
   public getLatency(): Promise<number> {
