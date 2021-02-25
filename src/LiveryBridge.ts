@@ -77,7 +77,24 @@ export class LiveryBridge {
     this.version = version;
     this.logger = logger;
 
-    this.init();
+    // Start listening for messages
+    window.addEventListener('message', (e) => {
+      if (LiveryBridge.isLiveryMessage(e.data)) {
+        this.handleMessage(e.data);
+      }
+    });
+
+    // Attempt to handshake.
+    this.handshakeId = uuid();
+    this.sendHandshake(this.handshakeId, this.version)
+      .then(() => {
+        this.handshakeComplete = true;
+        this.logger(`Handshake Complete. \n\n`);
+      })
+      .catch((error: Error) => {
+        this.handshakeComplete = false;
+        this.logger(`Handshake Failed: ${error.message} \n\n`);
+      });
   }
 
   static isCommandMessage(object: LiveryMessage): object is CommandMessage {
@@ -223,28 +240,6 @@ export class LiveryBridge {
 
     // should always be last
     this.sendReject(message.id || 'unknown', new Error('Unknown Command'));
-  }
-
-  // move to constructor
-  protected init() {
-    // Start listening for messages
-    window.addEventListener('message', (e) => {
-      if (LiveryBridge.isLiveryMessage(e.data)) {
-        this.handleMessage(e.data);
-      }
-    });
-
-    // Attempt to handshake.
-    this.handshakeId = uuid();
-    this.sendHandshake(this.handshakeId, this.version)
-      .then(() => {
-        this.handshakeComplete = true;
-        this.logger(`Handshake Complete. \n\n`);
-      })
-      .catch((error: Error) => {
-        this.handshakeComplete = false;
-        this.logger(`Handshake Failed: ${error.message} \n\n`);
-      });
   }
 
   protected sendEvent<ValueType>(id: string, value: ValueType) {
