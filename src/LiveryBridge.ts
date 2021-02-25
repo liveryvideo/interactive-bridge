@@ -118,7 +118,7 @@ export class LiveryBridge {
   }
 
   static isLiveryMessage(object: any): object is LiveryMessage {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Incoming object is any.
     return !!object && object.isLivery === true && !!object.type;
   }
 
@@ -176,7 +176,7 @@ export class LiveryBridge {
     return this.sendCommand<string>(name, id, arg);
   }
 
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars -- Not implemented here.
   protected handleCommand(message: CommandMessage) {
     // Should be implemented in child class.
   }
