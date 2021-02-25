@@ -102,13 +102,81 @@
         width: 100%;
         flex-direction: column;
       }
+      textarea {
+        margin: 10px;
+      }
     </style>
     <script type="module" src="./build/index.js"></script>
   </head>
   <body>
-    <livery-interactive></livery-interactive>
+    <div class="content">
+      <a
+        class="logo"
+        href="https://www.liveryvideo.com"
+        rel="external"
+        target="_blank"
+      >
+        <img src="demo/assets/logo.png" />
+      </a>
+      <div class="subcontent">
+        <div class="valueBox">
+          <h3 id="latency">Latency</h3>
+          <button onclick="getLatency()">Get Latency</button>
+        </div>
+        <div class="valueBox">
+          <h3 id="orientation">Orientation</h3>
+          <button onclick="subscribeOrientation()">
+            Subscribe Orientation
+          </button>
+        </div>
+      </div>
+
+      <div class="subcontent">
+        <form id="message-form" action="" onsubmit="sendTestMessage(event)">
+          <div>
+            <button type="button" onclick="setTemplate('handshake')">
+              Handshake
+            </button>
+            <button type="button" onclick="setTemplate('command')">
+              Command
+            </button>
+            <button type="button" onclick="setTemplate('resolve')">
+              Resolve
+            </button>
+            <button type="button" onclick="setTemplate('reject')">
+              Reject
+            </button>
+            <button type="button" onclick="setTemplate('event')">Event</button>
+          </div>
+
+          <textarea id="message" name="message" rows="7" cols="20"></textarea>
+          <input type="submit" value="Send Message" />
+
+          <livery-interactive logEnabled></livery-interactive>
+        </form>
+      </div>
+    </div>
 
     <script>
+      const liveryInteractive = document.querySelector('livery-interactive');
+
+      // eslint-disable-next-line no-unused-vars
+      async function getLatency() {
+        document.querySelector(
+          '#latency',
+        ).innerText = await liveryInteractive.getLatency();
+      }
+
+      // eslint-disable-next-line no-unused-vars
+      function subscribeOrientation() {
+        const setOrientation = (orientation) => {
+          document.querySelector('#orientation').innerText = orientation;
+        };
+        liveryInteractive
+          .subscribeOrientation(setOrientation)
+          .then(setOrientation);
+      }
+
       // eslint-disable-next-line no-unused-vars
       function sendTestMessage(e) {
         e.preventDefault();
@@ -152,7 +220,7 @@
             template = {
               isLivery: true,
               type: 'reject',
-              error: {},
+              error: new Error('error message'),
               id: '',
             };
             break;
@@ -176,73 +244,6 @@
           null,
           1,
         );
-      }
-    </script>
-
-    <div class="content">
-      <a
-        class="logo"
-        href="https://www.liveryvideo.com"
-        rel="external"
-        target="_blank"
-      >
-        <img src="demo/assets/logo.png" />
-      </a>
-      <div class="subcontent">
-        <div class="valueBox">
-          <h3 id="latency">Latency</h3>
-          <button onclick="getLatency()">Get Latency</button>
-        </div>
-        <div class="valueBox">
-          <h3 id="orientation">Orientation</h3>
-          <button onclick="subscribeOrientation()">
-            Subscribe Orientation
-          </button>
-        </div>
-      </div>
-
-      <div class="subcontent">
-        <form id="message-form" action="" onsubmit="sendTestMessage(event)">
-          <div>
-            <button type="button" onclick="setTemplate('handshake')">
-              Handshake
-            </button>
-            <button type="button" onclick="setTemplate('command')">
-              Command
-            </button>
-            <button type="button" onclick="setTemplate('resolve')">
-              Resolve
-            </button>
-            <button type="button" onclick="setTemplate('reject')">
-              Reject
-            </button>
-            <button type="button" onclick="setTemplate('event')">Event</button>
-          </div>
-
-          <textarea id="message" name="message" rows="10" cols="20"></textarea>
-          <input type="submit" value="Send Message" />
-        </form>
-      </div>
-    </div>
-
-    <script>
-      const liveryInteractive = document.querySelector('livery-interactive');
-
-      // eslint-disable-next-line no-unused-vars
-      async function getLatency() {
-        document.querySelector(
-          '#latency',
-        ).innerText = await liveryInteractive.getLatency();
-      }
-
-      // eslint-disable-next-line no-unused-vars
-      function subscribeOrientation() {
-        const setOrientation = (orientation) => {
-          document.querySelector('#orientation').innerText = orientation;
-        };
-        liveryInteractive
-          .subscribeOrientation(setOrientation)
-          .then(setOrientation);
       }
     </script>
   </body>

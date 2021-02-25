@@ -1,5 +1,10 @@
-/* eslint-disable class-methods-use-this */
-import { customElement, LitElement, property, html } from 'lit-element';
+import {
+  customElement,
+  LitElement,
+  property,
+  html,
+  internalProperty,
+} from 'lit-element';
 
 import { LiveryBridge } from '../LiveryBridge';
 
@@ -11,12 +16,23 @@ declare global {
 
 @customElement('livery-interactive')
 export class LiveryInteractive extends LitElement {
+  @property({ type: Boolean })
+  logEnabled = false;
+
+  @internalProperty()
+  logValue: string;
+
   bridge: LiveryBridge;
 
   constructor() {
     super();
 
-    this.bridge = new LiveryBridge(window.parent, '*', '0.0.1');
+    this.logValue = '';
+    const logger = (message: string) => {
+      this.logValue += message;
+    };
+
+    this.bridge = new LiveryBridge(window.parent, '*', '0.0.1', logger);
   }
 
   public getLatency(): Promise<number> {
@@ -30,15 +46,20 @@ export class LiveryInteractive extends LitElement {
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  // render() {
-  //   return html`
-  //     <button
-  //       @click=${() => {
-  //         this.sendMessage({ type: 'test' });
-  //       }}
-  //     >
-  //       Test button!
-  //     </button>
-  //   `;
-  // }
+  render() {
+    if (this.logEnabled) {
+      return html`
+        <textarea
+          id="log"
+          name="message"
+          rows="15"
+          cols="30"
+          readonly
+          disabled
+          .value=${this.logValue}
+        ></textarea>
+      `;
+    }
+    return undefined;
+  }
 }

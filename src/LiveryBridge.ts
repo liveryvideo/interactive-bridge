@@ -8,44 +8,44 @@ export interface LiveryMessage {
   type: string;
 }
 
-export interface HandshakeMessage extends LiveryMessage {
+interface HandshakeMessage extends LiveryMessage {
   id: string;
   type: 'handshake';
   version: string;
 }
 
-export interface ResolveMessage<ValueType> extends LiveryMessage {
+interface ResolveMessage<ValueType> extends LiveryMessage {
   id: string;
   type: 'resolve';
   value: ValueType;
 }
 
-export interface RejectMessage extends LiveryMessage {
+interface RejectMessage extends LiveryMessage {
   error: Error;
   id: string;
   type: 'reject';
 }
 
-export interface CommandMessage extends LiveryMessage {
+interface CommandMessage extends LiveryMessage {
   arg?: string;
   id: string;
   name: string;
   type: 'command';
 }
 
-export interface EventMessage<ValueType> extends LiveryMessage {
+interface EventMessage<ValueType> extends LiveryMessage {
   id: string;
   type: 'event';
   value: ValueType;
 }
 
-export interface ResolveReject {
+interface Deferred {
   reject: (error: Error) => void;
   resolve: (value: any) => void;
 }
 
 export class LiveryBridge {
-  protected deferredMap: Map<string, ResolveReject>;
+  protected deferredMap: Map<string, Deferred>;
 
   protected handshakeComplete: boolean;
 
@@ -53,14 +53,21 @@ export class LiveryBridge {
 
   protected listenerMap: Map<string, (value: any) => void>;
 
+  protected logger: (message: string) => void;
+
   protected targetWindow: Window;
 
   protected targetWindowUrl: string;
 
   protected version: string;
 
-  constructor(targetWindow: Window, targetWindowUrl: string, version: string) {
-    this.deferredMap = new Map<string, ResolveReject>();
+  constructor(
+    targetWindow: Window,
+    targetWindowUrl: string,
+    version: string,
+    logger: (message: string) => void,
+  ) {
+    this.deferredMap = new Map<string, Deferred>();
     this.listenerMap = new Map<string, (value: any) => void>();
 
     this.handshakeComplete = false;
@@ -68,6 +75,7 @@ export class LiveryBridge {
     this.targetWindow = targetWindow;
     this.targetWindowUrl = targetWindowUrl;
     this.version = version;
+    this.logger = logger;
 
     this.init();
   }
@@ -120,17 +128,17 @@ export class LiveryBridge {
     id?: string,
     arg?: string,
   ): Promise<ValueType> {
-    const message: CommandMessage = {
+    const commandId = id || uuid();
+    this.sendMessage({
       isLivery: true,
       type: 'command',
       name,
-      id: id || uuid(),
+      id: commandId,
       arg,
-    };
-    this.sendMessage(message);
+    });
 
     return new Promise<ValueType>((resolve, reject) => {
-      this.deferredMap.set(message.id, {
+      this.deferredMap.set(commandId, {
         resolve: (value: ValueType) => {
           resolve(value);
         },
@@ -153,7 +161,7 @@ export class LiveryBridge {
 
   // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
   protected handleCommand(message: CommandMessage) {
-    // TODO:implement
+    // Should be implemented in child class.
   }
 
   protected handleHandshake(message: HandshakeMessage) {
@@ -169,7 +177,8 @@ export class LiveryBridge {
   }
 
   protected handleMessage(message: LiveryMessage) {
-    console.log('ℹ️[Livery-Interactive] Incoming Message:', message);
+    this.logger(`Incoming message: ${JSON.stringify(message, null, 1)} \n\n`);
+
     if (LiveryBridge.isHandshakeMessage(message)) {
       this.handleHandshake(message);
       return;
@@ -216,6 +225,7 @@ export class LiveryBridge {
     this.sendReject(message.id || 'unknown', new Error('Unknown Command'));
   }
 
+  // move to constructor
   protected init() {
     // Start listening for messages
     window.addEventListener('message', (e) => {
@@ -229,35 +239,34 @@ export class LiveryBridge {
     this.sendHandshake(this.handshakeId, this.version)
       .then(() => {
         this.handshakeComplete = true;
+        this.logger(`Handshake Complete. \n\n`);
       })
-      .catch(() => {
+      .catch((error: Error) => {
         this.handshakeComplete = false;
+        this.logger(`Handshake Failed: ${error.message} \n\n`);
       });
   }
 
   protected sendEvent<ValueType>(id: string, value: ValueType) {
-    const messagse: EventMessage<ValueType> = {
+    this.sendMessage({
       isLivery: true,
       type: 'event',
       value,
       id,
-    };
-    this.sendMessage(messagse);
+    });
   }
 
   protected sendHandshake(id: string, version: string) {
-    const message: HandshakeMessage = {
+    this.sendMessage({
       isLivery: true,
       type: 'handshake',
       id,
       version,
-    };
-    this.sendMessage(message);
+    });
 
     return new Promise<void>((resolve, reject) => {
       this.deferredMap.set(id, {
         resolve: () => {
-          console.log('ℹ️handshake complete');
           resolve();
         },
         reject: (error: Error) => {
@@ -267,29 +276,26 @@ export class LiveryBridge {
     });
   }
 
-  protected sendMessage(message: LiveryMessage) {
-    console.log('ℹ️[Livery-Interactive] Outgoing Message:', message);
+  protected sendMessage<T extends LiveryMessage>(message: T) {
+    this.logger(`Outgoing message: ${JSON.stringify(message, null, 1)} \n\n`);
     this.targetWindow.postMessage(message, this.targetWindowUrl);
   }
 
   protected sendReject(id: string, error: Error) {
-    const message: RejectMessage = {
+    this.sendMessage({
       isLivery: true,
       type: 'reject',
       error,
       id,
-    };
-
-    this.sendMessage(message);
+    });
   }
 
   protected sendResolve<ValueType>(id: string, value: ValueType) {
-    const messagse: ResolveMessage<ValueType> = {
+    this.sendMessage({
       isLivery: true,
       type: 'resolve',
       value,
       id,
-    };
-    this.sendMessage(messagse);
+    });
   }
 }
