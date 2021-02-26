@@ -1,4 +1,4 @@
-import { customElement, LitElement, property } from 'lit-element';
+import { customElement, LitElement } from 'lit-element';
 
 import { LiveryBridge } from '../LiveryBridge';
 

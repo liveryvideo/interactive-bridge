@@ -47,8 +47,6 @@ interface Deferred {
 export class LiveryBridge {
   protected deferredMap: Map<string, Deferred>;
 
-  protected handshakeComplete: boolean;
-
   protected handshakeId: string;
 
   protected handshakePromise: Promise<void>;
@@ -72,8 +70,6 @@ export class LiveryBridge {
     this.deferredMap = new Map<string, Deferred>();
     this.listenerMap = new Map<string, (value: any) => void>();
 
-    this.handshakeComplete = false;
-
     this.targetWindow = targetWindow;
     this.targetWindowUrl = targetWindowUrl;
     this.version = version;
@@ -89,13 +85,12 @@ export class LiveryBridge {
 
     // Attempt to handshake.
     this.handshakeId = uuid();
-    this.handshakePromise = this.sendHandshake(this.handshakeId, this.version)
-      .then(() => {
-        this.handshakeComplete = true;
-      })
-      .catch((error: Error) => {
-        this.handshakeComplete = false;
-      });
+    this.handshakePromise = this.sendHandshake(
+      this.handshakeId,
+      this.version,
+    ).catch((error: Error) => {
+      throw error;
+    });
   }
 
   static isCommandMessage(object: LiveryMessage): object is CommandMessage {
@@ -222,15 +217,6 @@ export class LiveryBridge {
         resolveReject.reject(message.error);
         this.deferredMap.delete(message.id);
       }
-      return;
-    }
-
-    // Should we check this here?
-    if (!this.handshakeComplete) {
-      this.sendReject(
-        message.id || 'unknown',
-        new Error('Handshake not complete.'),
-      );
       return;
     }
 
