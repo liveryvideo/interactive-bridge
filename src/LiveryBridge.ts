@@ -185,9 +185,9 @@ export class LiveryBridge {
     if (message.version !== this.version) {
       this.sendReject(message.id, new Error('Versions do not correspond.'));
     } else {
-      const resolveReject = this.deferredMap.get(this.handshakeId);
-      if (resolveReject) {
-        resolveReject.reject(new Error('Received new handshake.'));
+      const deferred = this.deferredMap.get(this.handshakeId);
+      if (deferred) {
+        deferred.reject(new Error('Received new handshake.'));
       }
       this.sendResolve(message.id, this.version);
     }
@@ -204,17 +204,17 @@ export class LiveryBridge {
       return;
     }
     if (LiveryBridge.isResolveMessage(message)) {
-      const resolveReject = this.deferredMap.get(message.id);
-      if (resolveReject) {
-        resolveReject.resolve(message.value);
+      const deferred = this.deferredMap.get(message.id);
+      if (deferred) {
+        deferred.resolve(message.value);
         this.deferredMap.delete(message.id);
       }
       return;
     }
     if (LiveryBridge.isRejectMessage(message)) {
-      const resolveReject = this.deferredMap.get(message.id);
-      if (resolveReject) {
-        resolveReject.reject(message.error);
+      const deferred = this.deferredMap.get(message.id);
+      if (deferred) {
+        deferred.reject(message.error);
         this.deferredMap.delete(message.id);
       }
       return;
