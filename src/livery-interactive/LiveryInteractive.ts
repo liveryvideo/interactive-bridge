@@ -1,10 +1,4 @@
-import {
-  customElement,
-  LitElement,
-  property,
-  html,
-  internalProperty,
-} from 'lit-element';
+import { customElement, LitElement, property } from 'lit-element';
 
 import { LiveryBridge } from '../LiveryBridge';
 
@@ -16,50 +10,36 @@ declare global {
 
 @customElement('livery-interactive')
 export class LiveryInteractive extends LitElement {
-  @property({ type: Boolean })
-  logEnabled = false;
+  bridge!: LiveryBridge;
 
-  @internalProperty()
-  logValue: string;
-
-  bridge: LiveryBridge;
-
-  constructor() {
-    super();
-
-    this.logValue = '';
-    const logger = (message: string) => {
-      this.logValue += message;
-    };
-
-    this.bridge = new LiveryBridge(window.parent, '*', '0.0.1', logger);
-  }
-
+  /**
+   * Returns a promise with the SDK's current latency in seconds.
+   */
   public getLatency(): Promise<number> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.bridge.sendCommand<number>('latency');
   }
 
+  /**
+   * Initializes the livery-interactive element.
+   * @param messageListener - Optional parameter used for keeping track of messages for debugging purposes.
+   */
+  public init(messageListener?: (message: string) => void) {
+    this.bridge = new LiveryBridge(
+      window.parent,
+      '*',
+      '0.0.1',
+      messageListener,
+    );
+  }
+
+  /**
+   * Returns a promise with the current screen orientation.
+   * @param listener - Called when the screen orientation changes, with the new orientation as parameter.
+   */
   public subscribeOrientation(
     listener: (value: string) => void,
   ): Promise<string> {
     return this.bridge.sendSubscribe<string>('orientation', listener);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/member-ordering
-  render() {
-    if (this.logEnabled) {
-      return html`
-        <textarea
-          id="log"
-          name="message"
-          rows="15"
-          cols="30"
-          readonly
-          disabled
-          .value=${this.logValue}
-        ></textarea>
-      `;
-    }
-    return undefined;
   }
 }

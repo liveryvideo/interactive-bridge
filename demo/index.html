@@ -14,95 +14,7 @@
 
     <title>Livery Interactive Layer</title>
 
-    <style>
-      * {
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 8px;
-        /* background: rgba(245, 245, 245, 0.728); */
-        font-family: Arial, Helvetica, sans-serif;
-      }
-
-      body,
-      html {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-      }
-
-      a.logo {
-        display: inline-block;
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        padding: 4px;
-        background: #222;
-        box-shadow: 0 0 2px 2px #222;
-        opacity: 0.25;
-      }
-
-      a.logo:active,
-      a.logo:hover {
-        opacity: 1;
-      }
-
-      .logo img {
-        width: 117px;
-      }
-
-      .content {
-        /* border: 1px solid red; */
-        height: 100%;
-
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-      }
-
-      .subcontent {
-        /* border: 1px solid #4a275e; */
-
-        padding: 5px;
-        width: 45%;
-        height: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        background-color: transparent;
-      }
-
-      .valueBox {
-        border: 1px solid grey;
-        background-color: rgba(245, 245, 245, 0.913);
-        height: 50%;
-        padding: 5px;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-      }
-
-      #message-form {
-        border: 1px solid grey;
-        background-color: rgba(245, 245, 245, 0.913);
-        padding: 5px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        flex-direction: column;
-      }
-      textarea {
-        margin: 10px;
-      }
-    </style>
-    <script type="module" src="./build/index.js"></script>
+    <link rel="stylesheet" href="demo/style.css" />
   </head>
   <body>
     <div class="content">
@@ -117,13 +29,11 @@
       <div class="subcontent">
         <div class="valueBox">
           <h3 id="latency">Latency</h3>
-          <button onclick="getLatency()">Get Latency</button>
+          <button id="getLatency">Get Latency</button>
         </div>
         <div class="valueBox">
           <h3 id="orientation">Orientation</h3>
-          <button onclick="subscribeOrientation()">
-            Subscribe Orientation
-          </button>
+          <button id="subOrientation">Subscribe Orientation</button>
         </div>
       </div>
 
@@ -148,99 +58,23 @@
           <textarea id="message" name="message" rows="7" cols="20"></textarea>
           <input type="submit" value="Send Message" />
 
-          <livery-interactive logEnabled></livery-interactive>
+          <textarea
+            id="log"
+            name="message"
+            rows="10"
+            cols="30"
+            readonly
+            disabled
+          ></textarea>
         </form>
       </div>
     </div>
 
-    <script>
-      const liveryInteractive = document.querySelector('livery-interactive');
-
-      // eslint-disable-next-line no-unused-vars
-      async function getLatency() {
-        document.querySelector(
-          '#latency',
-        ).innerText = await liveryInteractive.getLatency();
-      }
-
-      // eslint-disable-next-line no-unused-vars
-      function subscribeOrientation() {
-        const setOrientation = (orientation) => {
-          document.querySelector('#orientation').innerText = orientation;
-        };
-        liveryInteractive
-          .subscribeOrientation(setOrientation)
-          .then(setOrientation);
-      }
-
-      // eslint-disable-next-line no-unused-vars
-      function sendTestMessage(e) {
-        e.preventDefault();
-        const message = document.querySelector('#message').value;
-        window.postMessage(JSON.parse(message), '*');
-        // console.log('ℹ️Sending test message: ', message, JSON.parse(message));
-      }
-      // eslint-disable-next-line no-unused-vars
-      function setTemplate(type) {
-        let template;
-        switch (type) {
-          case 'handshake':
-            template = {
-              isLivery: true,
-              type: 'handshake',
-              id: '',
-              version: '',
-            };
-            break;
-
-          case 'command':
-            template = {
-              isLivery: true,
-              type: 'command',
-              name: '',
-              id: '',
-              arg: '',
-            };
-            break;
-
-          case 'resolve':
-            template = {
-              isLivery: true,
-              type: 'resolve',
-              value: '',
-              id: '',
-            };
-            break;
-
-          case 'reject':
-            template = {
-              isLivery: true,
-              type: 'reject',
-              error: new Error('error message'),
-              id: '',
-            };
-            break;
-
-          case 'event':
-            template = {
-              isLivery: true,
-              type: 'event',
-              // name: '',
-              value: '',
-              id: '',
-            };
-            break;
-
-          default:
-            break;
-        }
-
-        document.querySelector('#message').value = JSON.stringify(
-          template,
-          null,
-          1,
-        );
-      }
-    </script>
+    <livery-interactive
+      messageListener="(message) => {
+      document.querySelector('#log').value += message;
+    }"
+    ></livery-interactive>
+    <script type="module" src="demo/script.js"></script>
   </body>
 </html>

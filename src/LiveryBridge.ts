@@ -49,11 +49,13 @@ export class LiveryBridge {
 
   protected handshakeComplete: boolean;
 
-  protected handshakeId!: string;
+  protected handshakeId: string;
+
+  protected handshakePromise: Promise<void>;
 
   protected listenerMap: Map<string, (value: any) => void>;
 
-  protected logger: (message: string) => void;
+  protected messageListener?: (message: string) => void;
 
   protected targetWindow: Window;
 
@@ -65,7 +67,7 @@ export class LiveryBridge {
     targetWindow: Window,
     targetWindowUrl: string,
     version: string,
-    logger: (message: string) => void,
+    messageListener?: (message: string) => void,
   ) {
     this.deferredMap = new Map<string, Deferred>();
     this.listenerMap = new Map<string, (value: any) => void>();
@@ -75,7 +77,8 @@ export class LiveryBridge {
     this.targetWindow = targetWindow;
     this.targetWindowUrl = targetWindowUrl;
     this.version = version;
-    this.logger = logger;
+
+    this.messageListener = messageListener;
 
     // Start listening for messages
     window.addEventListener('message', (e) => {
@@ -86,14 +89,12 @@ export class LiveryBridge {
 
     // Attempt to handshake.
     this.handshakeId = uuid();
-    this.sendHandshake(this.handshakeId, this.version)
+    this.handshakePromise = this.sendHandshake(this.handshakeId, this.version)
       .then(() => {
         this.handshakeComplete = true;
-        this.logger(`Handshake Complete. \n\n`);
       })
       .catch((error: Error) => {
         this.handshakeComplete = false;
-        this.logger(`Handshake Failed: ${error.message} \n\n`);
       });
   }
 
@@ -145,25 +146,29 @@ export class LiveryBridge {
     id?: string,
     arg?: string,
   ): Promise<ValueType> {
-    const commandId = id || uuid();
-    this.sendMessage({
-      isLivery: true,
-      type: 'command',
-      name,
-      id: commandId,
-      arg,
-    });
+    return this.handshakePromise
+      .then(() => {
+        const commandId = id || uuid();
+        this.sendMessage({
+          isLivery: true,
+          type: 'command',
+          name,
+          id: commandId,
+          arg,
+        });
 
-    return new Promise<ValueType>((resolve, reject) => {
-      this.deferredMap.set(commandId, {
-        resolve: (value: ValueType) => {
-          resolve(value);
-        },
-        reject: (error: Error) => {
-          reject(error);
-        },
-      });
-    });
+        return new Promise<ValueType>((resolve, reject) => {
+          this.deferredMap.set(commandId, {
+            resolve: (value: ValueType) => {
+              resolve(value);
+            },
+            reject: (error: Error) => {
+              reject(error);
+            },
+          });
+        });
+      })
+      .catch(() => Promise.reject(new Error('Handshake not complete.')));
   }
 
   public sendSubscribe<ValueType>(
@@ -194,8 +199,11 @@ export class LiveryBridge {
   }
 
   protected handleMessage(message: LiveryMessage) {
-    this.logger(`Incoming message: ${JSON.stringify(message, null, 1)} \n\n`);
-
+    if (this.messageListener) {
+      this.messageListener(
+        `Incoming Message:${JSON.stringify(message, null, 1)} \n\n`,
+      );
+    }
     if (LiveryBridge.isHandshakeMessage(message)) {
       this.handleHandshake(message);
       return;
@@ -243,11 +251,13 @@ export class LiveryBridge {
   }
 
   protected sendEvent<ValueType>(id: string, value: ValueType) {
-    this.sendMessage({
-      isLivery: true,
-      type: 'event',
-      value,
-      id,
+    return this.handshakePromise.then(() => {
+      this.sendMessage({
+        isLivery: true,
+        type: 'event',
+        value,
+        id,
+      });
     });
   }
 
@@ -272,7 +282,11 @@ export class LiveryBridge {
   }
 
   protected sendMessage<T extends LiveryMessage>(message: T) {
-    this.logger(`Outgoing message: ${JSON.stringify(message, null, 1)} \n\n`);
+    if (this.messageListener) {
+      this.messageListener(
+        `Outgoing Message:${JSON.stringify(message, null, 1)} \n\n`,
+      );
+    }
     this.targetWindow.postMessage(message, this.targetWindowUrl);
   }
 
