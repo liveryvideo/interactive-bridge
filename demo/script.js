@@ -1,84 +1,57 @@
 /* eslint-disable no-unused-vars */
 import '../build/index.js';
 
-const liveryInteractive = document.querySelector('livery-interactive');
+const $ = (query) => document.querySelector(query);
+
+const liveryInteractive = $('livery-interactive');
+const latencyText = $('#latency');
+const orientationText = $('#orientation');
+
+function setTemplate(type, properties) {
+  $('#message').value = JSON.stringify(
+    { isLivery: true, type, id: '', ...properties },
+    null,
+    1,
+  );
+}
 
 liveryInteractive.init((message) => {
-  document.querySelector('#log').value += message;
+  $('#log').value += message;
 });
 
-document.querySelector('#getLatency').onclick = async () => {
-  document.querySelector(
-    '#latency',
-  ).innerText = await liveryInteractive.getLatency();
-};
+$('#get-latency').addEventListener('click', async () => {
+  latencyText.innerText = await liveryInteractive.getLatency();
+});
 
-document.querySelector('#subOrientation').onclick = () => {
+$('#sub-orientation').addEventListener('click', () => {
   const setOrientation = (orientation) => {
-    document.querySelector('#orientation').innerText = orientation;
+    orientationText.innerText = orientation;
   };
   liveryInteractive.subscribeOrientation(setOrientation).then(setOrientation);
-};
+});
 
-document.querySelector('#message-form').onsubmit = (e) => {
+$('#message-form').addEventListener('submit', (e) => {
   e.preventDefault();
-  const message = document.querySelector('#message').value;
+  const message = $('#message').value;
   window.postMessage(JSON.parse(message), '*');
-};
+});
 
-function setTemplate(type) {
-  let template;
-  switch (type) {
-    case 'handshake':
-      template = {
-        isLivery: true,
-        type: 'handshake',
-        id: '',
-        version: '',
-      };
-      break;
+$('#template-handshake').addEventListener('click', () => {
+  setTemplate('handshake', { version: '' });
+});
 
-    case 'command':
-      template = {
-        isLivery: true,
-        type: 'command',
-        name: '',
-        id: '',
-        arg: '',
-      };
-      break;
+$('#template-command').addEventListener('click', () => {
+  setTemplate('command', { name: '', arg: '' });
+});
 
-    case 'resolve':
-      template = {
-        isLivery: true,
-        type: 'resolve',
-        value: '',
-        id: '',
-      };
-      break;
+$('#template-resolve').addEventListener('click', () => {
+  setTemplate('resolve', { value: '' });
+});
 
-    case 'reject':
-      template = {
-        isLivery: true,
-        type: 'reject',
-        error: new Error('error message'),
-        id: '',
-      };
-      break;
+$('#template-reject').addEventListener('click', () => {
+  setTemplate('reject', { error: Error('Example error') });
+});
 
-    case 'event':
-      template = {
-        isLivery: true,
-        type: 'event',
-        value: '',
-        id: '',
-      };
-      break;
-
-    default:
-      break;
-  }
-
-  document.querySelector('#message').value = JSON.stringify(template, null, 1);
-}
-window.setTemplate = setTemplate;
+$('#template-event').addEventListener('click', () => {
+  setTemplate('event', { value: '' });
+});

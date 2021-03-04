@@ -15,9 +15,8 @@ export class LiveryInteractive extends LitElement {
   /**
    * Returns a promise with the SDK's current latency in seconds.
    */
-  public getLatency(): Promise<number> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.bridge.sendCommand<number>('latency');
+  public getLatency() {
+    return this.bridge.sendCommand<number, undefined>('latency');
   }
 
   /**
@@ -28,7 +27,7 @@ export class LiveryInteractive extends LitElement {
     this.bridge = new LiveryBridge(
       window.parent,
       '*',
-      '0.0.1',
+      '__VERSION__',
       messageListener,
     );
   }
@@ -37,9 +36,10 @@ export class LiveryInteractive extends LitElement {
    * Returns a promise with the current screen orientation.
    * @param listener - Called when the screen orientation changes, with the new orientation as parameter.
    */
-  public subscribeOrientation(
-    listener: (value: string) => void,
-  ): Promise<string> {
-    return this.bridge.sendSubscribe<string>('orientation', listener);
+  public subscribeOrientation(listener: (value: string) => void) {
+    return this.bridge.sendSubscribe<string, undefined>(
+      'orientation',
+      listener,
+    );
   }
 }

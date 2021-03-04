@@ -4,7 +4,7 @@ Ex Machina Group Livery Interactive element.
 
 This element can be used to communicate with Livery SDK's
 
-Please refer to [docs.liveryvideo.com/web-sdk](https://docs.liveryvideo.com/livery-interactive) for complete documentation.
+Please refer to (TBD) for complete documentation.
 
 ## Installation
 
@@ -14,14 +14,10 @@ npm install @exmg/livery-interactive
 
 ## Usage
 
-### HTML
-
-```html
-<livery-interactive></livery-player>
-```
+TBD
 
 ### JavaScript
 
 ```JS
-const liveryInteractive = document.querySelector('livery-interactive');
+TBD
 ```

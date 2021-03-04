@@ -3,7 +3,7 @@
 import { uuid } from './livery-interactive/util/uuid';
 
 export interface LiveryMessage {
-  id?: string;
+  id: string;
   isLivery: true;
   type: string;
 }
@@ -26,8 +26,8 @@ interface RejectMessage extends LiveryMessage {
   type: 'reject';
 }
 
-interface CommandMessage extends LiveryMessage {
-  arg?: string;
+interface CommandMessage<ArgType> extends LiveryMessage {
+  arg?: ArgType;
   id: string;
   name: string;
   type: 'command';
@@ -93,8 +93,10 @@ export class LiveryBridge {
     });
   }
 
-  static isCommandMessage(object: LiveryMessage): object is CommandMessage {
-    const command = object as CommandMessage;
+  static isCommandMessage<ArgType>(
+    object: LiveryMessage,
+  ): object is CommandMessage<ArgType> {
+    const command = object as CommandMessage<ArgType>;
     return object.type === 'command' && !!object.id && !!command.name;
   }
 
@@ -136,48 +138,42 @@ export class LiveryBridge {
     );
   }
 
-  public sendCommand<ValueType>(
+  public sendCommand<ValueType, ArgType>(
     name: string,
-    id?: string,
-    arg?: string,
+    id = uuid(),
+    arg?: ArgType,
   ): Promise<ValueType> {
     return this.handshakePromise
       .then(() => {
-        const commandId = id || uuid();
-        this.sendMessage({
+        this.sendMessage('command', {
           isLivery: true,
           type: 'command',
           name,
-          id: commandId,
+          id,
           arg,
         });
 
         return new Promise<ValueType>((resolve, reject) => {
-          this.deferredMap.set(commandId, {
-            resolve: (value: ValueType) => {
-              resolve(value);
-            },
-            reject: (error: Error) => {
-              reject(error);
-            },
-          });
+          this.deferredMap.set(id, { resolve, reject });
         });
       })
       .catch(() => Promise.reject(new Error('Handshake not complete.')));
   }
 
-  public sendSubscribe<ValueType>(
+  public sendSubscribe<ValueType, ArgType>(
     name: string,
     listener: (value: ValueType) => void,
-    arg?: string,
+    arg?: ArgType,
   ) {
     const id = uuid();
     this.listenerMap.set(id, listener);
-    return this.sendCommand<string>(name, id, arg);
+    return this.sendCommand<string, ArgType>(name, id, arg);
   }
 
   // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars -- Not implemented here.
-  protected handleCommand(message: CommandMessage) {
+  protected handleCommand<ArgType>(message: CommandMessage<ArgType>) {
+    console.log('IS COMMAND MESSAGE!!!!!!!!!!!!');
+
     // Should be implemented in child class.
   }
 
@@ -238,9 +234,7 @@ export class LiveryBridge {
 
   protected sendEvent<ValueType>(id: string, value: ValueType) {
     return this.handshakePromise.then(() => {
-      this.sendMessage({
-        isLivery: true,
-        type: 'event',
+      this.sendMessage('event', {
         value,
         id,
       });
@@ -248,8 +242,7 @@ export class LiveryBridge {
   }
 
   protected sendHandshake(id: string, version: string) {
-    this.sendMessage({
-      isLivery: true,
+    this.sendMessage('handshake', {
       type: 'handshake',
       id,
       version,
@@ -267,28 +260,30 @@ export class LiveryBridge {
     });
   }
 
-  protected sendMessage<T extends LiveryMessage>(message: T) {
-    if (this.messageListener) {
-      this.messageListener(
-        `Outgoing Message:${JSON.stringify(message, null, 1)} \n\n`,
-      );
+  protected sendMessage(type: string, properties: Record<string, unknown>) {
+    const message = { isLivery: true, type, ...properties };
+
+    if (LiveryBridge.isLiveryMessage(message)) {
+      if (this.messageListener) {
+        this.messageListener(
+          `Outgoing Message:${JSON.stringify(message, null, 1)} \n\n`,
+        );
+      }
+      this.targetWindow.postMessage(message, this.targetWindowUrl);
+    } else {
+      throw new Error('Message is not a livery message.');
     }
-    this.targetWindow.postMessage(message, this.targetWindowUrl);
   }
 
   protected sendReject(id: string, error: Error) {
-    this.sendMessage({
-      isLivery: true,
-      type: 'reject',
+    this.sendMessage('reject', {
       error,
       id,
     });
   }
 
   protected sendResolve<ValueType>(id: string, value: ValueType) {
-    this.sendMessage({
-      isLivery: true,
-      type: 'resolve',
+    this.sendMessage('resolve', {
       value,
       id,
     });
