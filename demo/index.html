@@ -10,67 +10,33 @@
       name="Description"
       content="Interactive Layer for Ex Machina Group Livery (https://www.liveryvideo.com/)."
     />
-    <base href="/" />
 
     <title>Livery Interactive Layer</title>
 
-    <link rel="stylesheet" href="demo/style.css" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="content">
-      <a
-        class="logo"
-        href="https://www.liveryvideo.com"
-        rel="external"
-        target="_blank"
-      >
-        <img src="demo/assets/logo.png" />
-      </a>
-      <div class="subcontent">
-        <div class="valueBox">
-          <h3 id="latency">Latency</h3>
-          <button id="getLatency">Get Latency</button>
-        </div>
-        <div class="valueBox">
-          <h3 id="orientation">Orientation</h3>
-          <button id="subOrientation">Subscribe Orientation</button>
-        </div>
-      </div>
+    <a
+      class="logo"
+      href="https://www.liveryvideo.com"
+      rel="external"
+      target="_blank"
+    >
+      <img src="assets/logo.png" />
+    </a>
 
-      <div class="subcontent">
-        <form id="message-form" action="" onsubmit="sendTestMessage(event)">
-          <div>
-            <button type="button" onclick="setTemplate('handshake')">
-              Handshake
-            </button>
-            <button type="button" onclick="setTemplate('command')">
-              Command
-            </button>
-            <button type="button" onclick="setTemplate('resolve')">
-              Resolve
-            </button>
-            <button type="button" onclick="setTemplate('reject')">
-              Reject
-            </button>
-            <button type="button" onclick="setTemplate('event')">Event</button>
-          </div>
-
-          <textarea id="message" name="message" rows="7" cols="20"></textarea>
-          <input type="submit" value="Send Message" />
-
-          <textarea
-            id="log"
-            name="message"
-            rows="10"
-            cols="30"
-            readonly
-            disabled
-          ></textarea>
-        </form>
-      </div>
+    <div class="panel">
+      <h3>Latency</h3>
+      <span id="latency"></span>
+      <button id="get-latency">Get Latency</button>
     </div>
 
-    <livery-interactive></livery-interactive>
-    <script type="module" src="demo/script.js"></script>
+    <div class="panel">
+      <h3>Orientation</h3>
+      <span id="orientation"></span>
+      <button id="subscribe-orientation">Subscribe Orientation</button>
+    </div>
+
+    <script type="module" src="script.js"></script>
   </body>
 </html>

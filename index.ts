@@ -3,6 +3,6 @@
  */
 export const version = '__VERSION__';
 
-export { LiveryInteractive } from './src/livery-interactive/LiveryInteractive';
-
+export { InteractiveBridge } from './src/InteractiveBridge';
 export { LiveryBridge } from './src/LiveryBridge';
+export { MockSdkBridge } from './src/MockSdkBridge';

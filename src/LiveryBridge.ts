@@ -1,296 +1,303 @@
-/* eslint-disable @typescript-eslint/no-explicit-any --- MessageEvent returns an any object. The maps we use also use any, as multiple data types are allowed. */
+// We carefully work with unsafe message data within this class, so we will use `any` typed variables and arguments
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { uuid } from './livery-interactive/util/uuid';
+import { uuid } from './uuid';
 
-export interface LiveryMessage {
-  id?: string;
-  isLivery: true;
+interface Message {
+  [key: string]: unknown;
   type: string;
 }
 
-interface HandshakeMessage extends LiveryMessage {
-  id: string;
-  type: 'handshake';
-  version: string;
-}
+const VERSION = '__VERSION__';
 
-interface ResolveMessage<ValueType> extends LiveryMessage {
-  id: string;
-  type: 'resolve';
-  value: ValueType;
-}
-
-interface RejectMessage extends LiveryMessage {
-  error: Error;
-  id: string;
-  type: 'reject';
-}
-
-interface CommandMessage extends LiveryMessage {
-  arg?: string;
-  id: string;
-  name: string;
-  type: 'command';
-}
-
-interface EventMessage<ValueType> extends LiveryMessage {
-  id: string;
-  type: 'event';
-  value: ValueType;
-}
-
-interface Deferred {
-  reject: (error: Error) => void;
-  resolve: (value: any) => void;
+function toError(shouldBeError: any) {
+  return shouldBeError instanceof Error
+    ? shouldBeError
+    : new Error(shouldBeError);
 }
 
 export class LiveryBridge {
-  protected deferredMap: Map<string, Deferred>;
+  private deferredMap = new Map<
+    string,
+    {
+      reject: (error: Error) => void;
+      resolve: (value: any) => void;
+    }
+  >();
 
-  protected handshakeId: string;
+  private handshakeId = uuid();
 
-  protected handshakePromise: Promise<void>;
+  private listenersMap = new Map<string, ((value: any) => void)[]>();
 
-  protected listenerMap: Map<string, (value: any) => void>;
+  private messageQueue?: Message[] = [];
 
-  protected messageListener?: (message: string) => void;
+  private nrHandshakes = 0;
 
-  protected targetWindow: Window;
+  private targetOrigin: string;
 
-  protected targetWindowUrl: string;
+  private targetWindow: Window;
 
-  protected version: string;
-
-  constructor(
-    targetWindow: Window,
-    targetWindowUrl: string,
-    version: string,
-    messageListener?: (message: string) => void,
-  ) {
-    this.deferredMap = new Map<string, Deferred>();
-    this.listenerMap = new Map<string, (value: any) => void>();
-
+  constructor(targetWindow: Window, targetOrigin: string) {
     this.targetWindow = targetWindow;
-    this.targetWindowUrl = targetWindowUrl;
-    this.version = version;
+    this.targetOrigin = targetOrigin;
 
-    this.messageListener = messageListener;
+    window.addEventListener('message', (event) => this.handleMessage(event));
 
-    // Start listening for messages
-    window.addEventListener('message', (e) => {
-      if (LiveryBridge.isLiveryMessage(e.data)) {
-        this.handleMessage(e.data);
-      }
+    this.sendHandshake();
+  }
+
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars -- overridable method
+  protected handleCommand(name: string, arg: unknown): Promise<unknown> {
+    return Promise.reject(
+      new Error(`Received command message with unsupported name: ${name}`),
+    );
+  }
+
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars -- overridable method
+  protected handleSubscribe(name: string, arg: unknown): Promise<unknown> {
+    return Promise.reject(
+      new Error(`Received subscribe message with unsupported name: ${name}`),
+    );
+  }
+
+  protected sendCommand<ValueType>(name: string, arg: unknown) {
+    return new Promise<ValueType>((resolve, reject) => {
+      const id = uuid();
+
+      this.deferredMap.set(id, { resolve, reject });
+
+      this.sendMessage({ type: 'command', id, name, arg });
     });
-
-    // Attempt to handshake.
-    this.handshakeId = uuid();
-    this.handshakePromise = this.sendHandshake(
-      this.handshakeId,
-      this.version,
-    ).catch((error: Error) => {
-      throw error;
-    });
   }
 
-  static isCommandMessage(object: LiveryMessage): object is CommandMessage {
-    const command = object as CommandMessage;
-    return object.type === 'command' && !!object.id && !!command.name;
+  protected sendEvent<ValueType>(name: string, value: ValueType) {
+    this.sendMessage({ type: 'event', name, value });
   }
 
-  static isEventMessage(
-    object: LiveryMessage,
-  ): object is EventMessage<unknown> {
-    const event = object as EventMessage<unknown>;
-    return object.type === 'event' && !!event.id && !!event.value;
-  }
-
-  static isHandshakeMessage(object: LiveryMessage): object is HandshakeMessage {
-    return (
-      object.type === 'handshake' &&
-      !!(object as HandshakeMessage).version &&
-      !!object.id
-    );
-  }
-
-  static isLiveryMessage(object: any): object is LiveryMessage {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Incoming object is any.
-    return !!object && object.isLivery === true && !!object.type;
-  }
-
-  static isRejectMessage(object: LiveryMessage): object is RejectMessage {
-    return (
-      object.type === 'reject' &&
-      !!object.id &&
-      !!(object as RejectMessage).error
-    );
-  }
-
-  static isResolveMessage<ValueType>(
-    object: LiveryMessage,
-  ): object is ResolveMessage<ValueType> {
-    return (
-      object.type === 'resolve' &&
-      !!object.id &&
-      !!(object as ResolveMessage<ValueType>).value
-    );
-  }
-
-  public sendCommand<ValueType>(
+  protected sendSubscribe<ArgType, ValueType>(
     name: string,
-    id?: string,
-    arg?: string,
-  ): Promise<ValueType> {
-    return this.handshakePromise
-      .then(() => {
-        const commandId = id || uuid();
-        this.sendMessage({
-          isLivery: true,
-          type: 'command',
-          name,
-          id: commandId,
-          arg,
-        });
-
-        return new Promise<ValueType>((resolve, reject) => {
-          this.deferredMap.set(commandId, {
-            resolve: (value: ValueType) => {
-              resolve(value);
-            },
-            reject: (error: Error) => {
-              reject(error);
-            },
-          });
-        });
-      })
-      .catch(() => Promise.reject(new Error('Handshake not complete.')));
-  }
-
-  public sendSubscribe<ValueType>(
-    name: string,
+    arg: ArgType,
     listener: (value: ValueType) => void,
-    arg?: string,
   ) {
-    const id = uuid();
-    this.listenerMap.set(id, listener);
-    return this.sendCommand<string>(name, id, arg);
+    return new Promise<ValueType>((resolve, reject) => {
+      const id = uuid();
+
+      this.deferredMap.set(id, { resolve, reject });
+
+      const listeners = this.listenersMap.get(name);
+      if (listeners) {
+        listeners.push(listener);
+      } else {
+        this.listenersMap.set(name, [listener]);
+      }
+
+      this.sendMessage({ type: 'subscribe', id, name, arg });
+    });
   }
 
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars -- Not implemented here.
-  protected handleCommand(message: CommandMessage) {
-    // Should be implemented in child class.
+  private handleCommandMessage(id: string, data: any) {
+    const { name, arg } = data;
+
+    if (typeof name !== 'string') {
+      throw new Error(
+        `Received command message with name property type: ${typeof name}, should be string`,
+      );
+    }
+
+    this.handleCommand(name, arg).then(
+      (value) => {
+        this.sendResolve(id, value);
+      },
+      (error) => {
+        this.sendReject(id, toError(error));
+      },
+    );
   }
 
-  protected handleHandshake(message: HandshakeMessage) {
-    if (message.version !== this.version) {
-      this.sendReject(message.id, new Error('Versions do not correspond.'));
+  private handleEventMessage(id: string, data: any) {
+    const { name, value } = data;
+
+    if (typeof name !== 'string') {
+      throw new Error(
+        `Received event message with name property type: ${typeof name}, should be string`,
+      );
+    }
+
+    const listeners = this.listenersMap.get(name);
+
+    if (!listeners) {
+      throw new Error('Received event message with unsubscribed name');
+    }
+
+    for (const listener of listeners) {
+      listener(value);
+    }
+  }
+
+  private handleHandshakeMessage(id: string, data: any) {
+    const { version } = data;
+
+    if (typeof version !== 'string') {
+      throw new Error(
+        `Received handshake message with version property type: ${typeof version}, should be string`,
+      );
+    }
+
+    if (version !== VERSION) {
+      throw new Error(
+        `Received handshake message with different version: ${version}, should be: ${VERSION}`,
+      );
+    }
+
+    // Other side was last to send handshake
+    if (id !== this.handshakeId) {
+      this.handshakeId = id;
+      if (this.nrHandshakes < 2) {
+        this.nrHandshakes += 1;
+        this.sendHandshake();
+      }
+    }
+
+    // Handshake done, send queued messages and remove queue
+    const messages = this.messageQueue;
+    this.messageQueue = undefined;
+    if (messages) {
+      for (const message of messages) {
+        this.sendMessage(message);
+      }
+    }
+  }
+
+  private handleLiveryMessage(type: string, id: string, data: unknown) {
+    if (type === 'command') {
+      this.handleCommandMessage(id, data);
+    } else if (type === 'event') {
+      this.handleEventMessage(id, data);
+    } else if (type === 'handshake') {
+      this.handleHandshakeMessage(id, data);
+    } else if (type === 'reject') {
+      this.handleRejectMessage(id, data);
+    } else if (type === 'resolve') {
+      this.handleResolveMessage(id, data);
+    } else if (type === 'subscribe') {
+      this.handleSubscribeMessage(id, data);
     } else {
-      const deferred = this.deferredMap.get(this.handshakeId);
-      if (deferred) {
-        deferred.reject(new Error('Received new handshake.'));
-      }
-      this.sendResolve(message.id, this.version);
+      throw new Error(`Received message with unsupported type: ${type}`);
     }
   }
 
-  protected handleMessage(message: LiveryMessage) {
-    if (this.messageListener) {
-      this.messageListener(
-        `Incoming Message:${JSON.stringify(message, null, 1)} \n\n`,
+  private handleMessage(event: MessageEvent) {
+    const { data, origin } = event;
+    if ((this.targetOrigin !== '*' && origin !== this.targetOrigin) || !data) {
+      return;
+    }
+
+    const { id, isLivery, type } = data;
+    if (!isLivery) {
+      return;
+    }
+
+    if (typeof type !== 'string') {
+      throw new Error(
+        `Received message with type property type: ${typeof type}, should be string`,
       );
     }
-    if (LiveryBridge.isHandshakeMessage(message)) {
-      this.handleHandshake(message);
-      return;
-    }
-    if (LiveryBridge.isResolveMessage(message)) {
-      const deferred = this.deferredMap.get(message.id);
-      if (deferred) {
-        deferred.resolve(message.value);
-        this.deferredMap.delete(message.id);
-      }
-      return;
-    }
-    if (LiveryBridge.isRejectMessage(message)) {
-      const deferred = this.deferredMap.get(message.id);
-      if (deferred) {
-        deferred.reject(message.error);
-        this.deferredMap.delete(message.id);
-      }
-      return;
-    }
 
-    if (LiveryBridge.isCommandMessage(message)) {
-      this.handleCommand(message);
-    }
-
-    if (LiveryBridge.isEventMessage(message)) {
-      const listener = this.listenerMap.get(message.id);
-      if (listener) {
-        listener(message.value);
-      }
-      return;
-    }
-
-    // should always be last
-    this.sendReject(message.id || 'unknown', new Error('Unknown Command'));
-  }
-
-  protected sendEvent<ValueType>(id: string, value: ValueType) {
-    return this.handshakePromise.then(() => {
-      this.sendMessage({
-        isLivery: true,
-        type: 'event',
-        value,
-        id,
-      });
-    });
-  }
-
-  protected sendHandshake(id: string, version: string) {
-    this.sendMessage({
-      isLivery: true,
-      type: 'handshake',
-      id,
-      version,
-    });
-
-    return new Promise<void>((resolve, reject) => {
-      this.deferredMap.set(id, {
-        resolve: () => {
-          resolve();
-        },
-        reject: (error: Error) => {
-          reject(error);
-        },
-      });
-    });
-  }
-
-  protected sendMessage<T extends LiveryMessage>(message: T) {
-    if (this.messageListener) {
-      this.messageListener(
-        `Outgoing Message:${JSON.stringify(message, null, 1)} \n\n`,
+    if (typeof id !== 'string' && type !== 'event') {
+      throw new Error(
+        `Received message with id property type: ${typeof id}, should be string`,
       );
     }
-    this.targetWindow.postMessage(message, this.targetWindowUrl);
+
+    if (this.messageQueue && type !== 'handshake') {
+      throw new Error(`Received ${type} message before handshake`);
+    }
+
+    this.handleLiveryMessage(type, id, data);
   }
 
-  protected sendReject(id: string, error: Error) {
-    this.sendMessage({
-      isLivery: true,
-      type: 'reject',
-      error,
-      id,
-    });
+  private handleRejectMessage(id: string, data: any) {
+    const deferred = this.deferredMap.get(id);
+
+    if (!deferred) {
+      throw new Error(`Received reject message with unknown id: ${id}`);
+    }
+
+    const { error } = data;
+
+    if (typeof error !== 'object') {
+      throw new Error(
+        `Received reject message with error property type: ${typeof error}, should be object`,
+      );
+    }
+    if (!(error instanceof Error)) {
+      throw new Error(
+        'Received reject message with error property that is not an instance of Error',
+      );
+    }
+
+    deferred.reject(error);
+
+    this.deferredMap.delete(id);
   }
 
-  protected sendResolve<ValueType>(id: string, value: ValueType) {
-    this.sendMessage({
-      isLivery: true,
-      type: 'resolve',
-      value,
-      id,
-    });
+  private handleResolveMessage(id: string, data: any) {
+    const deferred = this.deferredMap.get(id);
+
+    if (!deferred) {
+      throw new Error(`Received resolve message with unknown id: ${id}`);
+    }
+
+    const { value } = data;
+
+    deferred.resolve(value);
+
+    this.deferredMap.delete(id);
+  }
+
+  private handleSubscribeMessage(id: string, data: any) {
+    const { name, arg } = data;
+
+    if (typeof name !== 'string') {
+      throw new Error(
+        `Received subscribe message with name property type: ${typeof name}, should be string`,
+      );
+    }
+
+    this.handleSubscribe(name, arg).then(
+      (value) => {
+        this.sendResolve(id, value);
+      },
+      (error) => {
+        this.sendReject(id, toError(error));
+      },
+    );
+  }
+
+  private sendHandshake() {
+    this.sendMessage(
+      { type: 'handshake', id: this.handshakeId, version: VERSION },
+      true,
+    );
+  }
+
+  private sendMessage(message: Message, immediate = false) {
+    if (!immediate && this.messageQueue) {
+      this.messageQueue.push(message);
+    } else {
+      this.targetWindow.postMessage(
+        { isLivery: true, ...message },
+        this.targetOrigin,
+      );
+    }
+  }
+
+  private sendReject(id: string, error: Error) {
+    this.sendMessage({ type: 'reject', id, error });
+  }
+
+  private sendResolve<ValueType>(id: string, value: ValueType) {
+    this.sendMessage({ type: 'resolve', id, value });
   }
 }

@@ -4,8 +4,9 @@
 }
 
 body {
-  margin: 8px;
-  /* background: rgba(245, 245, 245, 0.728); */
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -37,50 +38,12 @@ a.logo:hover {
   width: 117px;
 }
 
-.content {
-  /* border: 1px solid red; */
-  height: 100%;
-
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-}
-
-.subcontent {
-  /* border: 1px solid #4a275e; */
-
-  padding: 5px;
-  width: 45%;
-  height: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: transparent;
-}
-
-.valueBox {
-  border: 1px solid grey;
-  background-color: rgba(245, 245, 245, 0.913);
-  height: 50%;
-  padding: 5px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-
-#message-form {
+.panel {
   border: 1px solid grey;
   background-color: rgba(245, 245, 245, 0.913);
   padding: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
   flex-direction: column;
-}
-textarea {
-  margin: 10px;
 }

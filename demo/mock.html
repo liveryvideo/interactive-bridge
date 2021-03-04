@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="Description"
+      content="Mock SDK Bridge for Ex Machina Group Livery (https://www.liveryvideo.com/)."
+    />
+
+    <title>Livery Mock SDK Bridge</title>
+
+    <style>
+      body,
+      html {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe
+      src="index.html"
+      width="100%"
+      height="100%"
+      frameborder="0"
+    ></iframe>
+
+    <script type="module">
+      import { MockSdkBridge } from '../build/index.js';
+
+      // eslint-disable-next-line no-new
+      new MockSdkBridge(document.querySelector('iframe').contentWindow, '*');
+
+      window.addEventListener('message', (event) => {
+        // eslint-disable-next-line no-console
+        console.log('message', event.data);
+      });
+    </script>
+  </body>
+</html>
