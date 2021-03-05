@@ -172,8 +172,6 @@ export class LiveryBridge {
 
   // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars -- Not implemented here.
   protected handleCommand<ArgType>(message: CommandMessage<ArgType>) {
-    console.log('IS COMMAND MESSAGE!!!!!!!!!!!!');
-
     // Should be implemented in child class.
   }
 
