@@ -91,7 +91,6 @@ module.exports = {
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
         // Disable formatting rules; leave that to prettier
         'prettier',
-        'prettier/@typescript-eslint',
       ],
       parserOptions: {
         project: './tsconfig.json',
