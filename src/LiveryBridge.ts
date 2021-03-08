@@ -97,7 +97,6 @@ export class LiveryBridge {
     return isCommand;
   }
 
-  // check generic
   static isEventMessage<ArgType>(
     object: LiveryMessage,
   ): object is EventMessage<ArgType> {
@@ -296,8 +295,8 @@ export class LiveryBridge {
       (value) => {
         this.sendResolve(message.id, value);
       },
-      (error: string) => {
-        this.sendReject(message.id, error);
+      (error: Error) => {
+        this.sendReject(message.id, error.message);
       },
     );
   }

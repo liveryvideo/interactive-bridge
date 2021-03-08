@@ -1,7 +1,7 @@
 import { LiveryBridge, CommandMessage } from './LiveryBridge';
 
 export class MockSdkBridge extends LiveryBridge {
-  private portraitListening = false;
+  private portraitListeners: string[] = [];
 
   private portraitQuery = window.matchMedia('(orientation: portrait)');
 
@@ -23,7 +23,8 @@ export class MockSdkBridge extends LiveryBridge {
 
   // eslint-disable-next-line @typescript-eslint/require-await, class-methods-use-this
   private async subscribeOrientation(id: string) {
-    if (!this.portraitListening) {
+    if (this.portraitListeners.indexOf(id) === -1) {
+      this.portraitListeners.push(id);
       this.portraitQuery.addEventListener('change', (event) => {
         this.sendEvent(id, event.matches ? 'portrait' : 'landscape').catch(
           (error) => {
@@ -31,7 +32,6 @@ export class MockSdkBridge extends LiveryBridge {
           },
         );
       });
-      this.portraitListening = true;
     }
 
     return this.portraitQuery.matches ? 'portrait' : 'landscape';
