@@ -1,11 +1,13 @@
-import { LiveryBridge, CommandMessage } from './LiveryBridge';
+import { LiveryBridge } from './LiveryBridge';
 
 export class MockSdkBridge extends LiveryBridge {
   private portraitListeners: string[] = [];
 
   private portraitQuery = window.matchMedia('(orientation: portrait)');
 
-  protected handleCommand<ArgType>(message: CommandMessage<ArgType>) {
+  protected handleCommand(
+    message: Parameters<LiveryBridge['handleCommand']>[0],
+  ) {
     if (message.name === 'getLatency') {
       return this.getLatency();
     }
@@ -13,7 +15,7 @@ export class MockSdkBridge extends LiveryBridge {
       return this.subscribeOrientation(message.id);
     }
 
-    return super.handleCommand<ArgType>(message);
+    return super.handleCommand(message);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await, class-methods-use-this
