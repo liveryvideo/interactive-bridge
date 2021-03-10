@@ -10,7 +10,7 @@ export default merge(config, {
   input: './demo/index.html',
   plugins: [
     cpy({
-      files: ['demo/**/*', '!demo/index.html'],
+      files: ['demo/*', '!demo/index.html'],
       dest: 'dist',
     }),
   ],
