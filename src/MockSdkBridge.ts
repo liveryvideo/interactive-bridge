@@ -1,40 +1,32 @@
 import { LiveryBridge } from './LiveryBridge';
 
 export class MockSdkBridge extends LiveryBridge {
-  private portraitListeners: string[] = [];
-
   private portraitQuery = window.matchMedia('(orientation: portrait)');
 
   protected handleCommand(
-    message: Parameters<LiveryBridge['handleCommand']>[0],
+    name: string,
+    arg: unknown,
+    listener: (value: unknown) => void,
   ) {
-    if (message.name === 'getLatency') {
+    if (name === 'getLatency') {
       return this.getLatency();
     }
-    if (message.name === 'subscribeOrientation') {
-      return this.subscribeOrientation(message.id);
+    if (name === 'subscribeOrientation') {
+      return this.subscribeOrientation(listener);
     }
 
-    return super.handleCommand(message);
+    return super.handleCommand(name, arg, listener);
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await, class-methods-use-this
-  private async getLatency() {
+  // eslint-disable-next-line class-methods-use-this
+  private getLatency() {
     return Math.random() * 6;
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await, class-methods-use-this
-  private async subscribeOrientation(id: string) {
-    if (this.portraitListeners.indexOf(id) === -1) {
-      this.portraitListeners.push(id);
-      this.portraitQuery.addEventListener('change', (event) => {
-        this.sendEvent(id, event.matches ? 'portrait' : 'landscape').catch(
-          (error) => {
-            throw new Error(error);
-          },
-        );
-      });
-    }
+  private subscribeOrientation(listener: (value: unknown) => void) {
+    this.portraitQuery.addEventListener('change', (event) => {
+      listener(event.matches ? 'portrait' : 'landscape');
+    });
 
     return this.portraitQuery.matches ? 'portrait' : 'landscape';
   }

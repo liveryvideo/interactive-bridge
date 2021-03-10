@@ -35,7 +35,10 @@
       import { MockSdkBridge } from '../build/index.js';
 
       // eslint-disable-next-line no-new
-      new MockSdkBridge(document.querySelector('iframe').contentWindow, '*');
+      window.bridge = new MockSdkBridge(
+        document.querySelector('iframe').contentWindow,
+        '*',
+      );
 
       window.addEventListener('message', (event) => {
         // eslint-disable-next-line no-console

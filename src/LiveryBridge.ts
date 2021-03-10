@@ -3,237 +3,262 @@
 
 import { uuid } from './util/uuid';
 
-interface LiveryMessage {
+type TypeName = 'bigint' | 'boolean' | 'number' | 'string' | 'undefined';
+
+type NamedType<T> = T extends 'bigint'
+  ? bigint
+  : T extends 'boolean'
+  ? boolean
+  : T extends 'number'
+  ? number
+  : T extends 'string'
+  ? string
+  : T extends 'undefined'
+  ? undefined
+  : never;
+
+interface LiveryMessage extends Record<string, any> {
   id: string;
   isLivery: true;
   type: string;
 }
 
 interface HandshakeMessage extends LiveryMessage {
-  id: string;
   type: 'handshake';
   version: string;
 }
 
-interface ResolveMessage<ValueType> extends LiveryMessage {
-  id: string;
+interface ResolveMessage extends LiveryMessage {
   type: 'resolve';
-  value: ValueType;
+  value: any;
 }
 
 interface RejectMessage extends LiveryMessage {
   error: string;
-  id: string;
   type: 'reject';
 }
 
-interface CommandMessage<ArgType> extends LiveryMessage {
-  arg?: ArgType;
-  id: string;
+interface CommandMessage extends LiveryMessage {
+  arg: any;
   name: string;
   type: 'command';
 }
 
-interface EventMessage<ValueType> extends LiveryMessage {
-  id: string;
+interface EventMessage extends LiveryMessage {
   type: 'event';
-  value: ValueType;
+  value: any;
 }
 
-interface Deferred {
-  reject: (error: Error) => void;
-  resolve: (value: any) => void;
-}
+const version = '__VERSION__';
 
 export class LiveryBridge {
-  private deferredMap: Map<string, Deferred>;
+  private deferredMap = new Map<
+    string,
+    {
+      reject: (error: Error) => void;
+      resolve: (value: any) => void;
+    }
+  >();
 
   private handshakeId: string;
 
   private handshakePromise: Promise<void>;
 
-  private listenerMap: Map<string, (value: any) => void>;
+  private listenerMap = new Map<string, (value: any) => void>();
+
+  private targetOrigin: string;
 
   private targetWindow: Window;
 
-  private targetWindowUrl: string;
-
-  private version = '__VERSION__';
-
-  constructor(targetWindow: Window, targetWindowUrl: string) {
-    this.deferredMap = new Map<string, Deferred>();
-    this.listenerMap = new Map<string, (value: any) => void>();
-
+  constructor(targetWindow: Window, targetOrigin: string) {
     this.targetWindow = targetWindow;
-    this.targetWindowUrl = targetWindowUrl;
+    this.targetOrigin = targetOrigin;
 
     // Start listening for messages
-    window.addEventListener('message', (e) => {
-      if (LiveryBridge.isLiveryMessage(e.data)) {
-        this.handleLiveryMessage(e.data);
-      }
-    });
+    window.addEventListener('message', (event) => this.handleMessage(event));
 
-    // Attempt to handshake.
+    // Send handshake
     this.handshakeId = uuid();
-    this.handshakePromise = this.sendHandshake(
-      this.handshakeId,
-      this.version,
-    ).catch((error: Error) => {
-      throw error;
+    this.handshakePromise = new Promise<void>((resolve, reject) => {
+      this.deferredMap.set(this.handshakeId, { resolve, reject });
     });
+    this.sendMessage('handshake', this.handshakeId, { version });
   }
 
-  private static isCommandMessage<ArgType>(
-    object: LiveryMessage,
-  ): object is CommandMessage<ArgType> {
-    const command = object as CommandMessage<ArgType>;
-    const isCommand = object.type === 'command' && !!command.name;
-
-    if (isCommand) {
-      LiveryBridge.propertyTypeCheck(command.name, 'name', 'Command', 'string');
+  private static assertMessagePropertyType(
+    message: LiveryMessage,
+    key: string,
+    type: string,
+  ) {
+    const actualType = typeof message[key];
+    if (actualType !== type) {
+      throw new Error(
+        `Received ${message.type} message with ${key} property type: ${actualType}, should be ${type}`,
+      );
     }
-    return isCommand;
   }
 
-  private static isEventMessage<ArgType>(
-    object: LiveryMessage,
-  ): object is EventMessage<ArgType> {
-    return object.type === 'event' && !!(object as EventMessage<ArgType>).value;
+  private static assertType<T extends TypeName>(
+    name: string,
+    value: any,
+    type: T,
+  ) {
+    if (typeof value !== type) {
+      throw new Error(`${name} type: ${typeof value}, should be: ${type}`);
+    }
+    return value as NamedType<T>;
+  }
+
+  private static isCommandMessage(
+    message: LiveryMessage,
+  ): message is CommandMessage {
+    if (message.type !== 'command') {
+      return false;
+    }
+    LiveryBridge.assertMessagePropertyType(message, 'name', 'string');
+    return true;
+  }
+
+  private static isEventMessage(
+    message: LiveryMessage,
+  ): message is EventMessage {
+    return message.type === 'event';
   }
 
   private static isHandshakeMessage(
-    object: LiveryMessage,
-  ): object is HandshakeMessage {
-    const handshake = object as HandshakeMessage;
-    const isHandshake = object.type === 'handshake' && !!handshake.version;
-    if (isHandshake) {
-      LiveryBridge.propertyTypeCheck(
-        handshake.version,
-        'version',
-        'Handshake',
-        'string',
-      );
+    message: LiveryMessage,
+  ): message is HandshakeMessage {
+    if (message.type !== 'handshake') {
+      return false;
     }
-    return isHandshake;
+    LiveryBridge.assertMessagePropertyType(message, 'version', 'string');
+    return true;
   }
 
   private static isLiveryMessage(object: any): object is LiveryMessage {
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access -- Incoming object is any. */
-    const isLivery =
-      !!object && object.isLivery === true && !!object.type && !!object.id;
-    if (isLivery) {
-      LiveryBridge.propertyTypeCheck(object.type, 'type', 'Livery', 'string');
-      LiveryBridge.propertyTypeCheck(object.id, 'id', 'Livery', 'string');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Incoming object is any */
+    if (!object || object.isLivery !== true) {
+      return false;
     }
-
-    return isLivery;
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access -- Incoming object is any. */
+    LiveryBridge.assertMessagePropertyType(object, 'type', 'string');
+    LiveryBridge.assertMessagePropertyType(object, 'id', 'string');
+    return true;
   }
 
   private static isRejectMessage(
-    object: LiveryMessage,
-  ): object is RejectMessage {
-    const reject = object as RejectMessage;
-    const isReject = object.type === 'reject' && !!reject.error;
-
-    if (isReject) {
-      LiveryBridge.propertyTypeCheck(reject.error, 'error', 'Reject', 'string');
+    message: LiveryMessage,
+  ): message is RejectMessage {
+    if (message.type !== 'reject') {
+      return false;
     }
-
-    return isReject;
+    LiveryBridge.assertMessagePropertyType(message, 'error', 'string');
+    return true;
   }
 
-  private static isResolveMessage<ValueType>(
-    object: LiveryMessage,
-  ): object is ResolveMessage<ValueType> {
-    return (
-      object.type === 'resolve' && !!(object as ResolveMessage<ValueType>).value
-    );
+  private static isResolveMessage(
+    message: LiveryMessage,
+  ): message is ResolveMessage {
+    return message.type === 'resolve';
   }
 
-  private static propertyTypeCheck(
-    property: unknown,
-    propertyName: string,
-    messageName = '',
-    correctType: string,
-  ) {
-    if (typeof property !== correctType) {
-      throw new Error(
-        `Received ${messageName} message with ${propertyName} property type: ${typeof property}, should be ${correctType}`,
-      );
-    }
-  }
-
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars -- Overridable method
-  protected handleCommand<ArgType>(
-    message: CommandMessage<ArgType>,
-  ): Promise<unknown> {
-    return Promise.reject(
-      new Error(
-        `Received command message with unsupported name: ${message.name}`,
-      ),
-    );
-  }
-
-  protected sendCommand<ValueType, ArgType>(
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  // eslint-disable-next-line class-methods-use-this -- Overridable method
+  protected handleCommand(
     name: string,
-    id = uuid(),
-    arg?: ArgType,
-  ): Promise<ValueType> {
-    return this.handshakePromise
-      .then(() => {
-        this.sendMessage('command', {
-          isLivery: true,
-          type: 'command',
-          name,
-          id,
-          arg,
-        });
-
-        return new Promise<ValueType>((resolve, reject) => {
-          this.deferredMap.set(id, { resolve, reject });
-        });
-      })
-      .catch((error) => Promise.reject(error));
+    arg: unknown,
+    listener: (value: unknown) => void,
+  ): unknown {
+    throw new Error(`Received command message with unsupported name: ${name}`);
   }
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 
-  protected sendEvent<ValueType>(id: string, value: ValueType) {
+  protected sendCommand<T extends TypeName>({
+    arg,
+    listener,
+    name,
+    validate,
+  }: {
+    arg?: unknown;
+    listener?: (value: NamedType<T>) => void;
+    name: string;
+    validate: T;
+  }): Promise<NamedType<T>>;
+
+  protected sendCommand<T>({
+    arg,
+    listener,
+    name,
+    validate,
+  }: {
+    arg?: unknown;
+    listener?: (value: T) => void;
+    name: string;
+    validate: (value: unknown) => T;
+  }): Promise<T>;
+
+  protected sendCommand<T1 extends TypeName, T2>({
+    arg,
+    listener,
+    name,
+    validate,
+  }: {
+    arg?: unknown;
+    listener?: (value: NamedType<T1> | T2) => void;
+    name: string;
+    validate: T1 | ((value: unknown) => T2);
+  }) {
     return this.handshakePromise.then(() => {
-      this.sendMessage('event', {
-        value,
-        id,
+      const id = uuid();
+
+      const promise = new Promise<T2 | NamedType<T1>>((resolve, reject) => {
+        this.deferredMap.set(id, {
+          resolve: (value) => {
+            try {
+              resolve(
+                typeof validate === 'function'
+                  ? validate(value)
+                  : LiveryBridge.assertType(
+                      `Received ${name} resolve value`,
+                      value,
+                      validate,
+                    ),
+              );
+            } catch (error) {
+              reject(error);
+            }
+          },
+          reject,
+        });
       });
+
+      if (listener) {
+        this.listenerMap.set(id, (value) => {
+          listener(
+            typeof validate === 'function'
+              ? validate(value)
+              : LiveryBridge.assertType(
+                  `Received ${name} event value`,
+                  value,
+                  validate,
+                ),
+          );
+        });
+      }
+
+      this.sendMessage('command', id, { name, arg });
+
+      return promise;
     });
   }
 
-  protected sendReject(id: string, error: string) {
-    this.sendMessage('reject', {
-      error,
-      id,
-    });
-  }
-
-  protected sendResolve<ValueType>(id: string, value: ValueType) {
-    this.sendMessage('resolve', {
-      value,
-      id,
-    });
-  }
-
-  protected sendSubscribe<ValueType, ArgType>(
-    name: string,
-    listener: (value: ValueType) => void,
-    arg?: ArgType,
-  ) {
-    const id = uuid();
-    this.listenerMap.set(id, listener);
-    return this.sendCommand<string, ArgType>(name, id, arg);
-  }
-
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars -- Overridable method
-  private handleCommandMessage<ArgType>(message: CommandMessage<ArgType>) {
-    this.handleCommand(message).then(
+  private handleCommandMessage(message: CommandMessage) {
+    new Promise((resolve) => {
+      resolve(
+        this.handleCommand(message.name, message.arg, (value: unknown) => {
+          this.sendEvent(message.id, value);
+        }),
+      );
+    }).then(
       (value) => {
         this.sendResolve(message.id, value);
       },
@@ -243,26 +268,31 @@ export class LiveryBridge {
     );
   }
 
-  private handleEventMessage<ArgType>(message: EventMessage<ArgType>) {
+  private handleEventMessage(message: EventMessage) {
     const listener = this.listenerMap.get(message.id);
     if (listener) {
       listener(message.value);
     }
   }
 
+  // Called when target bridge was last to be constructed or restarted
   private handleHandshake(message: HandshakeMessage) {
-    if (message.version !== this.version) {
-      this.sendReject(message.id, 'Versions do not correspond.');
-    } else if (message.id !== this.handshakeId) {
-      // Other side was last to send handshake
-      this.sendResolve(message.id, this.version);
-      const deferred = this.deferredMap.get(this.handshakeId);
-      if (deferred) {
-        deferred.resolve(this.version);
-        this.deferredMap.delete(this.handshakeId);
-      }
-      this.handshakeId = message.id;
+    if (message.version !== version) {
+      this.sendReject(
+        message.id,
+        `Incompatible version: ${message.version}, should be ${version}`,
+      );
+      return;
     }
+
+    // Resolve our handshake promise if it wasn't already
+    const deferred = this.deferredMap.get(this.handshakeId);
+    if (deferred) {
+      deferred.resolve(version);
+      this.deferredMap.delete(this.handshakeId);
+    }
+
+    this.sendResolve(message.id, version);
   }
 
   private handleLiveryMessage(message: LiveryMessage) {
@@ -277,8 +307,22 @@ export class LiveryBridge {
     } else if (LiveryBridge.isEventMessage(message)) {
       this.handleEventMessage(message);
     } else {
-      // should always be last
-      this.sendReject(message.id || 'unknown', 'Unknown Message');
+      throw new Error(
+        `Received message with unsupported type: ${message.type}`,
+      );
+    }
+  }
+
+  private handleMessage(event: MessageEvent) {
+    if (
+      event.source !== this.targetWindow ||
+      (this.targetOrigin !== '*' && event.origin !== this.targetOrigin)
+    ) {
+      return;
+    }
+
+    if (LiveryBridge.isLiveryMessage(event.data)) {
+      this.handleLiveryMessage(event.data);
     }
   }
 
@@ -290,7 +334,7 @@ export class LiveryBridge {
     }
   }
 
-  private handleResolveMessage<ValueType>(message: ResolveMessage<ValueType>) {
+  private handleResolveMessage(message: ResolveMessage) {
     const deferred = this.deferredMap.get(message.id);
     if (deferred) {
       deferred.resolve(message.value);
@@ -298,32 +342,24 @@ export class LiveryBridge {
     }
   }
 
-  private sendHandshake(id: string, version: string) {
-    this.sendMessage('handshake', {
-      type: 'handshake',
-      id,
-      version,
-    });
-
-    return new Promise<void>((resolve, reject) => {
-      this.deferredMap.set(id, {
-        resolve: () => {
-          resolve();
-        },
-        reject: (error: Error) => {
-          reject(error);
-        },
-      });
-    });
+  private sendEvent(id: string, value: unknown) {
+    this.sendMessage('event', id, { value });
   }
 
-  private sendMessage(type: string, properties: Record<string, unknown>) {
-    const message = { isLivery: true, type, ...properties };
+  private sendMessage(
+    type: string,
+    id: string,
+    properties: Record<string, unknown>,
+  ) {
+    const message = { isLivery: true, type, id, ...properties };
+    this.targetWindow.postMessage(message, this.targetOrigin);
+  }
 
-    if (LiveryBridge.isLiveryMessage(message)) {
-      this.targetWindow.postMessage(message, this.targetWindowUrl);
-    } else {
-      throw new Error('Message is not a livery message.');
-    }
+  private sendReject(id: string, error: string) {
+    this.sendMessage('reject', id, { error });
+  }
+
+  private sendResolve(id: string, value: unknown) {
+    this.sendMessage('resolve', id, { value });
   }
 }
