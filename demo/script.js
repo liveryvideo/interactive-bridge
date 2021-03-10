@@ -1,9 +1,5 @@
 import { InteractiveBridge } from '../build/index.js';
 
-if (window.parent === window) {
-  window.location = 'mock.html';
-}
-
 function $(selector) {
   return document.querySelector(selector);
 }
