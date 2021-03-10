@@ -1,6 +1,7 @@
 // We carefully work with unsafe message data within this class, so we will use `any` typed variables and arguments
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
 
 type TypeName = 'bigint' | 'boolean' | 'number' | 'string' | 'undefined';
@@ -277,10 +278,14 @@ export class LiveryBridge {
 
   // Called when target bridge was last to be constructed or restarted
   private handleHandshake(message: HandshakeMessage) {
-    if (message.version !== version) {
+    // To support development version values ('__VERSION__') also check for non-semver equal version
+    if (
+      message.version !== version &&
+      !isSemVerCompatible(message.version, version)
+    ) {
       this.sendReject(
         message.id,
-        `Incompatible version: ${message.version}, should be ${version}`,
+        `Remote version: ${message.version} is incompatible with: ${version}`,
       );
       return;
     }
