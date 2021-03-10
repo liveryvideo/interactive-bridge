@@ -8,10 +8,10 @@
     />
     <meta
       name="Description"
-      content="Mock SDK Bridge for Ex Machina Group Livery (https://www.liveryvideo.com/)."
+      content="Mock Player Bridge for Ex Machina Group Livery (https://www.liveryvideo.com/)."
     />
 
-    <title>Livery Mock SDK Bridge</title>
+    <title>Livery Mock Player Bridge</title>
 
     <style>
       body,
@@ -32,10 +32,10 @@
     ></iframe>
 
     <script type="module">
-      import { MockSdkBridge } from '../build/index.js';
+      import { MockPlayerBridge } from '../build/index.js';
 
       // eslint-disable-next-line no-new
-      window.bridge = new MockSdkBridge(
+      window.bridge = new MockPlayerBridge(
         document.querySelector('iframe').contentWindow,
         '*',
       );

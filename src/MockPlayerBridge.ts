@@ -1,6 +1,6 @@
 import { LiveryBridge } from './LiveryBridge';
 
-export class MockSdkBridge extends LiveryBridge {
+export class MockPlayerBridge extends LiveryBridge {
   private portraitQuery = window.matchMedia('(orientation: portrait)');
 
   protected handleCommand(
