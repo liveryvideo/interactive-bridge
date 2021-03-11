@@ -5,6 +5,14 @@ export class InteractiveBridge extends LiveryBridge {
     super(window.parent, targetOrigin);
   }
 
+  public getAuthToken(arg?: unknown) {
+    return this.sendCommand({
+      arg,
+      name: 'getAuthToken',
+      validate: 'string',
+    });
+  }
+
   public getLatency() {
     return this.sendCommand({ name: 'getLatency', validate: 'number' });
   }

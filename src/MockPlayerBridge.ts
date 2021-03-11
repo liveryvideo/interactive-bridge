@@ -1,4 +1,5 @@
 import { LiveryBridge } from './LiveryBridge';
+import { uuid } from './util/uuid';
 
 export class MockPlayerBridge extends LiveryBridge {
   private portraitQuery = window.matchMedia('(orientation: portrait)');
@@ -8,6 +9,9 @@ export class MockPlayerBridge extends LiveryBridge {
     arg: unknown,
     listener: (value: unknown) => void,
   ) {
+    if (name === 'getAuthToken') {
+      return this.getAuthToken();
+    }
     if (name === 'getLatency') {
       return this.getLatency();
     }
@@ -19,6 +23,11 @@ export class MockPlayerBridge extends LiveryBridge {
     }
 
     return super.handleCommand(name, arg, listener);
+  }
+
+  // eslint-disable-next-line class-methods-use-this --- this usage is not necessary
+  private getAuthToken() {
+    return uuid();
   }
 
   // eslint-disable-next-line class-methods-use-this --- this usage is not necessary

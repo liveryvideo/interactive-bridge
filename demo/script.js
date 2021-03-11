@@ -7,6 +7,17 @@ function $(selector) {
 // Note: Don't use origin '*' like we do here unless security is not an issue for your purposes
 const bridge = new InteractiveBridge('*');
 
+$('#get-auth-token').addEventListener('click', () => {
+  bridge
+    .getAuthToken()
+    .then((token) => {
+      $('#auth-token').innerText = token;
+    })
+    .catch((error) => {
+      $('#auth-token').innerText = error.toString();
+    });
+});
+
 $('#get-latency').addEventListener('click', () => {
   bridge
     .getLatency()
