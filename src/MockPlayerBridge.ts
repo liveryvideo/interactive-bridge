@@ -14,11 +14,14 @@ export class MockPlayerBridge extends LiveryBridge {
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
     }
+    if (name === 'subscribeStreamPhase') {
+      return this.subscribeStreamPhase(listener);
+    }
 
     return super.handleCommand(name, arg, listener);
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line class-methods-use-this --- this usage is not necessary
   private getLatency() {
     return Math.random() * 6;
   }
@@ -29,5 +32,23 @@ export class MockPlayerBridge extends LiveryBridge {
     });
 
     return this.portraitQuery.matches ? 'portrait' : 'landscape';
+  }
+
+  // eslint-disable-next-line class-methods-use-this --- this usage is not necessary
+  private subscribeStreamPhase(listener: (value: unknown) => void) {
+    const phases = ['PRE', 'LIVE', 'POST'];
+    let i = 0;
+    const updatePhase = () => {
+      setTimeout(() => {
+        i += 1;
+        if (i < phases.length) {
+          listener(phases[i]);
+          updatePhase();
+        }
+      }, 1500);
+    };
+    updatePhase();
+
+    return phases[0];
   }
 }

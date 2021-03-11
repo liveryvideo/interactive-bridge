@@ -26,4 +26,22 @@ export class InteractiveBridge extends LiveryBridge {
       },
     });
   }
+
+  public subscribeStreamPhase(
+    listener: (phase: 'LIVE' | 'POST' | 'PRE') => void,
+  ) {
+    return this.sendCommand({
+      name: 'subscribeStreamPhase',
+      listener,
+      validate: (value) => {
+        if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
+          const strValue = JSON.stringify(value);
+          throw new Error(
+            `Received subscribeStreamPhase value: ${strValue}, should be: "LIVE" | "POST" | "PRE"`,
+          );
+        }
+        return value;
+      },
+    });
+  }
 }

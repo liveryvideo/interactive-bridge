@@ -31,6 +31,19 @@ $('#subscribe-orientation').addEventListener('click', () => {
     });
 });
 
+$('#subscribe-stream-phase').addEventListener('click', () => {
+  function setStreamPhase(phase) {
+    $('#stream-phase').innerText = phase;
+  }
+
+  bridge
+    .subscribeStreamPhase(setStreamPhase)
+    .then(setStreamPhase)
+    .catch((error) => {
+      $('#stream-phase').innerText = error.toString();
+    });
+});
+
 window.addEventListener('message', (event) => {
   console.log('message in:', event.data);
 });
