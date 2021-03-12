@@ -21,6 +21,7 @@ type NamedType<T> = T extends 'bigint'
 interface LiveryMessage extends Record<string, any> {
   id: string;
   isLivery: true;
+  sourceId: string;
   type: string;
 }
 
@@ -72,11 +73,11 @@ export class LiveryBridge {
     }
   >();
 
-  private handshakeId: string;
-
   private handshakePromise: Promise<void>;
 
   private listenerMap = new Map<string, (value: any) => void>();
+
+  private sourceId = uuid();
 
   private targetOrigin: string;
 
@@ -90,11 +91,10 @@ export class LiveryBridge {
     window.addEventListener('message', (event) => this.handleMessage(event));
 
     // Send handshake
-    this.handshakeId = uuid();
     this.handshakePromise = new Promise<void>((resolve, reject) => {
-      this.deferredMap.set(this.handshakeId, { resolve, reject });
+      this.deferredMap.set(this.sourceId, { resolve, reject });
     });
-    this.sendMessage('handshake', this.handshakeId, { version });
+    this.sendMessage('handshake', this.sourceId, { version });
   }
 
   public static validatePrimitive<T extends TypeName>(value: any, type: T) {
@@ -158,8 +158,9 @@ export class LiveryBridge {
     if (!object || object.isLivery !== true) {
       return false;
     }
-    LiveryBridge.assertMessagePropertyType(object, 'type', 'string');
     LiveryBridge.assertMessagePropertyType(object, 'id', 'string');
+    LiveryBridge.assertMessagePropertyType(object, 'sourceId', 'string');
+    LiveryBridge.assertMessagePropertyType(object, 'type', 'string');
     return true;
   }
 
@@ -323,16 +324,20 @@ export class LiveryBridge {
     }
 
     // Resolve our handshake promise if it wasn't already
-    const deferred = this.deferredMap.get(this.handshakeId);
+    const deferred = this.deferredMap.get(this.sourceId);
     if (deferred) {
       deferred.resolve(version);
-      this.deferredMap.delete(this.handshakeId);
+      this.deferredMap.delete(this.sourceId);
     }
 
     this.sendResolve(message.id, version);
   }
 
   private handleLiveryMessage(message: LiveryMessage) {
+    if (message.sourceId === this.sourceId) {
+      return;
+    }
+
     if (LiveryBridge.isHandshakeMessage(message)) {
       this.handleHandshake(message);
     } else if (LiveryBridge.isResolveMessage(message)) {
@@ -390,7 +395,13 @@ export class LiveryBridge {
     id: string,
     properties: Record<string, unknown>,
   ) {
-    const message = { isLivery: true, type, id, ...properties };
+    const message = {
+      isLivery: true,
+      sourceId: this.sourceId,
+      type,
+      id,
+      ...properties,
+    };
     this.targetWindow.postMessage(message, this.targetOrigin);
   }
 
