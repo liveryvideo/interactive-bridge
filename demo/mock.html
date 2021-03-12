@@ -14,22 +14,24 @@
     <title>Livery Mock Player Bridge</title>
 
     <style>
-      body,
-      html {
+      html,
+      body {
         height: 100%;
-        width: 100%;
         margin: 0;
         padding: 0;
+        background: #888;
+      }
+
+      iframe {
+        margin: 2vh 2vw;
+        width: 96vw;
+        height: 96vh;
+        border: none;
       }
     </style>
   </head>
   <body>
-    <iframe
-      src="index.html"
-      width="100%"
-      height="100%"
-      frameborder="0"
-    ></iframe>
+    <iframe src="index.html"></iframe>
 
     <script type="module">
       import { MockPlayerBridge } from '../build/index.js';
