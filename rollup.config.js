@@ -24,12 +24,7 @@ const common = {
 export default [
   {
     ...common,
-    external: [
-      ...Object.keys(pkg.dependencies),
-      // Unfortunately we have to manually specify non-default import paths here
-      // (which in turn we use instead of 'lodash' to optimize es-dev-server)
-      'lodash-es/debounce',
-    ],
+    external: [...Object.keys(pkg.dependencies)],
     output: {
       banner,
       file: pkg.module,
