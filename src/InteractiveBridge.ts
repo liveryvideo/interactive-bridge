@@ -6,7 +6,10 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   public getLatency() {
-    return this.sendCommand({ name: 'getLatency', validate: 'number' });
+    return this.sendCommand({
+      name: 'getLatency',
+      validate: (value) => LiveryBridge.validatePrimitive(value, 'number'),
+    });
   }
 
   public subscribeOrientation(

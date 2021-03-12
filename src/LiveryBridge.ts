@@ -86,6 +86,13 @@ export class LiveryBridge {
     this.sendMessage('handshake', this.handshakeId, { version });
   }
 
+  public static validatePrimitive<T extends TypeName>(value: any, type: T) {
+    if (typeof value !== type) {
+      throw new Error(`Value type: ${typeof value}, should be: ${type}`);
+    }
+    return value as NamedType<T>;
+  }
+
   private static assertMessagePropertyType(
     message: LiveryMessage,
     key: string,
@@ -97,17 +104,6 @@ export class LiveryBridge {
         `Received ${message.type} message with ${key} property type: ${actualType}, should be ${type}`,
       );
     }
-  }
-
-  private static assertType<T extends TypeName>(
-    name: string,
-    value: any,
-    type: T,
-  ) {
-    if (typeof value !== type) {
-      throw new Error(`${name} type: ${typeof value}, should be: ${type}`);
-    }
-    return value as NamedType<T>;
   }
 
   private static isCommandMessage(
@@ -162,6 +158,26 @@ export class LiveryBridge {
     return message.type === 'resolve';
   }
 
+  public sendCustomCommand<T>({
+    arg,
+    listener,
+    name,
+    validate,
+  }: {
+    arg?: unknown;
+    listener?: (value: T) => void;
+    name: string;
+    validate: (value: unknown) => T;
+  }) {
+    return this.sendCommand({
+      arg,
+      listener,
+      name,
+      type: 'customCommand',
+      validate,
+    });
+  }
+
   /* eslint-disable @typescript-eslint/no-unused-vars */
   // eslint-disable-next-line class-methods-use-this -- Overridable method
   protected handleCommand(
@@ -173,57 +189,27 @@ export class LiveryBridge {
   }
   /* eslint-enable @typescript-eslint/no-unused-vars */
 
-  protected sendCommand<T extends TypeName>({
-    arg,
-    listener,
-    name,
-    validate,
-  }: {
-    arg?: unknown;
-    listener?: (value: NamedType<T>) => void;
-    name: string;
-    validate: T;
-  }): Promise<NamedType<T>>;
-
   protected sendCommand<T>({
     arg,
     listener,
     name,
+    type = 'command',
     validate,
   }: {
     arg?: unknown;
     listener?: (value: T) => void;
     name: string;
+    type?: 'command' | 'customCommand';
     validate: (value: unknown) => T;
-  }): Promise<T>;
-
-  protected sendCommand<T1 extends TypeName, T2>({
-    arg,
-    listener,
-    name,
-    validate,
-  }: {
-    arg?: unknown;
-    listener?: (value: NamedType<T1> | T2) => void;
-    name: string;
-    validate: T1 | ((value: unknown) => T2);
   }) {
     return this.handshakePromise.then(() => {
       const id = uuid();
 
-      const promise = new Promise<T2 | NamedType<T1>>((resolve, reject) => {
+      const promise = new Promise<T>((resolve, reject) => {
         this.deferredMap.set(id, {
           resolve: (value) => {
             try {
-              resolve(
-                typeof validate === 'function'
-                  ? validate(value)
-                  : LiveryBridge.assertType(
-                      `Received ${name} resolve value`,
-                      value,
-                      validate,
-                    ),
-              );
+              resolve(validate(value));
             } catch (error) {
               reject(error);
             }
@@ -234,19 +220,11 @@ export class LiveryBridge {
 
       if (listener) {
         this.listenerMap.set(id, (value) => {
-          listener(
-            typeof validate === 'function'
-              ? validate(value)
-              : LiveryBridge.assertType(
-                  `Received ${name} event value`,
-                  value,
-                  validate,
-                ),
-          );
+          listener(validate(value));
         });
       }
 
-      this.sendMessage('command', id, { name, arg });
+      this.sendMessage(type, id, { name, arg });
 
       return promise;
     });
