@@ -40,6 +40,8 @@
         '*',
       );
 
+      window.bridge.registerCustomCommand('getAuthToken', () => 'testToken');
+
       window.addEventListener('message', (event) => {
         // eslint-disable-next-line no-console
         console.log('message in', event.data);

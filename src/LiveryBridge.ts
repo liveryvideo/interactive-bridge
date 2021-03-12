@@ -45,6 +45,12 @@ interface CommandMessage extends LiveryMessage {
   type: 'command';
 }
 
+interface CustomCommandMessage extends LiveryMessage {
+  arg: any;
+  name: string;
+  type: 'customCommand';
+}
+
 interface EventMessage extends LiveryMessage {
   type: 'event';
   value: any;
@@ -53,6 +59,11 @@ interface EventMessage extends LiveryMessage {
 const version = '__VERSION__';
 
 export class LiveryBridge {
+  private customCommandRegistrations = new Map<
+    string,
+    (arg: unknown) => void
+  >();
+
   private deferredMap = new Map<
     string,
     {
@@ -116,6 +127,16 @@ export class LiveryBridge {
     return true;
   }
 
+  private static isCustomCommandMessage(
+    message: LiveryMessage,
+  ): message is CustomCommandMessage {
+    if (message.type !== 'customCommand') {
+      return false;
+    }
+    LiveryBridge.assertMessagePropertyType(message, 'name', 'string');
+    return true;
+  }
+
   private static isEventMessage(
     message: LiveryMessage,
   ): message is EventMessage {
@@ -158,6 +179,13 @@ export class LiveryBridge {
     return message.type === 'resolve';
   }
 
+  public registerCustomCommand(
+    name: string,
+    handler: (arg: unknown) => unknown,
+  ) {
+    this.customCommandRegistrations.set(name, handler);
+  }
+
   public sendCustomCommand<T>({
     arg,
     listener,
@@ -176,6 +204,10 @@ export class LiveryBridge {
       type: 'customCommand',
       validate,
     });
+  }
+
+  public unRegisterCustomCommand(name: string) {
+    this.customCommandRegistrations.delete(name);
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -247,6 +279,28 @@ export class LiveryBridge {
     );
   }
 
+  private handleCustomCommandMessage(message: CustomCommandMessage) {
+    new Promise((resolve, reject) => {
+      const handler = this.customCommandRegistrations.get(message.name);
+      if (handler) {
+        resolve(handler(message.arg));
+      } else {
+        reject(
+          new Error(
+            `No registrations for custom command with name ${message.name}`,
+          ),
+        );
+      }
+    }).then(
+      (value) => {
+        this.sendResolve(message.id, value);
+      },
+      (error: Error) => {
+        this.sendReject(message.id, error.message);
+      },
+    );
+  }
+
   private handleEventMessage(message: EventMessage) {
     const listener = this.listenerMap.get(message.id);
     if (listener) {
@@ -287,6 +341,8 @@ export class LiveryBridge {
       this.handleRejectMessage(message);
     } else if (LiveryBridge.isCommandMessage(message)) {
       this.handleCommandMessage(message);
+    } else if (LiveryBridge.isCustomCommandMessage(message)) {
+      this.handleCustomCommandMessage(message);
     } else if (LiveryBridge.isEventMessage(message)) {
       this.handleEventMessage(message);
     } else {
