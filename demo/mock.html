@@ -34,7 +34,6 @@
     <script type="module">
       import { MockPlayerBridge } from '../build/index.js';
 
-      // eslint-disable-next-line no-new
       window.bridge = new MockPlayerBridge(
         document.querySelector('iframe').contentWindow,
         '*',
@@ -42,7 +41,7 @@
 
       window.addEventListener('message', (event) => {
         // eslint-disable-next-line no-console
-        console.log('message in', event.data);
+        console.log('player window message', event.data);
       });
     </script>
   </body>

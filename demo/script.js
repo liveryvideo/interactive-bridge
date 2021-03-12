@@ -1,4 +1,4 @@
-import { InteractiveBridge } from '../build/index.js';
+import { InteractiveBridge, MockPlayerBridge } from '../build/index.js';
 
 function $(selector) {
   return document.querySelector(selector);
@@ -45,7 +45,15 @@ $('#subscribe-stream-phase').addEventListener('click', () => {
 });
 
 window.addEventListener('message', (event) => {
-  console.log('message in:', event.data);
+  console.log('window message', event.data);
 });
 
 window.bridge = bridge;
+
+const params = new URLSearchParams(window.location.search);
+if (params.has('mock')) {
+  // Have the player bridge load asynchronously like in real use
+  window.setTimeout(() => {
+    window.mockBridge = new MockPlayerBridge(window, window.location.origin);
+  }, 1000);
+}
