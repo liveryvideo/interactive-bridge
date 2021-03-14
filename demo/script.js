@@ -71,8 +71,10 @@ window.bridge = bridge;
 
 const params = new URLSearchParams(window.location.search);
 if (params.has('mock')) {
-  // Have the player bridge load asynchronously like in real use
+  console.log('MockPlayerBridge will load in 3 seconds..');
   window.setTimeout(() => {
+    console.log('MockPlayerBridge loading..');
     window.mockBridge = new MockPlayerBridge(window, window.location.origin);
-  }, 1000);
+    window.mockBridge.registerCustomCommand('getAuthToken', () => 'testToken');
+  }, 3000);
 }
