@@ -7,20 +7,6 @@ function $(selector) {
 // Note: Don't use origin '*' like we do here unless security is not an issue for your purposes
 const bridge = new InteractiveBridge('*');
 
-$('#get-auth-token').addEventListener('click', () => {
-  bridge
-    .sendCustomCommand({
-      name: 'getAuthToken',
-      validate: (value) => InteractiveBridge.validatePrimitive(value, 'string'),
-    })
-    .then((token) => {
-      $('#auth-token').innerText = token;
-    })
-    .catch((error) => {
-      $('#auth-token').innerText = error.toString();
-    });
-});
-
 $('#get-latency').addEventListener('click', () => {
   bridge
     .getLatency()
@@ -55,6 +41,25 @@ $('#subscribe-stream-phase').addEventListener('click', () => {
     .then(setStreamPhase)
     .catch((error) => {
       $('#stream-phase').innerText = error.toString();
+    });
+});
+
+$('#custom-command-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const data = new FormData($('#custom-command-form'));
+
+  bridge
+    .sendCustomCommand({
+      name: data.get('name'),
+      arg: data.get('arg'),
+      validate: (value) => value,
+    })
+    .then((value) => {
+      $('#custom-command-value').innerText = value;
+    })
+    .catch((error) => {
+      $('#custom-command-value').innerText = error.toString();
     });
 });
 

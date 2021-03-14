@@ -16,37 +16,76 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <a
-      class="logo"
-      href="https://www.liveryvideo.com"
-      rel="external"
-      target="_blank"
-    >
-      <img src="logo.png" />
-    </a>
-
-    <div class="panel">
-      <h3>Auth Token</h3>
-      <span class="value" id="auth-token">..</span>
-      <button id="get-auth-token">Get Auth Token</button>
+    <div class="controls-space">
+      <!-- Livery Player controls can be shown here -->
     </div>
 
-    <div class="panel">
-      <h3>Latency</h3>
-      <span class="value" id="latency">..</span>
-      <button id="get-latency">Get Latency</button>
-    </div>
+    <header>
+      <a
+        class="logo"
+        href="https://www.liveryvideo.com"
+        rel="external"
+        target="_blank"
+      >
+        <img src="logo.png" />
+      </a>
+    </header>
 
-    <div class="panel">
-      <h3>Orientation</h3>
-      <span class="value" id="orientation">..</span>
-      <button id="subscribe-orientation">Subscribe Orientation</button>
-    </div>
+    <main>
+      <div class="panel">
+        <table>
+          <tr>
+            <th>Command</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td><button id="get-latency">getLatency</button></td>
+            <td id="latency"></td>
+          </tr>
+          <tr>
+            <td>
+              <button id="subscribe-orientation">subscribeOrientation</button>
+            </td>
+            <td id="orientation"></td>
+          </tr>
+          <tr>
+            <td>
+              <button id="subscribe-stream-phase">subscribeStreamPhase</button>
+            </td>
+            <td id="stream-phase"></td>
+          </tr>
+        </table>
+      </div>
 
-    <div class="panel">
-      <h3>Stream Phase</h3>
-      <span class="value" id="stream-phase">..</span>
-      <button id="subscribe-stream-phase">Subscribe Stream Phase</button>
+      <div class="panel">
+        <form id="custom-command-form" method="post" action="#">
+          <table>
+            <tr>
+              <th colspan="2">Custom Command</th>
+            </tr>
+            <tr>
+              <th>Name</th>
+              <td><input type="text" name="name" value="getAuthToken" /></td>
+            </tr>
+            <tr>
+              <th>Arg</th>
+              <td><input type="text" name="arg" value="" /></td>
+            </tr>
+            <tr>
+              <th></th>
+              <td><input type="submit" value="Send" /></td>
+            </tr>
+            <tr>
+              <th>Value</th>
+              <td id="custom-command-value"></td>
+            </tr>
+          </table>
+        </form>
+      </div>
+    </main>
+
+    <div class="controls-space">
+      <!-- Livery Player controls can be shown here -->
     </div>
 
     <script type="module" src="script.js"></script>
