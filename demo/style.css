@@ -22,7 +22,8 @@ body {
   height: 50px;
 }
 
-header {
+header,
+footer {
   display: flex;
   justify-content: space-evenly;
 }

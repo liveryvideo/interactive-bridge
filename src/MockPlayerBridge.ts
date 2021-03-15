@@ -3,6 +3,12 @@ import { LiveryBridge } from './LiveryBridge';
 export class MockPlayerBridge extends LiveryBridge {
   private portraitQuery = window.matchMedia('(orientation: portrait)');
 
+  constructor(targetWindow: Window, targetOrigin: string) {
+    super(targetWindow, targetOrigin);
+
+    this.registerCustomCommand('getAuthToken', () => 'testToken');
+  }
+
   protected handleCommand(
     name: string,
     arg: unknown,

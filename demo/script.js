@@ -48,19 +48,24 @@ $('#custom-command-form').addEventListener('submit', (event) => {
   event.preventDefault();
 
   const data = new FormData($('#custom-command-form'));
+  const arg = data.get('arg');
 
   bridge
     .sendCustomCommand({
       name: data.get('name'),
-      arg: data.get('arg'),
+      arg: !arg ? undefined : JSON.parse(arg),
       validate: (value) => value,
     })
     .then((value) => {
-      $('#custom-command-value').innerText = value;
+      $('#custom-command-value').innerText = JSON.stringify(value);
     })
     .catch((error) => {
       $('#custom-command-value').innerText = error.toString();
     });
+});
+
+$('#load-mock-bridge').addEventListener('click', () => {
+  window.mockBridge = new MockPlayerBridge(window, window.location.origin);
 });
 
 window.addEventListener('message', (event) => {
@@ -68,13 +73,3 @@ window.addEventListener('message', (event) => {
 });
 
 window.bridge = bridge;
-
-const params = new URLSearchParams(window.location.search);
-if (params.has('mock')) {
-  console.log('MockPlayerBridge will load in 3 seconds..');
-  window.setTimeout(() => {
-    console.log('MockPlayerBridge loading..');
-    window.mockBridge = new MockPlayerBridge(window, window.location.origin);
-    window.mockBridge.registerCustomCommand('getAuthToken', () => 'testToken');
-  }, 3000);
-}
