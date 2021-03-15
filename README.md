@@ -1,16 +1,8 @@
 # Livery Interactive
 
-Ex Machina Group Livery Interactive SDK.
-
-This can be used on a Livery interactive layer page.
+Ex Machina Group Livery Interactive SDK for use with LiveryPlayer interactive layer pages.
 
 Please refer to [docs.liveryvideo.com/interactive](https://docs.liveryvideo.com/interactive) for complete documentation.
-
-## Demo
-
-The demo page, for use in a Livery Player, can be found at: [interactive.liveryvideo.com](https://interactive.liveryvideo.com)
-
-To test with a mock player bridge use this page instead: [interactive.liveryvideo.com/mock.html](https://interactive.liveryvideo.com/mock.html)
 
 ## Installation
 
