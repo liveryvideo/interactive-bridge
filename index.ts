@@ -1,5 +1,5 @@
 /**
- * Livery Interactive version.
+ * Livery Interactive SDK version.
  */
 export const version = '__VERSION__';
 

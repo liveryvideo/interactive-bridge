@@ -1,10 +1,19 @@
 import { LiveryBridge } from './LiveryBridge';
 
+/**
+ * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
+ */
 export class InteractiveBridge extends LiveryBridge {
+  /**
+   * Constructs InteractiveBridge with `window.parent` as target window and with specified target origin.
+   */
   constructor(targetOrigin: string) {
     super(window.parent, targetOrigin);
   }
 
+  /**
+   * Returns promise of current LiveryPlayer latency in seconds.
+   */
   public getLatency() {
     return this.sendCommand('getLatency').then((value) => {
       if (typeof value !== 'number') {
@@ -16,6 +25,10 @@ export class InteractiveBridge extends LiveryBridge {
     });
   }
 
+  /**
+   * Returns promise of current LiveryPlayer window orientation (`'landscape' \| 'portrait'`)
+   * and calls back `listener` with any subsequent orientations.
+   */
   public subscribeOrientation(
     listener: (orientation: 'landscape' | 'portrait') => void,
   ) {
@@ -34,6 +47,10 @@ export class InteractiveBridge extends LiveryBridge {
     ).then(validate);
   }
 
+  /**
+   * Returns promise of current LiveryPlayer stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
+   * and calls back `listener` with any subsequent phases.
+   */
   public subscribeStreamPhase(
     listener: (phase: 'LIVE' | 'POST' | 'PRE') => void,
   ) {

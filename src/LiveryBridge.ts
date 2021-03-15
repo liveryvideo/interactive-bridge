@@ -159,6 +159,10 @@ export class LiveryBridge {
     return message.type === 'resolve';
   }
 
+  /**
+   * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
+   * other side with matching `name`.
+   */
   public registerCustomCommand(
     name: string,
     handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
@@ -166,6 +170,10 @@ export class LiveryBridge {
     this.customCommandMap.set(name, handler);
   }
 
+  /**
+   * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
+   * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
+   */
   public sendCustomCommand<T>(
     name: string,
     arg?: unknown,
@@ -174,6 +182,9 @@ export class LiveryBridge {
     return this.sendCommand(name, arg, listener, true);
   }
 
+  /**
+   * Unregister custom command by name.
+   */
   public unregisterCustomCommand(name: string) {
     this.customCommandMap.delete(name);
   }
