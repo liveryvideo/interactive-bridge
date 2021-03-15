@@ -60,10 +60,7 @@ interface EventMessage extends LiveryMessage {
 const version = '__VERSION__';
 
 export class LiveryBridge {
-  private customCommandRegistrations = new Map<
-    string,
-    (arg: unknown) => void
-  >();
+  private customCommandMap = new Map<string, (arg: unknown) => unknown>();
 
   private deferredMap = new Map<
     string,
@@ -112,7 +109,7 @@ export class LiveryBridge {
     const actualType = typeof message[key];
     if (actualType !== type) {
       throw new Error(
-        `Received ${message.type} message with ${key} property type: ${actualType}, should be ${type}`,
+        `${message.type} message with ${key} property type: ${actualType}, should be ${type}`,
       );
     }
   }
@@ -184,7 +181,7 @@ export class LiveryBridge {
     name: string,
     handler: (arg: unknown) => unknown,
   ) {
-    this.customCommandRegistrations.set(name, handler);
+    this.customCommandMap.set(name, handler);
   }
 
   public sendCustomCommand<T>({
@@ -207,8 +204,8 @@ export class LiveryBridge {
     });
   }
 
-  public unRegisterCustomCommand(name: string) {
-    this.customCommandRegistrations.delete(name);
+  public unregisterCustomCommand(name: string) {
+    this.customCommandMap.delete(name);
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -218,7 +215,7 @@ export class LiveryBridge {
     arg: unknown,
     listener: (value: unknown) => void,
   ): unknown {
-    throw new Error(`Received command message with unsupported name: ${name}`);
+    throw new Error(`Unsupported command: ${name}`);
   }
   /* eslint-enable @typescript-eslint/no-unused-vars */
 
@@ -282,15 +279,11 @@ export class LiveryBridge {
 
   private handleCustomCommandMessage(message: CustomCommandMessage) {
     new Promise((resolve, reject) => {
-      const handler = this.customCommandRegistrations.get(message.name);
+      const handler = this.customCommandMap.get(message.name);
       if (handler) {
         resolve(handler(message.arg));
       } else {
-        reject(
-          new Error(
-            `No registrations for custom command with name ${message.name}`,
-          ),
-        );
+        reject(new Error(`Unregistered custom command: ${message.name}`));
       }
     }).then(
       (value) => {
@@ -338,22 +331,20 @@ export class LiveryBridge {
       return;
     }
 
-    if (LiveryBridge.isHandshakeMessage(message)) {
-      this.handleHandshake(message);
-    } else if (LiveryBridge.isResolveMessage(message)) {
-      this.handleResolveMessage(message);
-    } else if (LiveryBridge.isRejectMessage(message)) {
-      this.handleRejectMessage(message);
-    } else if (LiveryBridge.isCommandMessage(message)) {
+    if (LiveryBridge.isCommandMessage(message)) {
       this.handleCommandMessage(message);
     } else if (LiveryBridge.isCustomCommandMessage(message)) {
       this.handleCustomCommandMessage(message);
     } else if (LiveryBridge.isEventMessage(message)) {
       this.handleEventMessage(message);
+    } else if (LiveryBridge.isHandshakeMessage(message)) {
+      this.handleHandshake(message);
+    } else if (LiveryBridge.isRejectMessage(message)) {
+      this.handleRejectMessage(message);
+    } else if (LiveryBridge.isResolveMessage(message)) {
+      this.handleResolveMessage(message);
     } else {
-      throw new Error(
-        `Received message with unsupported type: ${message.type}`,
-      );
+      throw new Error(`Invalid message type: ${message.type}`);
     }
   }
 
