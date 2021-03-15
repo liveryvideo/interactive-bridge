@@ -6,45 +6,49 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   public getLatency() {
-    return this.sendCommand({
-      name: 'getLatency',
-      validate: (value) => LiveryBridge.validatePrimitive(value, 'number'),
+    return this.sendCommand('getLatency').then((value) => {
+      if (typeof value !== 'number') {
+        throw new Error(
+          `getLatency value type: ${typeof value}, should be: number`,
+        );
+      }
+      return value;
     });
   }
 
   public subscribeOrientation(
     listener: (orientation: 'landscape' | 'portrait') => void,
   ) {
-    return this.sendCommand({
-      name: 'subscribeOrientation',
-      listener,
-      validate: (value) => {
-        if (value !== 'landscape' && value !== 'portrait') {
-          const strValue = JSON.stringify(value);
-          throw new Error(
-            `Received subscribeOrientation value: ${strValue}, should be: "landscape" | "portrait"`,
-          );
-        }
-        return value;
-      },
-    });
+    function validate(value: unknown) {
+      if (value !== 'landscape' && value !== 'portrait') {
+        const strValue = JSON.stringify(value);
+        throw new Error(
+          `subscribeOrientation value: ${strValue}, should be: "landscape" | "portrait"`,
+        );
+      }
+      return value;
+    }
+
+    return this.sendCommand('subscribeOrientation', undefined, (value) =>
+      listener(validate(value)),
+    ).then(validate);
   }
 
   public subscribeStreamPhase(
     listener: (phase: 'LIVE' | 'POST' | 'PRE') => void,
   ) {
-    return this.sendCommand({
-      name: 'subscribeStreamPhase',
-      listener,
-      validate: (value) => {
-        if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
-          const strValue = JSON.stringify(value);
-          throw new Error(
-            `Received subscribeStreamPhase value: ${strValue}, should be: "LIVE" | "POST" | "PRE"`,
-          );
-        }
-        return value;
-      },
-    });
+    function validate(value: unknown) {
+      if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
+        const strValue = JSON.stringify(value);
+        throw new Error(
+          `subscribeStreamPhase value: ${strValue}, should be: "LIVE" | "POST" | "PRE"`,
+        );
+      }
+      return value;
+    }
+
+    return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
+      listener(validate(value)),
+    ).then(validate);
   }
 }

@@ -4,20 +4,6 @@
 import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
 
-type TypeName = 'bigint' | 'boolean' | 'number' | 'string' | 'undefined';
-
-type NamedType<T> = T extends 'bigint'
-  ? bigint
-  : T extends 'boolean'
-  ? boolean
-  : T extends 'number'
-  ? number
-  : T extends 'string'
-  ? string
-  : T extends 'undefined'
-  ? undefined
-  : never;
-
 interface LiveryMessage extends Record<string, any> {
   id: string;
   isLivery: true;
@@ -95,13 +81,6 @@ export class LiveryBridge {
       this.deferredMap.set(this.sourceId, { resolve, reject });
     });
     this.sendMessage('handshake', this.sourceId, { version });
-  }
-
-  public static validatePrimitive<T extends TypeName>(value: any, type: T) {
-    if (typeof value !== type) {
-      throw new Error(`Value type: ${typeof value}, should be: ${type}`);
-    }
-    return value as NamedType<T>;
   }
 
   private static assertMessagePropertyType(
@@ -187,24 +166,12 @@ export class LiveryBridge {
     this.customCommandMap.set(name, handler);
   }
 
-  public sendCustomCommand<T>({
-    arg,
-    listener,
-    name,
-    validate,
-  }: {
-    arg?: unknown;
-    listener?: (value: T) => void;
-    name: string;
-    validate: (value: unknown) => T;
-  }) {
-    return this.sendCommand({
-      arg,
-      listener,
-      name,
-      type: 'customCommand',
-      validate,
-    });
+  public sendCustomCommand<T>(
+    name: string,
+    arg?: unknown,
+    listener?: (value: T) => void,
+  ) {
+    return this.sendCommand(name, arg, listener, true);
   }
 
   public unregisterCustomCommand(name: string) {
@@ -222,42 +189,24 @@ export class LiveryBridge {
   }
   /* eslint-enable @typescript-eslint/no-unused-vars */
 
-  protected sendCommand<T>({
-    arg,
-    listener,
-    name,
-    type = 'command',
-    validate,
-  }: {
-    arg?: unknown;
-    listener?: (value: T) => void;
-    name: string;
-    type?: 'command' | 'customCommand';
-    validate: (value: unknown) => T;
-  }) {
+  protected sendCommand<T>(
+    name: string,
+    arg?: unknown,
+    listener?: (value: T) => void,
+    custom = false,
+  ) {
     return this.handshakePromise.then(() => {
       const id = uuid();
 
       const promise = new Promise<T>((resolve, reject) => {
-        this.deferredMap.set(id, {
-          resolve: (value) => {
-            try {
-              resolve(validate(value));
-            } catch (error) {
-              reject(error);
-            }
-          },
-          reject,
-        });
+        this.deferredMap.set(id, { resolve, reject });
       });
 
       if (listener) {
-        this.listenerMap.set(id, (value) => {
-          listener(validate(value));
-        });
+        this.listenerMap.set(id, listener);
       }
 
-      this.sendMessage(type, id, { name, arg });
+      this.sendMessage(custom ? 'customCommand' : 'command', id, { name, arg });
 
       return promise;
     });
