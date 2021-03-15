@@ -60,7 +60,10 @@ interface EventMessage extends LiveryMessage {
 const version = '__VERSION__';
 
 export class LiveryBridge {
-  private customCommandMap = new Map<string, (arg: unknown) => unknown>();
+  private customCommandMap = new Map<
+    string,
+    (arg: unknown, listener: (value: unknown) => void) => unknown
+  >();
 
   private deferredMap = new Map<
     string,
@@ -179,7 +182,7 @@ export class LiveryBridge {
 
   public registerCustomCommand(
     name: string,
-    handler: (arg: unknown) => unknown,
+    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
   ) {
     this.customCommandMap.set(name, handler);
   }
@@ -281,7 +284,11 @@ export class LiveryBridge {
     new Promise((resolve, reject) => {
       const handler = this.customCommandMap.get(message.name);
       if (handler) {
-        resolve(handler(message.arg));
+        resolve(
+          handler(message.arg, (value: unknown) => {
+            this.sendEvent(message.id, value);
+          }),
+        );
       } else {
         reject(new Error(`Unregistered custom command: ${message.name}`));
       }

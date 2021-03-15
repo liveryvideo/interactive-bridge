@@ -45,6 +45,10 @@ $('#subscribe-stream-phase').addEventListener('click', () => {
 });
 
 $('#custom-command-form').addEventListener('submit', (event) => {
+  function setValue(value) {
+    $('#custom-command-value').innerText = JSON.stringify(value);
+  }
+
   event.preventDefault();
 
   const data = new FormData($('#custom-command-form'));
@@ -55,10 +59,9 @@ $('#custom-command-form').addEventListener('submit', (event) => {
       name: data.get('name'),
       arg: !arg ? undefined : JSON.parse(arg),
       validate: (value) => value,
+      listener: setValue,
     })
-    .then((value) => {
-      $('#custom-command-value').innerText = JSON.stringify(value);
-    })
+    .then(setValue)
     .catch((error) => {
       $('#custom-command-value').innerText = error.toString();
     });

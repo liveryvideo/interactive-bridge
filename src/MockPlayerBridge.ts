@@ -6,7 +6,16 @@ export class MockPlayerBridge extends LiveryBridge {
   constructor(targetWindow: Window, targetOrigin: string) {
     super(targetWindow, targetOrigin);
 
-    this.registerCustomCommand('getAuthToken', () => 'testToken');
+    this.registerCustomCommand('subscribeAuthToken', (arg, listener) => {
+      if (typeof arg !== 'string') {
+        throw new Error(`Argument type: ${typeof arg}, should be: string`);
+      }
+
+      window.setTimeout(() => listener(`${arg}-test-token-2`), 3000);
+      window.setTimeout(() => listener(`${arg}-test-token-3`), 10000);
+
+      return `${arg}-test-token-1`;
+    });
   }
 
   protected handleCommand(
