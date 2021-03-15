@@ -1,4 +1,4 @@
-import { InteractiveBridge, MockPlayerBridge } from '../build/index.js';
+import { InteractiveBridge } from '../build/index.js';
 
 function $(selector) {
   return document.querySelector(selector);
@@ -62,10 +62,6 @@ $('#custom-command-form').addEventListener('submit', (event) => {
     .catch((error) => {
       $('#custom-command-value').innerText = error.toString();
     });
-});
-
-$('#load-mock-bridge').addEventListener('click', () => {
-  window.mockBridge = new MockPlayerBridge(window, window.location.origin);
 });
 
 window.addEventListener('message', (event) => {
