@@ -24,7 +24,15 @@ const common = {
 export default [
   {
     ...common,
-    external: [...Object.keys(pkg.dependencies)],
+    external: (id) => {
+      // Note: not just 'lodash-es', but also 'lodash-es/debounce' is external
+      for (const dep of Object.keys(pkg.dependencies)) {
+        if (id === dep || id.startsWith(`${dep}/`)) {
+          return true;
+        }
+      }
+      return false;
+    },
     output: {
       banner,
       file: pkg.module,
