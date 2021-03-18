@@ -8,6 +8,10 @@
   "repository": "github:exmg/livery-interactive",
   "main": "dist/index.umd.js",
   "module": "dist/index.js",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.umd.js"
+  },
   "types": "build/index.d.ts",
   "files": [
     "dist",
