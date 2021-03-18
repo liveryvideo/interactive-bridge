@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/exmg/livery-interactive/compare/v1.0.0...v1.1.0) (2021-03-18)
+
+
+### Features
+
+* **livery-bridge-log:** add livery-bridge-log element for debugging ([c9eb820](https://github.com/exmg/livery-interactive/commit/c9eb82011e1a74336c30a5cd7a73ae544bc22f27))
+
 # 1.0.0 (2021-03-18)
 
 
