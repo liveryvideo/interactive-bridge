@@ -27,8 +27,12 @@ export class LiveryBridgeLog extends LitElement {
       display: none;
     }
 
+    pre {
+      white-space: pre-wrap;
+    }
+
     code {
-      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
   `;
 
