@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/exmg/livery-interactive/compare/v1.1.0...v1.1.1) (2021-03-18)
+
+
+### Bug Fixes
+
+* **livery-bridge-log:** fix text wrapping ([7675996](https://github.com/exmg/livery-interactive/commit/7675996bce22741945f6ba0fe3230d8300de0615))
+
 # [1.1.0](https://github.com/exmg/livery-interactive/compare/v1.0.0...v1.1.0) (2021-03-18)
 
 
