@@ -1,6 +1,9 @@
 {
   "name": "@exmg/livery-interactive",
   "version": "1.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Ex Machina Group Livery Interactive SDK.",
   "author": "Ex Machina Group",
   "homepage": "https://www.liveryvideo.com/",
