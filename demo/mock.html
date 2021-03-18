@@ -8,22 +8,53 @@
     />
     <meta
       name="Description"
-      content="Mock Player Bridge for Ex Machina Group Livery (https://www.liveryvideo.com/)."
+      content="Mock Livery Player (https://www.liveryvideo.com/)."
     />
 
-    <title>Livery Mock Player Bridge</title>
+    <title>Mock Livery Player</title>
 
     <style>
-      html,
+      * {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      html {
+        background-color: #222;
+        color: #aaa;
+        font-family: 'Open Sans', sans-serif;
+        line-height: 1.25em;
+        font-size: 14px;
+      }
+
       body {
-        height: 100%;
         margin: 0;
-        padding: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: center / cover url('screenshot.jpg');
+        padding: 4px;
+      }
+
+      .panel {
+        background-color: #444;
+        color: #ccc;
+        margin: 0 0 4px 0;
+        padding: 4px;
+      }
+
+      .player {
+        position: relative;
+        width: 100%;
+        height: 50vh;
+      }
+
+      .screenshot {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
         border: none;
@@ -52,13 +83,25 @@
     </style>
   </head>
   <body>
-    <iframe src="index.html"></iframe>
+    <div class="panel">
+      <h2>Mock Livery Player</h2>
+      <div class="player">
+        <img class="screenshot" src="screenshot.jpg" />
 
-    <div class="controls controls-top">
-      Livery Player controls can be shown here
+        <iframe src="index.html"></iframe>
+
+        <div class="controls controls-top">
+          Livery Player controls can be shown here
+        </div>
+        <div class="controls controls-bottom">
+          Livery Player controls can be shown here
+        </div>
+      </div>
     </div>
-    <div class="controls controls-bottom">
-      Livery Player controls can be shown here
+
+    <div class="panel">
+      <h2>Mock Bridge Messages</h2>
+      <livery-bridge-log></livery-bridge-log>
     </div>
 
     <script type="module">
@@ -68,11 +111,6 @@
         document.querySelector('iframe').contentWindow,
         '*',
       );
-
-      window.addEventListener('message', (event) => {
-        // eslint-disable-next-line no-console
-        console.log('player window message', event.data);
-      });
     </script>
   </body>
 </html>

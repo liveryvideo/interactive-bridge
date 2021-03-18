@@ -42,8 +42,4 @@ $('#custom-command-form').addEventListener('submit', (event) => {
     .then(setText, setText);
 });
 
-window.addEventListener('message', (event) => {
-  console.log('window message', event.data);
-});
-
 window.bridge = bridge;
