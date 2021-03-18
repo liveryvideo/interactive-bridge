@@ -1,18 +1,13 @@
-// import { expect, fixture, html } from '@open-wc/testing';
-// import '../index'; // defines the custom elements
-// import { LiveryPlayer } from '../src/livery-player/LiveryPlayer';
-// import { Logger } from '../src/util/Logger';
+import { expect } from '@open-wc/testing';
+import { InteractiveBridge } from '../src/InteractiveBridge';
+import { LiveryBridge } from '../src/LiveryBridge';
 
-// Logger.options.level = 'QUIET';
+describe('InteractiveBridge', () => {
+  // TODO: Write a proper suite of tests
 
-// describe('LiveryPlayer', () => {
-//   // TODO: Write a proper suite of tests
+  it('extends LiveryBridge', () => {
+    const bridge = new InteractiveBridge('*');
 
-//   it('has muted attribute bound to property', async () => {
-//     const el = await fixture<LiveryPlayer>(html`
-//       <livery-player muted></livery-player>
-//     `);
-
-//     expect(el.muted).to.equal(true);
-//   });
-// });
+    expect(bridge).to.be.an.instanceOf(LiveryBridge);
+  });
+});
