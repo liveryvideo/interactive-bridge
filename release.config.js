@@ -1,7 +1,6 @@
 const { execSync } = require('child_process');
 
 const config = {
-  repositoryUrl: 'git@bitbucket.org:exmachina/livery-sdk-web.git',
   plugins: [
     '@semantic-release/commit-analyzer',
     '@semantic-release/release-notes-generator',
