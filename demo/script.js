@@ -11,6 +11,8 @@ function createSetText(selector) {
   };
 }
 
+$('#version').innerText = '__VERSION__';
+
 // Note: Don't use origin '*' like we do here unless security is not an issue for your purposes
 const bridge = new InteractiveBridge('*');
 
