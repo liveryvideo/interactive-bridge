@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/exmg/livery-interactive/compare/v1.1.1...v1.1.2) (2021-03-26)
+
+
+### Bug Fixes
+
+* **livery-bridge:** fix version check only accepting identical versions ([8588c49](https://github.com/exmg/livery-interactive/commit/8588c49ac0751f7ca4b94be2866c3818cb00daee))
+
 ## [1.1.1](https://github.com/exmg/livery-interactive/compare/v1.1.0...v1.1.1) (2021-03-18)
 
 
