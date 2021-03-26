@@ -6,7 +6,7 @@ export function semver(version: string) {
   if (!matches) {
     throw new Error(`Invalid semantic version: ${version}`);
   }
-  const [major, minor, patch, prerelease, buildmetadata] = matches;
+  const [, major, minor, patch, prerelease, buildmetadata] = matches;
   return { major, minor, patch, prerelease, buildmetadata };
 }
 
