@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/exmg/livery-interactive/compare/v1.1.2...v1.2.0) (2021-03-31)
+
+
+### Features
+
+* **livery-bridge:** add setTargetOrigin method ([a836dee](https://github.com/exmg/livery-interactive/commit/a836dee2b356ea9c6d033185bc9392342fec1500))
+
 ## [1.1.2](https://github.com/exmg/livery-interactive/compare/v1.1.1...v1.1.2) (2021-03-26)
 
 
