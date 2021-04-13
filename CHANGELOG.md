@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/exmg/livery-interactive/compare/v1.2.0...v1.2.1) (2021-04-13)
+
+
+### Bug Fixes
+
+* **livery-bridge:** remove setTargetOrigin ([6ff55db](https://github.com/exmg/livery-interactive/commit/6ff55dbd884f4b674634746fbb101539d0b144c8))
+
 # [1.2.0](https://github.com/exmg/livery-interactive/compare/v1.1.2...v1.2.0) (2021-03-31)
 
 
