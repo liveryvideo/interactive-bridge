@@ -44,4 +44,13 @@ $('#custom-command-form').addEventListener('submit', (event) => {
     .then(setText, setText);
 });
 
+bridge.registerCustomCommand('testCustomCommand', (arg, handler) => {
+  $('#custom-registration-arg').innerText = JSON.stringify(arg);
+
+  window.setTimeout(() => handler(`${arg}-result-2`), 2000);
+  window.setTimeout(() => handler(`${arg}-result-3`), 4000);
+
+  return `${arg}-result-1`;
+});
+
 window.bridge = bridge;
