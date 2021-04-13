@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/exmg/livery-interactive/compare/v1.2.1...v1.2.2) (2021-04-13)
+
+
+### Bug Fixes
+
+* export Orientation and StreamPhase types ([2e8f47b](https://github.com/exmg/livery-interactive/commit/2e8f47b0dda7df4c7d015b154005f40175b59e20))
+
 ## [1.2.1](https://github.com/exmg/livery-interactive/compare/v1.2.0...v1.2.1) (2021-04-13)
 
 
