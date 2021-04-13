@@ -1,5 +1,9 @@
 import { LiveryBridge } from './LiveryBridge';
 
+export type Orientation = 'landscape' | 'portrait';
+
+export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
@@ -30,8 +34,8 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent orientations.
    */
   public subscribeOrientation(
-    listener: (orientation: 'landscape' | 'portrait') => void,
-  ) {
+    listener: (orientation: Orientation) => void,
+  ): Promise<Orientation> {
     function validate(value: unknown) {
       if (value !== 'landscape' && value !== 'portrait') {
         const strValue = JSON.stringify(value);
@@ -52,8 +56,8 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent phases.
    */
   public subscribeStreamPhase(
-    listener: (phase: 'LIVE' | 'POST' | 'PRE') => void,
-  ) {
+    listener: (phase: StreamPhase) => void,
+  ): Promise<StreamPhase> {
     function validate(value: unknown) {
       if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
         const strValue = JSON.stringify(value);
