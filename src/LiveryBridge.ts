@@ -223,10 +223,6 @@ export class LiveryBridge {
     });
   }
 
-  protected setTargetOrigin(origin: string) {
-    this.targetOrigin = origin;
-  }
-
   private handleCommandMessage(message: CommandMessage) {
     new Promise((resolve) => {
       resolve(
