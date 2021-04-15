@@ -40,7 +40,7 @@ $('#custom-command-form').addEventListener('submit', (event) => {
 
   const setText = createSetText('#custom-command-value');
   bridge
-    .sendCustomCommand(data.get('name'), arg, setText)
+    .sendPlayerCommand(data.get('name'), arg, setText)
     .then(setText, setText);
 });
 
