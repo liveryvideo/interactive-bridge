@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/exmg/livery-interactive/compare/v1.2.2...v1.3.0) (2021-04-15)
+
+
+### Features
+
+* **interactive-bridge:** add better custom command method names ([ecce00d](https://github.com/exmg/livery-interactive/commit/ecce00de8abb68f1d4e70c1246df4ef549441b8b))
+
 ## [1.2.2](https://github.com/exmg/livery-interactive/compare/v1.2.1...v1.2.2) (2021-04-13)
 
 
