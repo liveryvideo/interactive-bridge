@@ -159,36 +159,6 @@ export class LiveryBridge {
     return message.type === 'resolve';
   }
 
-  /**
-   * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
-   * other side with matching `name`.
-   */
-  public registerCustomCommand(
-    name: string,
-    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
-  ) {
-    this.customCommandMap.set(name, handler);
-  }
-
-  /**
-   * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
-   * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
-   */
-  public sendCustomCommand<T>(
-    name: string,
-    arg?: unknown,
-    listener?: (value: T) => void,
-  ) {
-    return this.sendCommand(name, arg, listener, true);
-  }
-
-  /**
-   * Unregister custom command by name.
-   */
-  public unregisterCustomCommand(name: string) {
-    this.customCommandMap.delete(name);
-  }
-
   /* eslint-disable @typescript-eslint/no-unused-vars */
   // eslint-disable-next-line class-methods-use-this -- Overridable method
   protected handleCommand(
@@ -199,6 +169,17 @@ export class LiveryBridge {
     throw new Error(`Unsupported command: ${name}`);
   }
   /* eslint-enable @typescript-eslint/no-unused-vars */
+
+  /**
+   * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
+   * other side with matching `name`.
+   */
+  protected registerCustomCommand(
+    name: string,
+    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
+  ) {
+    this.customCommandMap.set(name, handler);
+  }
 
   protected sendCommand<T>(
     name: string,
@@ -221,6 +202,25 @@ export class LiveryBridge {
 
       return promise;
     });
+  }
+
+  /**
+   * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
+   * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
+   */
+  protected sendCustomCommand<T>(
+    name: string,
+    arg?: unknown,
+    listener?: (value: T) => void,
+  ) {
+    return this.sendCommand(name, arg, listener, true);
+  }
+
+  /**
+   * Unregister custom command by name.
+   */
+  protected unregisterCustomCommand(name: string) {
+    this.customCommandMap.delete(name);
   }
 
   private handleCommandMessage(message: CommandMessage) {

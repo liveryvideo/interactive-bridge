@@ -42,21 +42,8 @@ export class MockPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
-   * other side with matching `name`.
-   *
-   * @deprecated Will become a protected member in LiveryBridge.ts in the next major version. Use registerPlayerCommand() instead.
-   */
-  public registerCustomCommand(
-    name: string,
-    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
-  ) {
-    return super.registerCustomCommand(name, handler);
-  }
-
-  /**
-   * Register `handler` function to be called with `arg` and `listener` when sendPlayerCommand() is called on
-   * other side with matching `name`.
+   * Register `handler` function to be called with `arg` and `listener` when sendPlayerCommand() is called
+   * from the interactive layer side with matching `name`.
    */
   public registerPlayerCommand(
     name: string,
@@ -66,21 +53,7 @@ export class MockPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
-   * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
-   *
-   * @deprecated Will become a protected member in LiveryBridge.ts in the next major version. Use sendInteractiveCommand() instead.
-   */
-  public sendCustomCommand<T>(
-    name: string,
-    arg?: unknown,
-    listener?: (value: T) => void,
-  ) {
-    return super.sendCustomCommand(name, arg, listener);
-  }
-
-  /**
-   * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
+   * Returns promise of value returned by the interactive layer's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
   public sendInteractiveCommand<T>(
@@ -89,15 +62,6 @@ export class MockPlayerBridge extends LiveryBridge {
     listener?: (value: T) => void,
   ) {
     return this.sendCustomCommand(name, arg, listener);
-  }
-
-  /**
-   * Unregister custom command by name.
-   *
-   * @deprecated Will become a protected member in LiveryBridge.ts in the next major version. Use unregisterInteractiveCommand() instead.
-   */
-  public unregisterCustomCommand(name: string) {
-    super.unregisterCustomCommand(name);
   }
 
   /**
