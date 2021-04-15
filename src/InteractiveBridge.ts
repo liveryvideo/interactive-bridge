@@ -43,7 +43,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Register `handler` function to be called with `arg` and `listener` when a custom interactive command is sent on
+   * Register `handler` function to be called with `arg` and `listener` when sendInteractiveCommand() is called on
    * other side with matching `name`.
    */
   public registerInteractiveCommand(
@@ -68,7 +68,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of value returned by other side's custom interactive command handler with matching `name` that is passed `arg`.
+   * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
   public sendPlayerCommand<T>(
