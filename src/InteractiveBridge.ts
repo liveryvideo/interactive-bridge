@@ -68,7 +68,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of value returned by the livery-player's side custom command handler with matching `name` that is passed `arg`.
+   * Returns promise of value returned by the livery-player's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
   public sendPlayerCommand<T>(
