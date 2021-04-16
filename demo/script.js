@@ -31,21 +31,21 @@ $('#subscribe-stream-phase').addEventListener('click', () => {
   bridge.subscribeStreamPhase(setText).then(setText, setText);
 });
 
-$('#custom-command-form').addEventListener('submit', (event) => {
+$('#player-command-form').addEventListener('submit', (event) => {
   event.preventDefault();
 
-  const data = new FormData($('#custom-command-form'));
+  const data = new FormData($('#player-command-form'));
   let arg = data.get('arg');
   arg = !arg ? undefined : JSON.parse(arg);
 
-  const setText = createSetText('#custom-command-value');
+  const setText = createSetText('#player-command-value');
   bridge
     .sendCustomCommand(data.get('name'), arg, setText)
     .then(setText, setText);
 });
 
-bridge.registerCustomCommand('testCustomCommand', (arg, handler) => {
-  $('#custom-registration-arg').innerText = JSON.stringify(arg);
+bridge.registerCustomCommand('test', (arg, handler) => {
+  $('#iinteractive-command-arg').innerText = JSON.stringify(arg);
 
   window.setTimeout(() => handler(`${arg}-result-2`), 2000);
   window.setTimeout(() => handler(`${arg}-result-3`), 4000);
