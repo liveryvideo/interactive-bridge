@@ -44,8 +44,8 @@ $('#player-command-form').addEventListener('submit', (event) => {
     .then(setText, setText);
 });
 
-bridge.registerCustomCommand('test', (arg, handler) => {
-  $('#iinteractive-command-arg').innerText = JSON.stringify(arg);
+bridge.registerInteractiveCommand('test', (arg, handler) => {
+  $('#interactive-command-arg').innerText = JSON.stringify(arg);
 
   window.setTimeout(() => handler(`${arg}-result-2`), 2000);
   window.setTimeout(() => handler(`${arg}-result-3`), 4000);
