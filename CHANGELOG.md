@@ -1,3 +1,17 @@
+# [1.3.0](https://github.com/exmg/livery-interactive/compare/v1.2.2...v1.3.0) (2021-04-15)
+
+
+### Features
+
+* **interactive-bridge:** add better custom command method names ([ecce00d](https://github.com/exmg/livery-interactive/commit/ecce00de8abb68f1d4e70c1246df4ef549441b8b))
+
+## [1.2.2](https://github.com/exmg/livery-interactive/compare/v1.2.1...v1.2.2) (2021-04-13)
+
+
+### Bug Fixes
+
+* export Orientation and StreamPhase types ([2e8f47b](https://github.com/exmg/livery-interactive/commit/2e8f47b0dda7df4c7d015b154005f40175b59e20))
+
 ## [1.2.1](https://github.com/exmg/livery-interactive/compare/v1.2.0...v1.2.1) (2021-04-13)
 
 
