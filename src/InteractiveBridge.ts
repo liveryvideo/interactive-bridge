@@ -50,7 +50,7 @@ export class InteractiveBridge extends LiveryBridge {
     name: string,
     handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
   ) {
-    this.registerCustomCommand(name, handler);
+    super.registerCustomCommand(name, handler);
   }
 
   /**
@@ -136,6 +136,6 @@ export class InteractiveBridge extends LiveryBridge {
    * Unregister custom interactive command by name.
    */
   public unregisterInteractiveCommand(name: string) {
-    return this.unregisterCustomCommand(name);
+    return super.unregisterCustomCommand(name);
   }
 }
