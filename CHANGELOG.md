@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/exmg/livery-interactive/compare/v1.3.0...v1.4.0) (2021-04-22)
+
+
+### Features
+
+* **demo:** register default "test" custom interactive command ([4f2ab73](https://github.com/exmg/livery-interactive/commit/4f2ab730855e8e764a6f4fc29cc1a9e290921aac))
+
 # [1.3.0](https://github.com/exmg/livery-interactive/compare/v1.2.2...v1.3.0) (2021-04-15)
 
 
