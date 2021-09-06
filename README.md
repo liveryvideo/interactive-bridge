@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/npm/l/@liveryvideo/interactive-bridge)](https://unpkg.com/browse/@liveryvideo/interactive-bridge/LICENSE)
 [![Built with open-wc recommendations](https://img.shields.io/badge/built%20with-open--wc-blue.svg)](https://open-wc.org/)
 
-Livery Video Interactive Bridge for use on/with Livery Player interactive layer pages.
+Bridge for communicating between a Livery Video Player and the interactive layer page shown within that.
 
 Please refer to [docs.liveryvideo.com/interactive-bridge](https://docs.liveryvideo.com/interactive-bridge) for complete documentation.
 
@@ -26,4 +26,4 @@ const bridge = new InteractiveBridge('*');
 bridge.getLatency().then(latency => window.alert(`latency: ${latency}`));
 ```
 
-**Note:** To prevent [cross site security issues](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#security_concerns) replace the `'*'` origin above with the origin of the page that the Livery Player containing this interactive layer page will be on.
+**Note:** To prevent [cross site security issues](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#security_concerns) replace the `'*'` origin above with the origin of the page that the Livery Video Player containing this interactive layer page will be on.
