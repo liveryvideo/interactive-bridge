@@ -6,7 +6,7 @@
 # By re-using a build command instead of requiring a build job before release
 # we don't need to persist to a workspace which saves time.
 #
-# Note: semantic-release depends on the GitHub exmg "web" context for GH_TOKEN and NPM_TOKEN
+# Note: semantic-release depends on the GitHub liveryvideo "web" context for GH_TOKEN and NPM_TOKEN
 # environment variables for repo write and package publish access.
 
 version: 2.1

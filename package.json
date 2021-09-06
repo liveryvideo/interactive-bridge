@@ -1,14 +1,14 @@
 {
-  "name": "@exmg/livery-interactive",
+  "name": "@liveryvideo/interactive-bridge",
   "version": "1.4.0",
   "publishConfig": {
     "access": "public"
   },
-  "description": "Ex Machina Group Livery Interactive SDK.",
-  "author": "Ex Machina Group",
+  "description": "Livery Video Interactive Bridge.",
+  "author": "Livery Video",
   "homepage": "https://www.liveryvideo.com/",
   "license": "MIT",
-  "repository": "github:exmg/livery-interactive",
+  "repository": "github:liveryvideo/interactive-bridge",
   "main": "dist/index.umd.js",
   "module": "dist/index.js",
   "exports": {
