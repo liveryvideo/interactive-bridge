@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.4.0...v1.5.0) (2021-09-07)
+
+
+### Features
+
+* move and rename to liveryvideo/interactive-bridge ([c03b3e4](https://github.com/liveryvideo/interactive-bridge/commit/c03b3e4f63adecb7a034d7ef6af0d31e89cac216))
+
 # [1.4.0](https://github.com/exmg/livery-interactive/compare/v1.3.0...v1.4.0) (2021-04-22)
 
 
