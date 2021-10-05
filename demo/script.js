@@ -16,19 +16,30 @@ $('#version').innerText = '__VERSION__';
 // Note: Don't use origin '*' like we do here unless security is not an issue for your purposes
 const bridge = new InteractiveBridge('*');
 
-$('#get-latency').addEventListener('click', () => {
-  const setText = createSetText('#latency');
-  bridge.getLatency().then(setText, setText);
+[
+  ['app-name', 'getAppName'],
+  ['customer-id', 'getCustomerId'],
+  ['endpoint-id', 'getEndpointId'],
+  ['latency', 'getLatency'],
+  ['player-version', 'getPlayerVersion'],
+  ['stream-id', 'getStreamId'],
+].forEach(([id, method]) => {
+  $(`#get-${id}`).addEventListener('click', () => {
+    const setText = createSetText(`#${id}`);
+    bridge[method]().then(setText, setText);
+  });
 });
 
-$('#subscribe-orientation').addEventListener('click', () => {
-  const setText = createSetText('#orientation');
-  bridge.subscribeOrientation(setText).then(setText, setText);
-});
-
-$('#subscribe-stream-phase').addEventListener('click', () => {
-  const setText = createSetText('#stream-phase');
-  bridge.subscribeStreamPhase(setText).then(setText, setText);
+[
+  ['fullscreen', 'subscribeFullscreen'],
+  ['orientation', 'subscribeOrientation'],
+  ['quality', 'subscribeQuality'],
+  ['stream-phase', 'subscribeStreamPhase'],
+].forEach(([id, method]) => {
+  $(`#subscribe-${id}`).addEventListener('click', () => {
+    const setText = createSetText(`#${id}`);
+    bridge[method](setText).then(setText, setText);
+  });
 });
 
 $('#player-command-form').addEventListener('submit', (event) => {
