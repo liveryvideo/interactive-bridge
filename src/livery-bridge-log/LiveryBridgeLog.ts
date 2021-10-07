@@ -6,6 +6,7 @@ import {
   property,
   query,
 } from 'lit-element';
+import { logStringify } from '../util/logStringify';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -68,9 +69,7 @@ export class LiveryBridgeLog extends LitElement {
     // eslint-disable-next-line no-console
     console.log(event.origin, event.data);
 
-    this.messages.unshift(
-      `${event.origin}: ${JSON.stringify(event.data, null, '  ')}`,
-    );
+    this.messages.unshift(`${event.origin}: ${logStringify(event.data, '  ')}`);
 
     while (this.messages.length > this.maxMessages) {
       this.messages.pop();

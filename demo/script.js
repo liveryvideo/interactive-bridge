@@ -1,4 +1,5 @@
 import { InteractiveBridge } from '../build/index.js';
+import { logStringify } from '../build/src/util/logStringify.js';
 
 function $(selector) {
   return document.querySelector(selector);
@@ -7,7 +8,7 @@ function $(selector) {
 function createSetText(selector) {
   return (value) => {
     $(selector).innerText =
-      value instanceof Error ? value.toString() : JSON.stringify(value);
+      value instanceof Error ? value.toString() : logStringify(value);
   };
 }
 
@@ -56,7 +57,7 @@ $('#player-command-form').addEventListener('submit', (event) => {
 });
 
 bridge.registerInteractiveCommand('test', (arg, handler) => {
-  $('#interactive-command-arg').innerText = JSON.stringify(arg);
+  $('#interactive-command-arg').innerText = logStringify(arg);
 
   window.setTimeout(() => handler(`${arg}-result-2`), 2000);
   window.setTimeout(() => handler(`${arg}-result-3`), 4000);
