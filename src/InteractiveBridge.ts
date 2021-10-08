@@ -1,5 +1,5 @@
 import { LiveryBridge } from './LiveryBridge';
-import { logStringify } from './util/logStringify';
+import { stringify } from './util/stringify';
 
 export type Orientation = 'landscape' | 'portrait';
 
@@ -176,7 +176,7 @@ export class InteractiveBridge extends LiveryBridge {
   public subscribeOrientation(listener: (orientation: Orientation) => void) {
     function validate(value: unknown) {
       if (value !== 'landscape' && value !== 'portrait') {
-        const strValue = logStringify(value);
+        const strValue = stringify(value);
         throw new Error(
           `subscribeOrientation value: ${strValue}, should be: "landscape" | "portrait"`,
         );
@@ -215,7 +215,7 @@ export class InteractiveBridge extends LiveryBridge {
   public subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
     function validate(value: unknown) {
       if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
-        const strValue = logStringify(value);
+        const strValue = stringify(value);
         throw new Error(
           `subscribeStreamPhase value: ${strValue}, should be: "LIVE" | "POST" | "PRE"`,
         );

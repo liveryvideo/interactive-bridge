@@ -1,3 +1,5 @@
+// Note: This is a copy from https://github.com/liveryvideo/player-web
+
 // Source: https://gist.github.com/jed/982883
 export function uuid(a?: number): string {
   /* eslint-disable */
