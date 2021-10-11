@@ -7,7 +7,8 @@ function $(selector) {
 
 function createSetText(selector) {
   return (value) => {
-    $(selector).innerText = stringify(value);
+    $(selector).innerText =
+      value instanceof Error ? value.toString() : stringify(value);
   };
 }
 

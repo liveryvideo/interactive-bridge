@@ -69,7 +69,9 @@ export class LiveryBridgeLog extends LitElement {
     // eslint-disable-next-line no-console
     console.log(event.origin, event.data);
 
-    this.messages.unshift(`${event.origin}: ${stringify(event.data)}`);
+    this.messages.unshift(
+      `${event.origin}: ${stringify(event.data, null, '  ')}`,
+    );
 
     while (this.messages.length > this.maxMessages) {
       this.messages.pop();
