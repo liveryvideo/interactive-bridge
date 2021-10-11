@@ -1,4 +1,5 @@
 import { InteractiveBridge } from '../build/index.js';
+import { stringify } from '../build/src/util/stringify.js';
 
 function $(selector) {
   return document.querySelector(selector);
@@ -7,7 +8,7 @@ function $(selector) {
 function createSetText(selector) {
   return (value) => {
     $(selector).innerText =
-      value instanceof Error ? value.toString() : JSON.stringify(value);
+      value instanceof Error ? value.toString() : stringify(value);
   };
 }
 
@@ -16,19 +17,30 @@ $('#version').innerText = '__VERSION__';
 // Note: Don't use origin '*' like we do here unless security is not an issue for your purposes
 const bridge = new InteractiveBridge('*');
 
-$('#get-latency').addEventListener('click', () => {
-  const setText = createSetText('#latency');
-  bridge.getLatency().then(setText, setText);
+[
+  ['app-name', 'getAppName'],
+  ['customer-id', 'getCustomerId'],
+  ['endpoint-id', 'getEndpointId'],
+  ['latency', 'getLatency'],
+  ['player-version', 'getPlayerVersion'],
+  ['stream-id', 'getStreamId'],
+].forEach(([id, method]) => {
+  $(`#get-${id}`).addEventListener('click', () => {
+    const setText = createSetText(`#${id}`);
+    bridge[method]().then(setText, setText);
+  });
 });
 
-$('#subscribe-orientation').addEventListener('click', () => {
-  const setText = createSetText('#orientation');
-  bridge.subscribeOrientation(setText).then(setText, setText);
-});
-
-$('#subscribe-stream-phase').addEventListener('click', () => {
-  const setText = createSetText('#stream-phase');
-  bridge.subscribeStreamPhase(setText).then(setText, setText);
+[
+  ['fullscreen', 'subscribeFullscreen'],
+  ['orientation', 'subscribeOrientation'],
+  ['quality', 'subscribeQuality'],
+  ['stream-phase', 'subscribeStreamPhase'],
+].forEach(([id, method]) => {
+  $(`#subscribe-${id}`).addEventListener('click', () => {
+    const setText = createSetText(`#${id}`);
+    bridge[method](setText).then(setText, setText);
+  });
 });
 
 $('#player-command-form').addEventListener('submit', (event) => {
@@ -45,7 +57,7 @@ $('#player-command-form').addEventListener('submit', (event) => {
 });
 
 bridge.registerInteractiveCommand('test', (arg, handler) => {
-  $('#interactive-command-arg').innerText = JSON.stringify(arg);
+  $('#interactive-command-arg').innerText = stringify(arg);
 
   window.setTimeout(() => handler(`${arg}-result-2`), 2000);
   window.setTimeout(() => handler(`${arg}-result-3`), 4000);

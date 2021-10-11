@@ -6,6 +6,7 @@ import {
   property,
   query,
 } from 'lit-element';
+import { stringify } from '../util/stringify';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -69,7 +70,7 @@ export class LiveryBridgeLog extends LitElement {
     console.log(event.origin, event.data);
 
     this.messages.unshift(
-      `${event.origin}: ${JSON.stringify(event.data, null, '  ')}`,
+      `${event.origin}: ${stringify(event.data, null, '  ')}`,
     );
 
     while (this.messages.length > this.maxMessages) {

@@ -19,13 +19,39 @@ export class MockPlayerBridge extends LiveryBridge {
     });
   }
 
+  private static getAppName() {
+    return window.location.hostname;
+  }
+
+  private static getCustomerId() {
+    return 'dummy-customer-id';
+  }
+
+  private static getEndpointId() {
+    return 'dummy-endpoint-id';
+  }
+
   private static getLatency() {
     return Math.random() * 6;
   }
 
-  private static subscribeOrientation(
-    listener: (value: Orientation) => void,
-  ): Orientation {
+  private static getPlayerVersion() {
+    return '1.0.0-dummy-version';
+  }
+
+  private static getStreamId() {
+    return 'dummy-stream-id';
+  }
+
+  private static subscribeFullscreen(listener: (value: boolean) => void) {
+    // Note: This is just an approximation of what the player does
+    document.addEventListener('fullscreenchange', () => {
+      listener(!!document.fullscreenElement);
+    });
+    return !!document.fullscreenElement;
+  }
+
+  private static subscribeOrientation(listener: (value: Orientation) => void) {
     MockPlayerBridge.portraitQuery.addEventListener('change', (event) => {
       listener(event.matches ? 'portrait' : 'landscape');
     });
@@ -33,9 +59,13 @@ export class MockPlayerBridge extends LiveryBridge {
     return MockPlayerBridge.portraitQuery.matches ? 'portrait' : 'landscape';
   }
 
-  private static subscribeStreamPhase(
-    listener: (value: StreamPhase) => void,
-  ): StreamPhase {
+  private static subscribeQuality(listener: (value: string) => void) {
+    setTimeout(() => listener('dummy-quality-2'), 1500);
+    setTimeout(() => listener('dummy-quality-3'), 3000);
+    return 'dummy-quality-1';
+  }
+
+  private static subscribeStreamPhase(listener: (value: StreamPhase) => void) {
     setTimeout(() => listener('LIVE'), 1500);
     setTimeout(() => listener('POST'), 3000);
     return 'PRE';
@@ -76,11 +106,32 @@ export class MockPlayerBridge extends LiveryBridge {
     arg: unknown,
     listener: (value: unknown) => void,
   ) {
+    if (name === 'getAppName') {
+      return MockPlayerBridge.getAppName();
+    }
+    if (name === 'getCustomerId') {
+      return MockPlayerBridge.getCustomerId();
+    }
+    if (name === 'getEndpointId') {
+      return MockPlayerBridge.getEndpointId();
+    }
     if (name === 'getLatency') {
       return MockPlayerBridge.getLatency();
     }
+    if (name === 'getPlayerVersion') {
+      return MockPlayerBridge.getPlayerVersion();
+    }
+    if (name === 'getStreamId') {
+      return MockPlayerBridge.getStreamId();
+    }
+    if (name === 'subscribeFullscreen') {
+      return MockPlayerBridge.subscribeFullscreen(listener);
+    }
     if (name === 'subscribeOrientation') {
       return MockPlayerBridge.subscribeOrientation(listener);
+    }
+    if (name === 'subscribeQuality') {
+      return MockPlayerBridge.subscribeQuality(listener);
     }
     if (name === 'subscribeStreamPhase') {
       return MockPlayerBridge.subscribeStreamPhase(listener);
