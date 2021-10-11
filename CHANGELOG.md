@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.5.0...v1.6.0) (2021-10-11)
+
+
+### Features
+
+* **interactive-bridge:** add support for various analytics values ([#8](https://github.com/liveryvideo/interactive-bridge/issues/8)) ([17fa338](https://github.com/liveryvideo/interactive-bridge/commit/17fa338c8fda3be6b0fec0fc013557e9c727d16d))
+
 # [1.5.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.4.0...v1.5.0) (2021-09-07)
 
 
