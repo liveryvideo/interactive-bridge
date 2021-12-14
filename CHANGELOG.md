@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.6.1...v1.6.2) (2021-12-14)
+
+
+### Bug Fixes
+
+* have semantic-release publish to npm this time ([0395eff](https://github.com/liveryvideo/interactive-bridge/commit/0395eff550ff93bab4497848a82efe21962b9544))
+
 ## [1.6.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.6.0...v1.6.1) (2021-12-14)
 
 
