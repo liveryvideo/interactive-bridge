@@ -103,6 +103,8 @@ module.exports = {
         },
       },
       rules: {
+        // Increase consistency and reduce merge conflicts
+        curly: ['error', 'all'],
         // Not worth the repetitive boilerplate IMHO; implicit inferred return types are fine
         '@typescript-eslint/explicit-function-return-type': 'off',
         // @open-wc's JS based rule (always include extensions) conflicts with @typescript-eslint's TS based rule

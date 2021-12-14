@@ -1,28 +1,31 @@
-import { createSpaConfig } from '@open-wc/building-rollup';
 import replace from '@rollup/plugin-replace';
-import merge from 'deepmerge';
-import cpy from 'rollup-plugin-cpy';
+import html from '@web/rollup-plugin-html';
+import resolve from 'rollup-plugin-node-resolve';
 import pkg from './package.json';
 
+const common = {
+  output: { dir: 'dist' },
+  plugins: [
+    replace({
+      preventAssignment: true,
+      values: {
+        __VERSION__: pkg.version,
+      },
+    }),
+    resolve(),
+    html({
+      injectServiceWorker: true,
+    }),
+  ],
+};
+
 export default [
-  merge(createSpaConfig({}), {
+  {
+    ...common,
     input: './demo/index.html',
-    plugins: [
-      replace({
-        __VERSION__: pkg.version,
-      }),
-      cpy({
-        files: ['demo/*', '!demo/index.html', '!demo/mock.html'],
-        dest: 'dist',
-      }),
-    ],
-  }),
-  merge(createSpaConfig({}), {
+  },
+  {
+    ...common,
     input: './demo/mock.html',
-    plugins: [
-      replace({
-        __VERSION__: pkg.version,
-      }),
-    ],
-  }),
+  },
 ];

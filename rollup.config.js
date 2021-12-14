@@ -14,7 +14,10 @@ const common = {
   input: 'build/index.js',
   plugins: [
     replace({
-      __VERSION__: pkg.version,
+      preventAssignment: true,
+      values: {
+        __VERSION__: pkg.version,
+      },
     }),
     resolve(),
     terser(),
