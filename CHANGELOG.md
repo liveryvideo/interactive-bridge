@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.6.0...v1.6.1) (2021-12-14)
+
+
+### Bug Fixes
+
+* update to TypeScript v4.5.4, lit v2.0.2, @web/dev-server, @web/test-runner, etc. ([7922ccf](https://github.com/liveryvideo/interactive-bridge/commit/7922ccfa45a9be4127928776201bd2bcbf648ee5))
+
 # [1.6.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.5.0...v1.6.0) (2021-10-11)
 
 
