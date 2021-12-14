@@ -45,6 +45,14 @@ interface EventMessage extends LiveryMessage {
 
 const version = '__VERSION__';
 
+// eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
+function hasOwnProperty<X extends {}, Y extends PropertyKey>(
+  obj: X,
+  prop: Y,
+): obj is X & Record<Y, unknown> {
+  return Object.hasOwnProperty.call(obj, prop);
+}
+
 export class LiveryBridge {
   private customCommandMap = new Map<
     string,
@@ -84,14 +92,22 @@ export class LiveryBridge {
   }
 
   private static assertMessagePropertyType(
-    message: LiveryMessage,
+    // eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
+    message: {},
     key: string,
     type: string,
   ) {
+    const messageType =
+      hasOwnProperty(message, 'type') && typeof message.type === 'string'
+        ? message.type
+        : '';
+    if (!hasOwnProperty(message, key)) {
+      throw new Error(`${messageType} message does not have property: ${key}`);
+    }
     const actualType = typeof message[key];
     if (actualType !== type) {
       throw new Error(
-        `${message.type} message with ${key} property type: ${actualType}, should be ${type}`,
+        `${messageType} message with ${key} property type: ${actualType}, should be: ${type}`,
       );
     }
   }
@@ -132,9 +148,13 @@ export class LiveryBridge {
     return true;
   }
 
-  private static isLiveryMessage(object: any): object is LiveryMessage {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Incoming object is any */
-    if (!object || object.isLivery !== true) {
+  private static isLiveryMessage(object: unknown): object is LiveryMessage {
+    if (
+      typeof object !== 'object' ||
+      object === null ||
+      !hasOwnProperty(object, 'isLivery') ||
+      object.isLivery !== true
+    ) {
       return false;
     }
     LiveryBridge.assertMessagePropertyType(object, 'id', 'string');

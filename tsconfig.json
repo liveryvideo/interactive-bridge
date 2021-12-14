@@ -12,6 +12,6 @@
     "esModuleInterop": true,
     "experimentalDecorators": true
   },
-  "include": ["**/*.ts", "node_modules/@open-wc/**/*.js"],
-  "exclude": ["build", "node_modules/!(@open-wc)"]
+  "include": ["**/*.ts"],
+  "exclude": ["build", "node_modules"]
 }
