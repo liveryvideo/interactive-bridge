@@ -25,7 +25,6 @@
     "build:ext": "mkdir -p build",
     "build": "npm run build:ext && tsc -d",
     "clean": "rimraf build dist coverage",
-    "cz": "git-cz",
     "dist:demo": "rollup -m -c rollup.config.demo.js",
     "dist:watch": "rollup -c -w",
     "dist": "rollup -m -c",
@@ -64,8 +63,6 @@
     "@web/dev-server-esbuild": "^0.2.16",
     "@web/rollup-plugin-html": "^1.10.3",
     "@web/test-runner": "^0.13.22",
-    "commitizen": "^4.2.4",
-    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.5.0",
     "git-branch-is": "^4.0.0",
@@ -80,11 +77,6 @@
     "rollup-plugin-terser": "^7.0.2",
     "semantic-release": "^18.0.1",
     "typescript": "^4.7.3"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   },
   "commitlint": {
     "extends": [
