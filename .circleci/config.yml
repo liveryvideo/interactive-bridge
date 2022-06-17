@@ -54,7 +54,7 @@ jobs:
     steps:
       - test
 
-  release:
+  test_and_release:
     executor: default
     steps:
       - test
@@ -64,13 +64,13 @@ jobs:
 workflows:
   version: 2
 
-  test_or_release:
+  release_or_not:
     jobs:
       - test:
           filters:
             branches:
               ignore: [beta, master]
-      - release:
+      - test_and_release:
           context: web
           filters:
             branches:
