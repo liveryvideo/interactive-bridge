@@ -3,7 +3,7 @@
 # Lint and test could be executed in parallel, but that would only make things slower.
 # Other then that everything is sequentially dependent.
 #
-# By re-using a build command instead of requiring a build job before release
+# By re-using a test command instead of requiring a test job before release
 # we don't need to persist to a workspace which saves time.
 #
 # Note: semantic-release depends on the GitHub liveryvideo "web" context for GH_TOKEN and NPM_TOKEN
@@ -20,7 +20,7 @@ orbs:
 executors:
   default:
     docker:
-      - image: cimg/node:16.4.0-browsers
+      - image: cimg/node:16.15.0-browsers
 
 commands:
   npm_install:
@@ -39,35 +39,34 @@ commands:
           key: node_modules-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
-  build:
+  test:
     steps:
       - browser-tools/install-chrome
       - browser-tools/install-chromedriver
       - checkout
       - npm_install
-      - run: npm run build
       - run: npm run lint
       - run: npm test
 
 jobs:
-  build:
+  test:
     executor: default
     steps:
-      - build
+      - test
 
   release:
     executor: default
     steps:
-      - build
+      - test
       # Disable husky git hooks to prevent commitlint from tripping on the generated changelog commit message
       - run: HUSKY=0 npx semantic-release
 
 workflows:
   version: 2
 
-  build_or_release:
+  test_or_release:
     jobs:
-      - build:
+      - test:
           filters:
             branches:
               ignore: [beta, master]
