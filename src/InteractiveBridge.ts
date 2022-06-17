@@ -19,7 +19,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of LiveryPlayer application name.
    */
-  public getAppName() {
+  getAppName() {
     return this.sendCommand('getAppName').then((value) => {
       if (typeof value !== 'string') {
         throw new Error(
@@ -33,7 +33,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of LiveryPlayer customer id.
    */
-  public getCustomerId() {
+  getCustomerId() {
     return this.sendCommand('getCustomerId').then((value) => {
       if (typeof value !== 'string') {
         throw new Error(
@@ -47,7 +47,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of LiveryPlayer Pinpoint analytics endpoint id.
    */
-  public getEndpointId() {
+  getEndpointId() {
     return this.sendCommand('getEndpointId').then((value) => {
       if (typeof value !== 'string') {
         throw new Error(
@@ -61,7 +61,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current LiveryPlayer latency in seconds.
    */
-  public getLatency() {
+  getLatency() {
     return this.sendCommand('getLatency').then((value) => {
       if (typeof value !== 'number') {
         throw new Error(
@@ -75,7 +75,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of LiveryPlayer version.
    */
-  public getPlayerVersion() {
+  getPlayerVersion() {
     return this.sendCommand('getPlayerVersion').then((value) => {
       if (typeof value !== 'string') {
         throw new Error(
@@ -89,7 +89,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of LiveryPlayer stream id.
    */
-  public getStreamId() {
+  getStreamId() {
     return this.sendCommand('getStreamId').then((value) => {
       if (typeof value !== 'string') {
         throw new Error(
@@ -106,7 +106,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `registerPlayerCommand()` instead.
    */
-  public registerCustomCommand(
+  registerCustomCommand(
     name: string,
     handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
   ) {
@@ -117,7 +117,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Register `handler` function to be called with `arg` and `listener` when `sendInteractiveCommand()` is called
    * from the livery-player side with matching `name`.
    */
-  public registerInteractiveCommand(
+  registerInteractiveCommand(
     name: string,
     handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
   ) {
@@ -130,7 +130,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `sendPlayerCommand()` instead.
    */
-  public sendCustomCommand<T>(
+  sendCustomCommand<T>(
     name: string,
     arg?: unknown,
     listener?: (value: T) => void,
@@ -142,7 +142,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of value returned by the livery-player's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
-  public sendPlayerCommand<T>(
+  sendPlayerCommand<T>(
     name: string,
     arg?: unknown,
     listener?: (value: T) => void,
@@ -154,7 +154,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of current LiveryPlayer fullscreen state
    * and calls back `listener` with any subsequent state changes.
    */
-  public subscribeFullscreen(listener: (value: boolean) => void) {
+  subscribeFullscreen(listener: (value: boolean) => void) {
     function validate(value: unknown) {
       if (typeof value !== 'boolean') {
         throw new Error(
@@ -173,7 +173,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of current LiveryPlayer window orientation (`'landscape' \| 'portrait'`)
    * and calls back `listener` with any subsequent orientations.
    */
-  public subscribeOrientation(listener: (orientation: Orientation) => void) {
+  subscribeOrientation(listener: (orientation: Orientation) => void) {
     function validate(value: unknown) {
       if (value !== 'landscape' && value !== 'portrait') {
         const strValue = stringify(value);
@@ -193,7 +193,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of current LiveryPlayer playback quality
    * and calls back `listener` with any subsequent quality changes.
    */
-  public subscribeQuality(listener: (value: string) => void) {
+  subscribeQuality(listener: (value: string) => void) {
     function validate(value: unknown) {
       if (typeof value !== 'string') {
         throw new Error(
@@ -212,7 +212,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of current LiveryPlayer stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
    * and calls back `listener` with any subsequent phases.
    */
-  public subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
+  subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
     function validate(value: unknown) {
       if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
         const strValue = stringify(value);
@@ -233,14 +233,14 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `unregisterInteractiveCommand()` instead.
    */
-  public unregisterCustomCommand(name: string) {
+  unregisterCustomCommand(name: string) {
     super.unregisterCustomCommand(name);
   }
 
   /**
    * Unregister custom interactive command by name.
    */
-  public unregisterInteractiveCommand(name: string) {
+  unregisterInteractiveCommand(name: string) {
     return super.unregisterCustomCommand(name);
   }
 }
