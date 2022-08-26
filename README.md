@@ -4,7 +4,7 @@
 [![NPM package](https://img.shields.io/npm/v/@liveryvideo/interactive-bridge)](https://www.npmjs.com/package/@liveryvideo/interactive-bridge)
 [![Changelog](https://img.shields.io/badge/docs-CHANGELOG-blue)](https://docs.liveryvideo.com/interactive-bridge-changelog)
 [![License](https://img.shields.io/npm/l/@liveryvideo/interactive-bridge)](https://unpkg.com/browse/@liveryvideo/interactive-bridge/LICENSE)
-[![Built with open-wc recommendations](https://img.shields.io/badge/built%20with-open--wc-blue.svg)](https://open-wc.org/)
+[![Build with Lit](https://img.shields.io/badge/build%20with-Lit-blue.svg)](https://lit.dev/)
 
 Bridge for communicating between a Livery Video Player and the interactive layer page shown within that.
 

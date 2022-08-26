@@ -13,7 +13,7 @@ declare global {
  */
 @customElement('livery-bridge-log')
 export class LiveryBridgeLog extends LitElement {
-  public static readonly styles = css`
+  static readonly styles = css`
     :host {
       display: block;
     }
@@ -35,27 +35,27 @@ export class LiveryBridgeLog extends LitElement {
    * Maximum number of messages to display.
    */
   @property({ type: Number, reflect: true })
-  public maxMessages = 10;
+  maxMessages = 10;
 
   @query('#container')
   private container?: HTMLElement;
 
   private messages: string[] = [];
 
-  public connectedCallback() {
+  connectedCallback() {
     super.connectedCallback();
 
     window.addEventListener('message', this.handleMessage);
   }
 
-  public disconnectedCallback() {
+  disconnectedCallback() {
     super.disconnectedCallback();
 
     window.removeEventListener('message', this.handleMessage);
     this.messages = [];
   }
 
-  public render() {
+  render() {
     return html`<pre><code id="container"></code></pre>`;
   }
 

@@ -131,6 +131,25 @@ module.exports = {
           'error',
           { default: { memberTypes: memberOrder, order: 'alphabetically' } },
         ],
+        // Don't use `public` TS accessibility syntax
+        // TODO: also disable `private` and use JS `#private` fields instead at some point
+        // Note: TS decorators can't be used with #private fields yet
+        // Note: @typescript-eslint/member-ordering might not support that; add eslint-plugin-sort-class-members?
+        // Note: #private fields probably depend on eslint v8 which is not yet supported by @open-wc/eslint-config
+        '@typescript-eslint/explicit-member-accessibility': [
+          'error',
+          { accessibility: 'no-public' },
+        ],
+        // It's not a big problem most of the time and in OO override situations it should not complain anyhow
+        'class-methods-use-this': 'off',
+        // Enable autofix to use `import type` when possible
+        '@typescript-eslint/consistent-type-imports': [
+          'error',
+          {
+            prefer: 'type-imports',
+            disallowTypeAnnotations: false,
+          },
+        ],
       },
     },
     // TypeScript for Node consumption

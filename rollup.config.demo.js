@@ -1,11 +1,13 @@
+import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
+import typescript from '@rollup/plugin-typescript';
 import html from '@web/rollup-plugin-html';
-import resolve from 'rollup-plugin-node-resolve';
 import pkg from './package.json';
 
 const common = {
   output: { dir: 'dist' },
   plugins: [
+    typescript(),
     replace({
       preventAssignment: true,
       values: {

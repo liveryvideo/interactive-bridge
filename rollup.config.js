@@ -1,6 +1,7 @@
 import babel from '@rollup/plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import resolve from 'rollup-plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
@@ -11,8 +12,16 @@ const banner = `/**
 */`;
 
 const common = {
-  input: 'build/index.js',
+  input: 'index.ts',
   plugins: [
+    typescript({
+      tsconfig: './tsconfig.json',
+      declaration: true,
+      // Work around this plugin producing dist/dist/index.d.ts instead of dist/index.d.ts
+      declarationDir: '.',
+      // Prevent /demo/ and /test/ .d.ts files from ending up in /dist/ somehow
+      exclude: ['demo/**/*', 'test/**/*'],
+    }),
     replace({
       preventAssignment: true,
       values: {
@@ -54,7 +63,7 @@ export default [
       ...common.plugins,
       babel({
         babelHelpers: 'bundled',
-        exclude: ['node_modules/**', 'build/ext/**'],
+        exclude: ['node_modules/**'],
         presets: ['@babel/preset-env'],
       }),
     ],
