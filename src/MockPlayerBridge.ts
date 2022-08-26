@@ -2,21 +2,22 @@ import type { Orientation, StreamPhase } from './InteractiveBridge';
 import { LiveryBridge } from './LiveryBridge';
 
 export class MockPlayerBridge extends LiveryBridge {
-  private static portraitQuery = window.matchMedia('(orientation: portrait)');
+  private orientation: Orientation = 'portrait';
 
-  constructor(targetWindow: Window, targetOrigin: string) {
+  private orientationListeners: ((value: Orientation) => void)[] = [];
+
+  private player: Element;
+
+  constructor(targetWindow: Window, targetOrigin: string, player: Element) {
     super(targetWindow, targetOrigin);
 
-    this.registerCustomCommand('subscribeAuthToken', (arg, listener) => {
-      if (typeof arg !== 'string') {
-        throw new Error(`Argument type: ${typeof arg}, should be: string`);
-      }
+    this.player = player;
 
-      window.setTimeout(() => listener(`${arg}-test-token-2`), 3000);
-      window.setTimeout(() => listener(`${arg}-test-token-3`), 10000);
+    new ResizeObserver((/* entries */) => this.handleResize()).observe(player);
 
-      return `${arg}-test-token-1`;
-    });
+    this.registerCustomCommand('subscribeAuthToken', (arg, listener) =>
+      this.handleSubscribeAuthToken(arg, listener),
+    );
   }
 
   private static getAppName() {
@@ -49,14 +50,6 @@ export class MockPlayerBridge extends LiveryBridge {
       listener(!!document.fullscreenElement);
     });
     return !!document.fullscreenElement;
-  }
-
-  private static subscribeOrientation(listener: (value: Orientation) => void) {
-    MockPlayerBridge.portraitQuery.addEventListener('change', (event) => {
-      listener(event.matches ? 'portrait' : 'landscape');
-    });
-
-    return MockPlayerBridge.portraitQuery.matches ? 'portrait' : 'landscape';
   }
 
   private static subscribeQuality(listener: (value: string) => void) {
@@ -128,7 +121,7 @@ export class MockPlayerBridge extends LiveryBridge {
       return MockPlayerBridge.subscribeFullscreen(listener);
     }
     if (name === 'subscribeOrientation') {
-      return MockPlayerBridge.subscribeOrientation(listener);
+      return this.subscribeOrientation(listener);
     }
     if (name === 'subscribeQuality') {
       return MockPlayerBridge.subscribeQuality(listener);
@@ -138,5 +131,32 @@ export class MockPlayerBridge extends LiveryBridge {
     }
 
     return super.handleCommand(name, arg, listener);
+  }
+
+  private handleResize() {
+    const { clientHeight, clientWidth } = this.player;
+    this.orientation = clientHeight > clientWidth ? 'portrait' : 'landscape';
+    for (const listener of this.orientationListeners) {
+      listener(this.orientation);
+    }
+  }
+
+  private handleSubscribeAuthToken(
+    arg: unknown,
+    listener: (value: unknown) => void,
+  ) {
+    if (typeof arg !== 'string') {
+      throw new Error(`Argument type: ${typeof arg}, should be: string`);
+    }
+
+    window.setTimeout(() => listener(`${arg}-test-token-2`), 3000);
+    window.setTimeout(() => listener(`${arg}-test-token-3`), 10000);
+
+    return `${arg}-test-token-1`;
+  }
+
+  private subscribeOrientation(listener: (value: Orientation) => void) {
+    this.orientationListeners.push(listener);
+    return this.orientation;
   }
 }
