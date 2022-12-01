@@ -1,9 +1,18 @@
 import babel from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
+import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
-import { terser } from 'rollup-plugin-terser';
-import pkg from './package.json';
+
+// Until this is supported by ESLint we'll use the workaround below
+// See: https://rollupjs.org/guide/en/#caveats-when-using-native-node-es-modules
+// import pkg from './package.json' assert { type: 'json' };
+
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url)),
+);
 
 const banner = `/**
 * ${pkg.name} v${pkg.version}

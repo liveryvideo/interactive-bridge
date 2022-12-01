@@ -1,37 +1,67 @@
 // Unfortunately we have to manually copy paste the default order from:
 // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/member-ordering.md#default-configuration
+// Note: This is modified to group fields, getters and setters together
+// and also decorated and undecorated fields and methods.
+// The idea being that from the outside they are identical and refactoring to change from one
+// type to the other should not result in needless moves of code and conflicts.
 const memberOrder = [
   // Index signature
   'signature',
+  'call-signature',
 
-  // Fields
-  'public-static-field',
-  'protected-static-field',
-  'private-static-field',
+  // Fields, getters and setters
+  ['public-static-field', 'public-static-get', 'public-static-set'],
+  ['protected-static-field', 'protected-static-get', 'protected-static-set'],
+  ['private-static-field', 'private-static-get', 'private-static-set'],
+  ['#private-static-field', '#private-static-get', '#private-static-set'],
 
-  'public-decorated-field',
-  'protected-decorated-field',
-  'private-decorated-field',
+  [
+    'public-decorated-field',
+    'public-decorated-get',
+    'public-decorated-set',
+    'public-instance-field',
+    'public-instance-get',
+    'public-instance-set',
+  ],
+  [
+    'protected-decorated-field',
+    'protected-decorated-get',
+    'protected-decorated-set',
+    'protected-instance-field',
+    'protected-instance-get',
+    'protected-instance-set',
+  ],
+  [
+    'private-decorated-field',
+    'private-decorated-get',
+    'private-decorated-set',
+    'private-instance-field',
+    'private-instance-get',
+    'private-instance-set',
+  ],
 
-  'public-instance-field',
-  'protected-instance-field',
-  'private-instance-field',
+  ['#private-instance-field', '#private-instance-get', '#private-instance-set'],
 
-  'public-abstract-field',
-  'protected-abstract-field',
-  'private-abstract-field',
+  ['public-abstract-field', 'public-abstract-get', 'public-abstract-set'],
+  [
+    'protected-abstract-field',
+    'protected-abstract-get',
+    'protected-abstract-set',
+  ],
 
-  'public-field',
-  'protected-field',
-  'private-field',
+  ['public-field', 'public-get', 'public-set'],
+  ['protected-field', 'protected-get', 'protected-set'],
+  ['private-field', 'private-get', 'private-set'],
+  ['#private-field', '#private-get', '#private-set'],
 
-  'static-field',
-  'instance-field',
-  'abstract-field',
+  ['static-field', 'static-get', 'static-set'],
+  ['instance-field', 'instance-get', 'instance-set'],
+  ['abstract-field', 'abstract-get', 'abstract-set'],
 
-  'decorated-field',
+  ['decorated-field', 'decorated-get', 'decorated-set', 'field', 'get', 'set'],
 
-  'field',
+  // Static initialization
+  'static-initialization',
 
   // Constructors
   'public-constructor',
@@ -44,30 +74,26 @@ const memberOrder = [
   'public-static-method',
   'protected-static-method',
   'private-static-method',
+  '#private-static-method',
 
-  'public-decorated-method',
-  'protected-decorated-method',
-  'private-decorated-method',
-
-  'public-instance-method',
-  'protected-instance-method',
-  'private-instance-method',
+  ['public-decorated-method', 'public-instance-method'],
+  ['protected-decorated-method', 'protected-instance-method'],
+  ['private-decorated-method', 'private-instance-method'],
+  '#private-instance-method',
 
   'public-abstract-method',
   'protected-abstract-method',
-  'private-abstract-method',
 
   'public-method',
   'protected-method',
   'private-method',
+  '#private-method',
 
   'static-method',
   'instance-method',
   'abstract-method',
 
-  'decorated-method',
-
-  'method',
+  ['decorated-method', 'method'],
 ];
 
 module.exports = {
@@ -155,7 +181,7 @@ module.exports = {
     // TypeScript for Node consumption
     {
       // Node JS build config and test files can use devDependencies
-      files: ['*.js', 'test/**/*.ts'],
+      files: ['*.js', '*.cjs', 'tests/**/*.ts'],
       rules: {
         'import/no-extraneous-dependencies': 'off',
       },
