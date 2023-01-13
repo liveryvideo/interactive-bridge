@@ -41,11 +41,11 @@ commands:
             - ./node_modules
   test:
     steps:
-      - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
       - checkout
       - npm_install
       - run: npm run lint
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - run: npm test
 
 jobs:
