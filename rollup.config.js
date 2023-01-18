@@ -8,7 +8,7 @@ import typescript from '@rollup/plugin-typescript';
 // See: https://rollupjs.org/guide/en/#caveats-when-using-native-node-es-modules
 // import pkg from './package.json' assert { type: 'json' };
 
-import { readFileSync } from 'node:fs';
+import { readFileSync } from 'fs';
 
 const pkg = JSON.parse(
   readFileSync(new URL('./package.json', import.meta.url)),
