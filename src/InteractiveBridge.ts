@@ -147,7 +147,7 @@ export class InteractiveBridge extends LiveryBridge {
     arg?: unknown,
     listener?: (value: T) => void,
   ) {
-    return this.sendCustomCommand(name, arg, listener);
+    return super.sendCustomCommand(name, arg, listener);
   }
 
   /**
