@@ -118,6 +118,7 @@ module.exports = {
         // Disable formatting rules; leave that to prettier
         'prettier',
       ],
+      plugins: ['deprecation'],
       parserOptions: {
         project: './tsconfig.json',
       },
@@ -176,6 +177,8 @@ module.exports = {
             disallowTypeAnnotations: false,
           },
         ],
+        // Make use of deprecated code obvious
+        'deprecation/deprecation': 'warn',
       },
     },
     // TypeScript for Node consumption
