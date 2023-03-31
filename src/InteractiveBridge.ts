@@ -78,7 +78,7 @@ export class InteractiveBridge extends LiveryBridge {
    * livery specific query parameters from the web player's context. Delegates to
    * callbacks for fulfillment in a native context.
    */
-  getLiveryParams() {
+  getLiveryParams(): Promise<Record<string, string>> {
     return this.sendCommand('getLiveryParams').then((value) => {
       if (typeof value !== 'object') {
         throw new Error(
@@ -100,7 +100,7 @@ export class InteractiveBridge extends LiveryBridge {
           );
         }
       }
-      return value;
+      return value as Record<string, string>;
     });
   }
 
