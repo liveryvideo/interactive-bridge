@@ -73,6 +73,38 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Returns from the LiveryPlayer's context an object of key-value parameters
+   * where the keys start 'livery_' and the values are strings. Used for retrieving
+   * livery specific query parameters from the web player's context. Delegates to
+   * callbacks for fulfillment in a native context.
+   */
+  getLiveryParams() {
+    return this.sendCommand('getLiveryParams').then((value) => {
+      if (typeof value !== 'object') {
+        throw new Error(
+          `getLiveryParams value type: ${typeof value}, should be: object`,
+        );
+      }
+      if (value === null) {
+        throw new Error(`getLiveryParams value type: null, should be: object`);
+      }
+      for (const [k, v] of Object.entries(value)) {
+        if (!k.startsWith('livery_')) {
+          throw new Error(`getLiveryParams illegal key ${k}`);
+        }
+        if (typeof v !== 'string') {
+          throw new Error(
+            `getLiveryParams value ${String(
+              v,
+            )} type: ${typeof v}, should be: string`,
+          );
+        }
+      }
+      return value;
+    });
+  }
+
+  /**
    * Returns promise of LiveryPlayer version.
    */
   getPlayerVersion() {
