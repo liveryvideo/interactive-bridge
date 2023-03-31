@@ -31,6 +31,7 @@ const bridge = new InteractiveBridge('*');
     ['customer-id', 'getCustomerId'],
     ['endpoint-id', 'getEndpointId'],
     ['latency', 'getLatency'],
+    ['livery-params', 'getLiveryParams'],
     ['player-version', 'getPlayerVersion'],
     ['stream-id', 'getStreamId'],
   ] as const
