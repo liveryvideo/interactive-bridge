@@ -89,14 +89,9 @@ export class InteractiveBridge extends LiveryBridge {
       }
       const dict: Record<string, string> = {};
       for (const [paramKey, paramValue] of Object.entries(value)) {
-        if (typeof paramValue !== 'string') {
-          throw new Error(
-            `getLiveryParams param value ${String(
-              paramValue,
-            )} type: ${typeof paramValue}, should be: string`,
-          );
+        if (typeof paramValue === 'string') {
+          dict[paramKey] = paramValue;
         }
-        dict[paramKey] = paramValue;
       }
       return dict;
     });
