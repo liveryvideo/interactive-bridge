@@ -74,9 +74,8 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Returns from the LiveryPlayer's context an object of key-value parameters
-   * where the keys start 'livery_' and the values are strings. Used for retrieving
-   * livery specific query parameters from the web player's context. Delegates to
-   * callbacks for fulfillment in a native context.
+   * where the values are strings. Used for retrieving livery specific query parameters
+   * from the web player's context. Delegates to callbacks for fulfillment in a native context.
    */
   getLiveryParams(): Promise<Record<string, string>> {
     return this.sendCommand('getLiveryParams').then((value) => {
@@ -88,19 +87,18 @@ export class InteractiveBridge extends LiveryBridge {
       if (value === null) {
         throw new Error(`getLiveryParams value type: null, should be: object`);
       }
-      for (const [k, v] of Object.entries(value)) {
-        if (!k.startsWith('livery_')) {
-          throw new Error(`getLiveryParams illegal key ${k}`);
-        }
-        if (typeof v !== 'string') {
+      const dict: Record<string, string> = {};
+      for (const [paramKey, paramValue] of Object.entries(value)) {
+        if (typeof paramValue !== 'string') {
           throw new Error(
-            `getLiveryParams value ${String(
-              v,
-            )} type: ${typeof v}, should be: string`,
+            `getLiveryParams param value ${String(
+              paramValue,
+            )} type: ${typeof paramValue}, should be: string`,
           );
         }
+        dict[paramKey] = paramValue;
       }
-      return value as Record<string, string>;
+      return dict;
     });
   }
 
