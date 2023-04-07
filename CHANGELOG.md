@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.6.2...v1.7.0) (2023-04-07)
+
+
+### Features
+
+* **interactive-bridge:** add 'getLiveryParams' command ([#20](https://github.com/liveryvideo/interactive-bridge/issues/20)) ([9fee27f](https://github.com/liveryvideo/interactive-bridge/commit/9fee27f263740d730ca61b34f93cbef4fc0ab587))
+
 ## [1.6.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.6.1...v1.6.2) (2021-12-14)
 
 
