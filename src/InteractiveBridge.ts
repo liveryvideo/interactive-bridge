@@ -131,7 +131,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `registerPlayerCommand()` instead.
    */
-  registerCustomCommand(
+  override registerCustomCommand(
     name: string,
     handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
   ) {
@@ -155,7 +155,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `sendPlayerCommand()` instead.
    */
-  sendCustomCommand<T>(
+  override sendCustomCommand<T>(
     name: string,
     arg?: unknown,
     listener?: (value: T) => void,
@@ -258,7 +258,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `unregisterInteractiveCommand()` instead.
    */
-  unregisterCustomCommand(name: string) {
+  override unregisterCustomCommand(name: string) {
     super.unregisterCustomCommand(name);
   }
 

@@ -101,7 +101,7 @@ export class MockPlayerBridge extends LiveryBridge {
     return this.unregisterCustomCommand(name);
   }
 
-  protected handleCommand(
+  protected override handleCommand(
     name: string,
     arg: unknown,
     listener: (value: unknown) => void,

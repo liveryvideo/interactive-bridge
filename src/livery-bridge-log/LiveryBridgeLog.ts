@@ -13,7 +13,7 @@ declare global {
  */
 @customElement('livery-bridge-log')
 export class LiveryBridgeLog extends LitElement {
-  static readonly styles = css`
+  static override readonly styles = css`
     :host {
       display: block;
     }
@@ -42,20 +42,20 @@ export class LiveryBridgeLog extends LitElement {
 
   private messages: string[] = [];
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
 
     window.addEventListener('message', this.handleMessage);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
 
     window.removeEventListener('message', this.handleMessage);
     this.messages = [];
   }
 
-  render() {
+  override render() {
     return html`<pre><code id="container"></code></pre>`;
   }
 
