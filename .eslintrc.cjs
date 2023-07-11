@@ -181,12 +181,12 @@ module.exports = {
         'deprecation/deprecation': 'warn',
       },
     },
-    // TypeScript for Node consumption
+    // Node JS and TS build configs and TypeScript test files can use devDependencies
     {
-      // Node JS build config and test files can use devDependencies
-      files: ['*.js', '*.cjs', 'tests/**/*.ts'],
+      files: ['*.js', '*.cjs', '*.config.ts', 'tests/**/*.ts'],
       rules: {
         'import/no-extraneous-dependencies': 'off',
+        'no-console': 'off',
       },
     },
   ],

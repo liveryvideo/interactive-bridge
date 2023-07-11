@@ -4,7 +4,7 @@ frontend:
     build:
       commands:
         - npm ci
-        - npm run dist:demo
+        - npm run build
   artifacts:
     baseDirectory: /dist
     files:
