@@ -43,7 +43,7 @@ interface EventMessage extends LiveryMessage {
   value: any;
 }
 
-const version = '__VERSION__';
+const version = __VERSION__;
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
 function hasOwnProperty<X extends {}, Y extends PropertyKey>(
@@ -291,11 +291,7 @@ export class LiveryBridge {
 
   // Called when target bridge was last to be constructed or restarted
   private handleHandshake(message: HandshakeMessage) {
-    // To support development version values ('__VERSION__') also check for non-semver equal version
-    if (
-      message.version !== version &&
-      !isSemVerCompatible(message.version, version)
-    ) {
+    if (!isSemVerCompatible(message.version, version)) {
       this.sendReject(
         message.id,
         `Remote version: ${message.version} is incompatible with: ${version}`,

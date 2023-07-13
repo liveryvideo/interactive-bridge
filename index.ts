@@ -1,7 +1,7 @@
 /**
  * Livery Interactive SDK version.
  */
-export const version = '__VERSION__';
+export const version = __VERSION__;
 
 export { InteractiveBridge } from './src/InteractiveBridge';
 export type { Orientation, StreamPhase } from './src/InteractiveBridge';
