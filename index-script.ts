@@ -1,5 +1,7 @@
-import { InteractiveBridge } from '../index';
-import { stringify } from '../src/util/stringify';
+import { InteractiveBridge } from './index';
+import { stringify } from './src/util/stringify';
+
+// TODO: Refactor into <livery-testbridge> lit element
 
 function $<K extends keyof HTMLElementTagNameMap>(
   selector: K,
