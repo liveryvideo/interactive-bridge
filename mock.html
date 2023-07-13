@@ -31,10 +31,10 @@
     <script type="module">
       import { MockPlayerBridge } from './index.ts';
 
-      window.bridge = new MockPlayerBridge(
-        document.querySelector('iframe').contentWindow,
-        '*',
-      );
+      window.bridge = new MockPlayerBridge({
+        window: document.querySelector('iframe').contentWindow,
+        origin: '*',
+      });
     </script>
   </body>
 </html>

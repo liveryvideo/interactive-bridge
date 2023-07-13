@@ -3,6 +3,7 @@
  */
 export const version = __VERSION__;
 
+export { AbstractPlayerBridge } from './src/AbstractPlayerBridge';
 export { InteractiveBridge } from './src/InteractiveBridge';
 export type { Orientation, StreamPhase } from './src/InteractiveBridge';
 export { LiveryBridge } from './src/LiveryBridge';

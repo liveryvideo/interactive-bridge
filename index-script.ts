@@ -1,4 +1,4 @@
-import { InteractiveBridge } from './index';
+import { InteractiveBridge, MockPlayerBridge } from './index';
 import { stringify } from './src/util/stringify';
 
 // TODO: Refactor into <livery-testbridge> lit element
@@ -22,10 +22,16 @@ function createSetText(selector: string) {
   };
 }
 
+const params = new URLSearchParams(window.location.search);
+
 $('#version').innerText = __VERSION__;
 
+if (params.has('mock')) {
+  window.mockBridge = new MockPlayerBridge();
+}
+
 // Note: Don't use origin '*' like we do here unless security is not an issue for your purposes
-const bridge = new InteractiveBridge('*');
+const bridge = new InteractiveBridge(window.mockBridge || '*');
 
 (
   [
@@ -83,6 +89,7 @@ bridge.registerInteractiveCommand('test', (arg, handler) => {
 declare global {
   interface Window {
     bridge: InteractiveBridge;
+    mockBridge?: MockPlayerBridge;
   }
 }
 

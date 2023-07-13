@@ -1,3 +1,4 @@
+import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { LiveryBridge } from './LiveryBridge';
 import { stringify } from './util/stringify';
 
@@ -10,10 +11,15 @@ export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
  */
 export class InteractiveBridge extends LiveryBridge {
   /**
-   * Constructs InteractiveBridge with `window.parent` as target window and with specified target origin.
+   * Constructs `InteractiveBridge` with specified `target: AbstractPlayerBridge` (i.e: `PlayerBridge`)
+   * or with `window.parent` as target window and with specified `target: string` as origin.
    */
-  constructor(targetOrigin: string) {
-    super(window.parent, targetOrigin);
+  constructor(target: AbstractPlayerBridge | string) {
+    if (typeof target === 'string') {
+      super({ window: window.parent, origin: target });
+    } else {
+      super(target);
+    }
   }
 
   /**
@@ -73,9 +79,9 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns from the LiveryPlayer's context an object of key-value parameters
-   * where the values are strings. Used for retrieving livery specific query parameters
-   * from the web player's context. Delegates to callbacks for fulfillment in a native context.
+   * Returns from the LiveryPlayer's context an object of key-value parameters where the values are strings.
+   * Used for retrieving livery specific query parameters from the web player's context.
+   * Delegates to callbacks for fulfillment in a native context.
    */
   getLiveryParams(): Promise<Record<string, string>> {
     return this.sendCommand('getLiveryParams').then((value) => {

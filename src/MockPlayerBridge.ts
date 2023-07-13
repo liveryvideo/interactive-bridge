@@ -1,11 +1,13 @@
-import type { Orientation, StreamPhase } from './InteractiveBridge';
-import { LiveryBridge } from './LiveryBridge';
+import { AbstractPlayerBridge } from './AbstractPlayerBridge';
+import type { StreamPhase } from './InteractiveBridge';
 
-export class MockPlayerBridge extends LiveryBridge {
-  private static portraitQuery = window.matchMedia('(orientation: portrait)');
-
-  constructor(targetWindow: Window, targetOrigin: string) {
-    super(targetWindow, targetOrigin);
+/**
+ * Mock player bridge for testing purposes; returning dummy values where real values are not available.
+ * And with dummy support for custom command: `subscribeAuthToken` as used on the test page.
+ */
+export class MockPlayerBridge extends AbstractPlayerBridge {
+  constructor(target: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
+    super(target);
 
     this.registerCustomCommand('subscribeAuthToken', (arg, listener) => {
       if (typeof arg !== 'string') {
@@ -19,124 +21,35 @@ export class MockPlayerBridge extends LiveryBridge {
     });
   }
 
-  private static getAppName() {
-    return window.location.hostname;
-  }
-
-  private static getCustomerId() {
+  protected getCustomerId() {
     return 'dummy-customer-id';
   }
 
-  private static getEndpointId() {
+  protected getEndpointId() {
     return 'dummy-endpoint-id';
   }
 
-  private static getLatency() {
+  protected getLatency() {
     return Math.random() * 6;
   }
 
-  private static getPlayerVersion() {
+  protected getPlayerVersion() {
     return '1.0.0-dummy-version';
   }
 
-  private static getStreamId() {
+  protected getStreamId() {
     return 'dummy-stream-id';
   }
 
-  private static subscribeFullscreen(listener: (value: boolean) => void) {
-    // Note: This is just an approximation of what the player does
-    document.addEventListener('fullscreenchange', () => {
-      listener(!!document.fullscreenElement);
-    });
-    return !!document.fullscreenElement;
-  }
-
-  private static subscribeOrientation(listener: (value: Orientation) => void) {
-    MockPlayerBridge.portraitQuery.addEventListener('change', (event) => {
-      listener(event.matches ? 'portrait' : 'landscape');
-    });
-
-    return MockPlayerBridge.portraitQuery.matches ? 'portrait' : 'landscape';
-  }
-
-  private static subscribeQuality(listener: (value: string) => void) {
+  protected subscribeQuality(listener: (value: string) => void) {
     setTimeout(() => listener('dummy-quality-2'), 1500);
     setTimeout(() => listener('dummy-quality-3'), 3000);
     return 'dummy-quality-1';
   }
 
-  private static subscribeStreamPhase(listener: (value: StreamPhase) => void) {
+  protected subscribeStreamPhase(listener: (value: StreamPhase) => void) {
     setTimeout(() => listener('LIVE'), 1500);
     setTimeout(() => listener('POST'), 3000);
     return 'PRE';
-  }
-
-  /**
-   * Register `handler` function to be called with `arg` and `listener` when sendPlayerCommand() is called
-   * from the interactive layer side with matching `name`.
-   */
-  registerPlayerCommand(
-    name: string,
-    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
-  ) {
-    this.registerCustomCommand(name, handler);
-  }
-
-  /**
-   * Returns promise of value returned by the interactive layer's custom command handler with matching `name` that is passed `arg`.
-   * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
-   */
-  sendInteractiveCommand<T>(
-    name: string,
-    arg?: unknown,
-    listener?: (value: T) => void,
-  ) {
-    return this.sendCustomCommand(name, arg, listener);
-  }
-
-  /**
-   * Unregister custom interactive command by name.
-   */
-  unregisterPlayerCommand(name: string) {
-    return this.unregisterCustomCommand(name);
-  }
-
-  protected override handleCommand(
-    name: string,
-    arg: unknown,
-    listener: (value: unknown) => void,
-  ) {
-    if (name === 'getAppName') {
-      return MockPlayerBridge.getAppName();
-    }
-    if (name === 'getCustomerId') {
-      return MockPlayerBridge.getCustomerId();
-    }
-    if (name === 'getEndpointId') {
-      return MockPlayerBridge.getEndpointId();
-    }
-    if (name === 'getLatency') {
-      return MockPlayerBridge.getLatency();
-    }
-    if (name === 'getPlayerVersion') {
-      return MockPlayerBridge.getPlayerVersion();
-    }
-    if (name === 'getStreamId') {
-      return MockPlayerBridge.getStreamId();
-    }
-    if (name === 'subscribeFullscreen') {
-      return MockPlayerBridge.subscribeFullscreen(listener);
-    }
-    if (name === 'subscribeOrientation') {
-      return MockPlayerBridge.subscribeOrientation(listener);
-    }
-    if (name === 'subscribeQuality') {
-      return MockPlayerBridge.subscribeQuality(listener);
-    }
-    if (name === 'subscribeStreamPhase') {
-      return MockPlayerBridge.subscribeStreamPhase(listener);
-    }
-
-    return super.handleCommand(name, arg, listener);
   }
 }
