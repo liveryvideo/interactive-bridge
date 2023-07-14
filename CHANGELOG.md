@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.7.0...v1.8.0) (2023-07-14)
+
+
+### Features
+
+* add support for target: AbstractPlayerBridge argument to InteractiveBridge ([#21](https://github.com/liveryvideo/interactive-bridge/issues/21)) ([40e600e](https://github.com/liveryvideo/interactive-bridge/commit/40e600e269460a3c53fad5fc9ef302effee0f15f))
+
 # [1.7.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.6.2...v1.7.0) (2023-04-07)
 
 
