@@ -41,6 +41,14 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return 'dummy-stream-id';
   }
 
+  protected subscribeFullscreen(listener: (value: boolean) => void) {
+    // Note: LiveryPlayer only listens to itself becoming fullscreen; not just anything
+    document.addEventListener('fullscreenchange', () => {
+      listener(!!document.fullscreenElement);
+    });
+    return !!document.fullscreenElement;
+  }
+
   protected subscribeQuality(listener: (value: string) => void) {
     setTimeout(() => listener('dummy-quality-2'), 1500);
     setTimeout(() => listener('dummy-quality-3'), 3000);

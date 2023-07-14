@@ -101,18 +101,19 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return result;
   }
 
-  private subscribeFullscreen(listener: (value: boolean) => void) {
-    // Note: This is just an approximation of what the player does
-    document.addEventListener('fullscreenchange', () => {
-      listener(!!document.fullscreenElement);
-    });
-    return !!document.fullscreenElement;
-  }
-
   private subscribeOrientation(listener: (value: Orientation) => void) {
-    this.portraitQuery.addEventListener('change', (event) => {
-      listener(event.matches ? 'portrait' : 'landscape');
-    });
+    // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use addListener()
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
+    if (this.portraitQuery.addEventListener === undefined) {
+      // eslint-disable-next-line deprecation/deprecation -- For backwards compatibility
+      this.portraitQuery.addListener((event) => {
+        listener(event.matches ? 'portrait' : 'landscape');
+      });
+    } else {
+      this.portraitQuery.addEventListener('change', (event) => {
+        listener(event.matches ? 'portrait' : 'landscape');
+      });
+    }
 
     return this.portraitQuery.matches ? 'portrait' : 'landscape';
   }
@@ -126,6 +127,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract getPlayerVersion(): string;
 
   protected abstract getStreamId(): string;
+
+  protected abstract subscribeFullscreen(
+    listener: (value: boolean) => void,
+  ): boolean;
 
   protected abstract subscribeQuality(
     listener: (value: string) => void,
