@@ -3,7 +3,7 @@ import { LiveryBridge } from './LiveryBridge';
 
 /**
  * Abstract player bridge class which implements part of the player side API based on browser logic
- * and defines abstract methods for to be implemented to complete support for all InteractiveBridge commands.
+ * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
  */
 export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
@@ -89,23 +89,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return window.location.hostname;
   }
 
-  /**
-   * Returns an object with all the 'livery_' prefixed query parameter names and values.
-   * The prefix will be stripped from the names.
-   * Parameter names and values will be URL decoded.
-   * Parameters without a value will get an empty string value.
-   * Only the first value of a repeated parameter will be returned.
-   *
-   * Notes:
-   * - URLSearchParams.get(name) would return null instead of an empty string
-   * - URLSearchParams.getAll(name) would return an array of values
-   * - Query parameter names are not converted from snake_case to camelCase
-   * - Query parameter values are not JSON parsed (only string values)
-   *
-   * @example
-   * // Given location.search: '?foo&livery_foo%3Abar=hey+you&livery_no_val&livery_multi=1&livery_multi=2
-   * liveryParams.all // => { 'foo:bar': 'hey you', no_val: '', multi: '1' }
-   */
   private getLiveryParams(queryString = window.location.search) {
     const urlParams = new URLSearchParams(queryString);
     const result: Record<string, string> = {};
