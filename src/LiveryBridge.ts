@@ -43,7 +43,7 @@ interface EventMessage extends LiveryMessage {
   value: any;
 }
 
-const version = '__VERSION__';
+const version = __VERSION__;
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
 function hasOwnProperty<X extends {}, Y extends PropertyKey>(
@@ -73,22 +73,41 @@ export class LiveryBridge {
 
   private sourceId = uuid();
 
-  private targetOrigin: string;
+  private target:
+    | undefined
+    | LiveryBridge
+    | {
+        origin: string;
+        window: Window;
+      };
 
-  private targetWindow: Window;
+  /**
+   * Constructs a LiveryBridge.
+   *
+   * Target can be either undefined, a LiveryBridge instance or a window and origin.
+   * If undefined this waits for the other bridge to be passed this instance
+   * and for that in turn to pass it's reference here.
+   *
+   * @param target LiveryBridge target
+   */
+  constructor(target?: LiveryBridge['target']) {
+    this.target = target;
 
-  constructor(targetWindow: Window, targetOrigin: string) {
-    this.targetWindow = targetWindow;
-    this.targetOrigin = targetOrigin;
-
-    // Start listening for messages
-    window.addEventListener('message', (event) => this.handleMessage(event));
-
-    // Send handshake
     this.handshakePromise = new Promise<void>((resolve, reject) => {
       this.deferredMap.set(this.sourceId, { resolve, reject });
     });
-    this.sendMessage('handshake', this.sourceId, { version });
+
+    if (target) {
+      if (target instanceof LiveryBridge) {
+        target.target = this;
+      } else {
+        window.addEventListener('message', (event) =>
+          this.handleMessage(event),
+        );
+      }
+
+      this.sendMessage('handshake', this.sourceId, { version });
+    }
   }
 
   private static assertMessagePropertyType(
@@ -291,11 +310,7 @@ export class LiveryBridge {
 
   // Called when target bridge was last to be constructed or restarted
   private handleHandshake(message: HandshakeMessage) {
-    // To support development version values ('__VERSION__') also check for non-semver equal version
-    if (
-      message.version !== version &&
-      !isSemVerCompatible(message.version, version)
-    ) {
+    if (!isSemVerCompatible(message.version, version)) {
       this.sendReject(
         message.id,
         `Remote version: ${message.version} is incompatible with: ${version}`,
@@ -336,9 +351,14 @@ export class LiveryBridge {
   }
 
   private handleMessage(event: MessageEvent) {
+    if (!this.target || this.target instanceof LiveryBridge) {
+      throw new Error('Use handleMessage only when target is a window');
+    }
+
+    const { origin, window } = this.target;
     if (
-      event.source !== this.targetWindow ||
-      (this.targetOrigin !== '*' && event.origin !== this.targetOrigin)
+      event.source !== window ||
+      (origin !== '*' && event.origin !== origin)
     ) {
       return;
     }
@@ -373,14 +393,23 @@ export class LiveryBridge {
     id: string,
     properties: Record<string, unknown>,
   ) {
-    const message = {
+    if (!this.target) {
+      throw new Error('target undefined');
+    }
+
+    const message: LiveryMessage = {
       isLivery: true,
       sourceId: this.sourceId,
       type,
       id,
       ...properties,
     };
-    this.targetWindow.postMessage(message, this.targetOrigin);
+
+    if (this.target instanceof LiveryBridge) {
+      this.target.handleLiveryMessage(message);
+    } else {
+      this.target.window.postMessage(message, this.target.origin);
+    }
   }
 
   private sendReject(id: string, error: string) {

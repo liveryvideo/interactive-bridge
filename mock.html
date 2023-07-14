@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title>Mock Livery Player</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="mock-style.css" />
+  </head>
+  <body>
+    <div class="panel">
+      <h2>Mock Livery Player</h2>
+      <div class="player">
+        <img class="screenshot" src="assets/screenshot.jpg" />
+
+        <iframe src="index.html"></iframe>
+
+        <div class="controls controls-top">
+          Livery Player controls can be shown here
+        </div>
+        <div class="controls controls-bottom">
+          Livery Player controls can be shown here
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Mock Bridge Messages</h2>
+      <livery-bridge-log></livery-bridge-log>
+    </div>
+
+    <script type="module">
+      import { MockPlayerBridge } from './index.ts';
+
+      window.bridge = new MockPlayerBridge({
+        window: document.querySelector('iframe').contentWindow,
+        origin: '*',
+      });
+    </script>
+  </body>
+</html>
