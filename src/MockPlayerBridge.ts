@@ -6,7 +6,7 @@ import type { StreamPhase } from './InteractiveBridge';
  * And with dummy support for custom command: `subscribeAuthToken` as used on the test page.
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
-  constructor(target: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
+  constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
     super(target);
 
     this.registerCustomCommand('subscribeAuthToken', (arg, listener) => {
