@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.8.0...v1.8.1) (2023-07-14)
+
+
+### Bug Fixes
+
+* **AbstractPlayerBridge:** make subscribeFullscreen() abstract and update subscribeOrientation ([5b226f5](https://github.com/liveryvideo/interactive-bridge/commit/5b226f5cd5b6e2500c161fd822f9e651e5d43983))
+
 # [1.8.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.7.0...v1.8.0) (2023-07-14)
 
 
