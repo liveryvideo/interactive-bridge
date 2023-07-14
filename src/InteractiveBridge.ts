@@ -79,7 +79,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns an object of key-value string parameters from the player.
+   * Returns promise of an object of key-value string parameters from LiveryPlayer.
    *
    * Android and iOS players will call a callback and pass on the returned values.
    *
