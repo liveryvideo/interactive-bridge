@@ -43,6 +43,8 @@ interface EventMessage extends LiveryMessage {
   value: any;
 }
 
+type Spy = (message: LiveryMessage) => void;
+
 const version = __VERSION__;
 
 // eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
@@ -72,6 +74,8 @@ export class LiveryBridge {
   private listenerMap = new Map<string, (value: any) => void>();
 
   private sourceId = uuid();
+
+  private spies: Spy[] = [];
 
   private target:
     | undefined
@@ -196,6 +200,19 @@ export class LiveryBridge {
     message: LiveryMessage,
   ): message is ResolveMessage {
     return message.type === 'resolve';
+  }
+
+  /**
+   * Spy on LiveryMessages handled by this bridge.
+   *
+   * @param callback Callback to call with message
+   * @returns Method to remove callback from spies
+   */
+  spy(callback: Spy) {
+    this.spies.push(callback);
+    return () => {
+      this.spies = this.spies.filter((candidate) => candidate !== callback);
+    };
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -331,6 +348,15 @@ export class LiveryBridge {
   private handleLiveryMessage(message: LiveryMessage) {
     if (message.sourceId === this.sourceId) {
       return;
+    }
+
+    for (const spy of this.spies) {
+      try {
+        spy(message);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('LiveryBridge spy callback threw error', error);
+      }
     }
 
     if (LiveryBridge.isCommandMessage(message)) {

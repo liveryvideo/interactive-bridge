@@ -9,3 +9,4 @@ export type { Orientation, StreamPhase } from './src/InteractiveBridge';
 export { LiveryBridge } from './src/LiveryBridge';
 export { MockPlayerBridge } from './src/MockPlayerBridge';
 export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog';
+export { LiveryInteractive } from './src/livery-interactive/LiveryInteractive';

@@ -1,3 +1,33 @@
+import type { InteractiveBridge } from './index';
+import { LiveryInteractive, MockPlayerBridge } from './index';
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'livery-interactive': LiveryInteractive;
+  }
+
+  interface Window {
+    interactiveBridge?: InteractiveBridge;
+    mockPlayerBridge?: MockPlayerBridge;
+  }
+}
+
+const params = new URLSearchParams(window.location.search);
+
+if (params.has('mock')) {
+  window.mockPlayerBridge = new MockPlayerBridge();
+}
+
+customElements.define('livery-interactive', LiveryInteractive);
+
+const liveryInteractive = document.createElement('livery-interactive');
+liveryInteractive.playerBridge = window.mockPlayerBridge;
+liveryInteractive.onload = () => {
+  window.interactiveBridge = liveryInteractive.interactiveBridge;
+};
+document.body.appendChild(liveryInteractive);
+
+/*
 import { InteractiveBridge, MockPlayerBridge } from './index';
 import { stringify } from './src/util/stringify';
 
@@ -94,3 +124,4 @@ declare global {
 }
 
 window.bridge = bridge;
+*/
