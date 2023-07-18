@@ -55,6 +55,7 @@ function isBridgeSubscribeMethodName(
 export class LiveryInteractive extends LitElement {
   static override readonly styles = css`
     :host {
+      color: #000;
       display: block;
       display: flex;
       flex-direction: column;

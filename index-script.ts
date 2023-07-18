@@ -1,5 +1,5 @@
-import type { InteractiveBridge } from './index';
-import { LiveryInteractive, MockPlayerBridge } from './index';
+import type { InteractiveBridge, MockPlayerBridge } from './index';
+import { LiveryInteractive } from './index';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -8,23 +8,23 @@ declare global {
 
   interface Window {
     interactiveBridge?: InteractiveBridge;
-    mockPlayerBridge?: MockPlayerBridge;
+    playerBridge?: MockPlayerBridge;
   }
 }
 
-const params = new URLSearchParams(window.location.search);
-
-if (params.has('mock')) {
-  window.mockPlayerBridge = new MockPlayerBridge();
-  // TODO: Also mock with player screenshot background and with PlayerBridge log like on mock.html page
-  // E.g: merge mock.html page into this?
-}
-
 customElements.define('livery-interactive', LiveryInteractive);
-
 const liveryInteractive = document.createElement('livery-interactive');
-liveryInteractive.playerBridge = window.mockPlayerBridge;
 liveryInteractive.onload = () => {
   window.interactiveBridge = liveryInteractive.interactiveBridge;
 };
-document.body.appendChild(liveryInteractive);
+
+const params = new URLSearchParams(window.location.search);
+if (params.has('mock')) {
+  const liveryBridgeMock = document.createElement('livery-bridge-mock');
+  window.playerBridge = liveryBridgeMock.playerBridge;
+  liveryInteractive.playerBridge = liveryBridgeMock.playerBridge;
+  liveryBridgeMock.appendChild(liveryInteractive);
+  document.body.appendChild(liveryBridgeMock);
+} else {
+  document.body.appendChild(liveryInteractive);
+}
