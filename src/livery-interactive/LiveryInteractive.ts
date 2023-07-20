@@ -60,6 +60,7 @@ export class LiveryInteractive extends LitElement {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      overflow: auto;
     }
 
     :host([hidden]) {
