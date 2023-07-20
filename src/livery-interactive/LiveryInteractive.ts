@@ -5,6 +5,7 @@ import { InteractiveBridge } from '../InteractiveBridge';
 import '../livery-bridge-log/LiveryBridgeLog';
 import { stringify } from '../util/stringify';
 
+// TODO: Refactor this fancy TypeScript to just using plain lit element state properties and click handler methods
 const BRIDGE_GET_NAMES = [
   'getAppName',
   'getCustomerId',
@@ -45,11 +46,7 @@ function isBridgeSubscribeMethodName(
  * @example
  * customElements.define('livery-interactive', LiveryInteractive);
  * const interactive = document.createElement('livery-interactive');
- * // Assign player bridge instance when you are embedded as interactive element (not page) by player
- * interactive.playerBridge = playerBridge;
- * interactive.onload = () => {
- *   // Use interactive.interactiveBridge
- * };
+ * interactive.playerBridge = new MockPlayerBridge();
  * document.body.appendChild(interactive);
  */
 export class LiveryInteractive extends LitElement {

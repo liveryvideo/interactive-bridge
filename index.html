@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en-US">
   <head>
-    <title>Livery Interactive Bridge Test</title>
+    <title>Test Interactive Layer</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
@@ -24,6 +24,46 @@
     </style>
   </head>
   <body>
-    <script type="module" src="index-script.ts"></script>
+    <script type="module">
+      import { LiveryInteractive } from './index.ts';
+
+      const params = new URLSearchParams(window.location.search);
+
+      function createInteractive() {
+        customElements.define('livery-interactive', LiveryInteractive);
+        const interactive = document.createElement('livery-interactive');
+        // Note: This page can be used from other origins by players for (unsecure) testing purposes
+        interactive.playerOrigin = '*';
+        interactive.onload = () => {
+          window.interactiveBridge = interactive.interactiveBridge;
+        };
+        return interactive;
+      }
+
+      if (!params.has('mock')) {
+        document.body.appendChild(createInteractive());
+      } else {
+        const mock = document.createElement('livery-bridge-mock');
+        document.body.appendChild(mock);
+
+        const mockIframe = params.get('mock') === 'iframe';
+        if (mockIframe) {
+          const iframe = document.createElement('iframe');
+          iframe.src = 'index.html';
+          iframe.frameBorder = 0;
+          mock.appendChild(iframe);
+        }
+
+        mock.onload = () => {
+          window.playerBridge = mock.playerBridge;
+
+          if (!mockIframe) {
+            const interactive = createInteractive();
+            interactive.playerBridge = mock.playerBridge;
+            mock.appendChild(interactive);
+          }
+        };
+      }
+    </script>
   </body>
 </html>

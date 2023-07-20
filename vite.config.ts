@@ -43,7 +43,6 @@ export default defineConfig(({ mode }) => ({
         }
       : undefined,
     rollupOptions: {
-      input: mode === 'production' ? ['index.html', 'mock.html'] : undefined,
       external:
         mode === 'lib:bundler'
           ? (id) => Object.keys(dependencies).includes(id.replace(/\/.*/, ''))
