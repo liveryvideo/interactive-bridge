@@ -2,30 +2,27 @@ import type { PropertyValues } from 'lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import '../livery-bridge-log/LiveryBridgeLog';
-import type { LiveryInteractive } from '../livery-interactive/LiveryInteractive';
 import { MockPlayerBridge } from '../MockPlayerBridge';
 
 declare global {
   interface HTMLElementTagNameMap {
     'livery-bridge-mock': LiveryBridgeMock;
-    'livery-interactive': LiveryInteractive;
   }
 }
 
 /**
  * Test element defined as `<livery-bridge-mock>` which creates a `MockPlayerBridge`
- * to be used by a `<livery-interactive>` element that should be passed as a child.
+ * to be used by a Livery Interactive element that should be passed as a child.
  *
  * Alternatively pass an `<iframe>` element as a child with an interactive layer page
  * which should be at the origin specified by the `interactiveOrigin` property.
  * That interactive page should create an `InteractiveBridge` instance targetting this window,
- * e.g. by using a `<livery-interactive>` element.
+ * e.g. by using a Livery Interactive element.
  *
  * @example
  * const mock = document.createElement('livery-bridge-mock');
  * mock.onload = () => {
- *   customElements.define('livery-interactive', LiveryInteractive);
- *   const interactive = document.createElement('livery-interactive');
+ *   const interactive = document.createElement('livery-bridge-interactive');
  *   interactive.playerBridge = mock.playerBridge;
  *   mock.appendChild(interactive);
  * };
@@ -128,15 +125,6 @@ export class LiveryBridgeMock extends LitElement {
       });
     } else {
       this.playerBridge = new MockPlayerBridge();
-    }
-
-    const element = slotNodes.find(
-      (node) => node.nodeName === 'livery-interactive',
-    );
-    if (element) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- Just for testing
-      // @ts-expect-error
-      element.playerBridge = this.playerBridge;
     }
 
     this.dispatchEvent(new Event('load'));

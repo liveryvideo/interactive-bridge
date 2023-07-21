@@ -1,9 +1,15 @@
 import { css, html, LitElement } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import type { AbstractPlayerBridge } from '../AbstractPlayerBridge';
 import { InteractiveBridge } from '../InteractiveBridge';
 import '../livery-bridge-log/LiveryBridgeLog';
 import { stringify } from '../util/stringify';
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'livery-bridge-interactive': LiveryBridgeInteractive;
+  }
+}
 
 // TODO: Refactor this fancy TypeScript to just using plain lit element state properties and click handler methods
 const BRIDGE_GET_NAMES = [
@@ -36,20 +42,18 @@ function isBridgeSubscribeMethodName(
 }
 
 /**
- * Element which can be registered as 'livery-interactive' to be used as Livery Interactive element
+ * Test element defined as `<livery-bridge-interactive>` which can be used as Livery Interactive element
  * for testing purposes.
- *
- * Note: This does not define itself as custom element 'livery-interactive' to avoid unintended conflicts!
  *
  * This dispatches a 'load' event once it's loaded and `interactiveBridge` has been assigned.
  *
  * @example
- * customElements.define('livery-interactive', LiveryInteractive);
- * const interactive = document.createElement('livery-interactive');
+ * const interactive = document.createElement('livery-bridge-interactive');
  * interactive.playerBridge = new MockPlayerBridge();
  * document.body.appendChild(interactive);
  */
-export class LiveryInteractive extends LitElement {
+@customElement('livery-bridge-interactive')
+export class LiveryBridgeInteractive extends LitElement {
   static override readonly styles = css`
     :host {
       color: #000;

@@ -18,20 +18,19 @@
         font-family: Arial, Helvetica, sans-serif;
       }
 
-      livery-interactive {
+      livery-bridge-interactive {
         height: 100%;
       }
     </style>
   </head>
   <body>
     <script type="module">
-      import { LiveryInteractive } from './index.ts';
+      import './index.ts';
 
       const params = new URLSearchParams(window.location.search);
 
       function createInteractive() {
-        customElements.define('livery-interactive', LiveryInteractive);
-        const interactive = document.createElement('livery-interactive');
+        const interactive = document.createElement('livery-bridge-interactive');
         // Note: This page can be used from other origins by players for (unsecure) testing purposes
         interactive.playerOrigin = '*';
         interactive.onload = () => {
