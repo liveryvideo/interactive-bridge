@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.8.1...v1.8.2) (2023-07-21)
+
+
+### Bug Fixes
+
+* add direct bridge support to LiveryBridgeLog and add LiveryInteractive and LiveryBridgeMock elements ([#22](https://github.com/liveryvideo/interactive-bridge/issues/22)) ([a98d64b](https://github.com/liveryvideo/interactive-bridge/commit/a98d64ba9fdd46458496a0119705de52b645fe3b))
+
 ## [1.8.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.8.0...v1.8.1) (2023-07-14)
 
 
