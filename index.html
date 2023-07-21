@@ -1,154 +1,69 @@
 <!doctype html>
 <html lang="en-US">
   <head>
-    <title>Livery Interactive Layer</title>
+    <title>Test Interactive Layer</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="index-style.css" />
+    <style>
+      * {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      livery-interactive {
+        height: 100%;
+      }
+    </style>
   </head>
   <body>
-    <div class="controls-space">
-      <!-- Livery Player controls can be shown here -->
-    </div>
+    <script type="module">
+      import { LiveryInteractive } from './index.ts';
 
-    <header>
-      <a
-        class="logo"
-        href="https://www.liveryvideo.com"
-        rel="external"
-        target="_blank"
-      >
-        <img src="assets/logo.png" />
-      </a>
-      <b>Interactive Layer v<span id="version">..</span></b>
-    </header>
+      const params = new URLSearchParams(window.location.search);
 
-    <main>
-      <div class="panel">
-        <table>
-          <tr>
-            <th>Player Command</th>
-            <th>Value</th>
-          </tr>
-          <tr>
-            <td>
-              <button id="get-app-name">getAppName</button>
-            </td>
-            <td id="app-name"></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="get-customer-id">getCustomerId</button>
-            </td>
-            <td id="customer-id"></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="get-endpoint-id">getEndpointId</button>
-            </td>
-            <td id="endpoint-id"></td>
-          </tr>
-          <tr>
-            <td><button id="get-latency">getLatency</button></td>
-            <td id="latency"></td>
-          </tr>
-          <tr>
-            <td><button id="get-livery-params">getLiveryParams</button></td>
-            <td id="livery-params"></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="get-player-version">getPlayerVersion</button>
-            </td>
-            <td id="player-version"></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="get-stream-id">getStreamId</button>
-            </td>
-            <td id="stream-id"></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="subscribe-fullscreen">subscribeFullscreen</button>
-            </td>
-            <td id="fullscreen"></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="subscribe-orientation">subscribeOrientation</button>
-            </td>
-            <td id="orientation"></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="subscribe-quality">subscribeQuality</button>
-            </td>
-            <td id="quality"></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="subscribe-stream-phase">subscribeStreamPhase</button>
-            </td>
-            <td id="stream-phase"></td>
-          </tr>
-        </table>
-      </div>
+      function createInteractive() {
+        customElements.define('livery-interactive', LiveryInteractive);
+        const interactive = document.createElement('livery-interactive');
+        // Note: This page can be used from other origins by players for (unsecure) testing purposes
+        interactive.playerOrigin = '*';
+        interactive.onload = () => {
+          window.interactiveBridge = interactive.interactiveBridge;
+        };
+        return interactive;
+      }
 
-      <div class="panel">
-        <form id="player-command-form" method="post" action="#">
-          <table>
-            <tr>
-              <th colspan="2">Custom Player Command</th>
-            </tr>
-            <tr>
-              <th>Name:</th>
-              <td>
-                <input type="text" name="name" value="subscribeAuthToken" />
-              </td>
-            </tr>
-            <tr>
-              <th>Arg:</th>
-              <td><input type="text" name="arg" value='"dummy"' /></td>
-            </tr>
-            <tr>
-              <th></th>
-              <td><input type="submit" value="Send" /></td>
-            </tr>
-            <tr>
-              <th>Value:</th>
-              <td id="player-command-value"></td>
-            </tr>
-          </table>
-        </form>
-      </div>
+      if (!params.has('mock')) {
+        document.body.appendChild(createInteractive());
+      } else {
+        const mock = document.createElement('livery-bridge-mock');
+        document.body.appendChild(mock);
 
-      <div class="panel">
-        <table>
-          <tr>
-            <th colspan="2">Custom Interactive Command</th>
-          </tr>
-          <tr>
-            <th>Name:</th>
-            <td>test</td>
-          </tr>
-          <tr>
-            <th>Arg:</th>
-            <td id="interactive-command-arg"></td>
-          </tr>
-        </table>
-      </div>
+        const mockIframe = params.get('mock') === 'iframe';
+        if (mockIframe) {
+          const iframe = document.createElement('iframe');
+          iframe.src = 'index.html';
+          iframe.frameBorder = 0;
+          mock.appendChild(iframe);
+        }
 
-      <div class="panel">
-        <b>Last Bridge Message</b>
-        <livery-bridge-log maxmessages="1"></livery-bridge-log>
-      </div>
-    </main>
+        mock.onload = () => {
+          window.playerBridge = mock.playerBridge;
 
-    <div class="controls-space">
-      <!-- Livery Player controls can be shown here -->
-    </div>
-
-    <script type="module" src="index-script.ts"></script>
+          if (!mockIframe) {
+            const interactive = createInteractive();
+            interactive.playerBridge = mock.playerBridge;
+            mock.appendChild(interactive);
+          }
+        };
+      }
+    </script>
   </body>
 </html>

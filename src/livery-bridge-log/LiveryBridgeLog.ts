@@ -1,5 +1,6 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import type { LiveryBridge } from '../LiveryBridge';
 import { stringify } from '../util/stringify';
 
 declare global {
@@ -32,6 +33,15 @@ export class LiveryBridgeLog extends LitElement {
   `;
 
   /**
+   * Bridge to spy on.
+   *
+   * If undefined this will instead just listen to messages posted to this window.
+   *
+   * Note: This needs to be defined before this element is connected to DOM.
+   */
+  bridge?: LiveryBridge;
+
+  /**
    * Maximum number of messages to display.
    */
   @property({ type: Number, reflect: true })
@@ -42,16 +52,32 @@ export class LiveryBridgeLog extends LitElement {
 
   private messages: string[] = [];
 
+  private removeSpy?: () => void;
+
   override connectedCallback() {
     super.connectedCallback();
 
-    window.addEventListener('message', this.handleMessage);
+    if (this.bridge) {
+      this.removeSpy = this.bridge.spy((message) => {
+        // eslint-disable-next-line no-console
+        console.log(message);
+        this.addMessage(stringify(message, null, '  '));
+      });
+    } else {
+      window.addEventListener('message', this.handleWindowMessage);
+    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    window.removeEventListener('message', this.handleMessage);
+    if (this.removeSpy) {
+      this.removeSpy();
+      this.removeSpy = undefined;
+    } else {
+      window.removeEventListener('message', this.handleWindowMessage);
+    }
+
     this.messages = [];
   }
 
@@ -59,13 +85,8 @@ export class LiveryBridgeLog extends LitElement {
     return html`<pre><code id="container"></code></pre>`;
   }
 
-  private handleMessage = (event: MessageEvent) => {
-    // eslint-disable-next-line no-console
-    console.log(event.origin, event.data);
-
-    this.messages.unshift(
-      `${event.origin}: ${stringify(event.data, null, '  ')}`,
-    );
+  private addMessage(message: string) {
+    this.messages.unshift(message);
 
     while (this.messages.length > this.maxMessages) {
       this.messages.pop();
@@ -74,5 +95,12 @@ export class LiveryBridgeLog extends LitElement {
     if (this.container) {
       this.container.innerText = this.messages.join('\n');
     }
+  }
+
+  private handleWindowMessage = (event: MessageEvent) => {
+    // eslint-disable-next-line no-console
+    console.log(event.origin, event.data);
+
+    this.addMessage(`${event.origin}: ${stringify(event.data, null, '  ')}`);
   };
 }
