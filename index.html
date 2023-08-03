@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en-US">
   <head>
-    <title>Test Interactive Layer</title>
+    <title>Test Interactive Bridge</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
@@ -59,6 +59,8 @@
           if (!mockIframe) {
             const interactive = createInteractive();
             interactive.playerBridge = mock.playerBridge;
+            interactive.region = params.get('region') ?? '';
+            interactive.tenantId = params.get('tenantid') ?? '';
             mock.appendChild(interactive);
           }
         };
