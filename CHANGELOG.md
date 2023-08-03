@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.8.3...v1.9.0) (2023-08-03)
+
+
+### Features
+
+* **livery-bridge-element:** add support for region and tenantId ([#23](https://github.com/liveryvideo/interactive-bridge/issues/23)) ([1ffb945](https://github.com/liveryvideo/interactive-bridge/commit/1ffb94537d98374ef81dad947ac4d52d394d1aa7))
+
 ## [1.8.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.8.2...v1.8.3) (2023-07-21)
 
 
