@@ -50,6 +50,8 @@ function isBridgeSubscribeMethodName(
  * @example
  * const interactive = document.createElement('livery-bridge-interactive');
  * interactive.playerBridge = new MockPlayerBridge();
+ * interactive.region = 'eu';
+ * interactive.tenantId = 'abc123';
  * document.body.appendChild(interactive);
  */
 @customElement('livery-bridge-interactive')
@@ -130,6 +132,18 @@ export class LiveryBridgeInteractive extends LitElement {
    */
   playerBridge?: AbstractPlayerBridge;
 
+  /**
+   * Region of interactive server that interactive element should connect to.
+   */
+  @property({ type: String, reflect: true })
+  region: string | null = null;
+
+  /**
+   * Id of tenant that interactive element should use on server.
+   */
+  @property({ type: String, reflect: true })
+  tenantId: string | null = null;
+
   @state()
   private interactiveCommandArg = '';
 
@@ -179,7 +193,23 @@ export class LiveryBridgeInteractive extends LitElement {
           />
           Livery
         </a>
-        <b>Interactive Layer v${__VERSION__}</b>
+        <table>
+          <tr>
+            <th colspan="2">Interactive</th>
+          </tr>
+          <tr>
+            <th>Bridge</th>
+            <td>v${__VERSION__}</td>
+          </tr>
+          <tr>
+            <th>Region</th>
+            <td>${this.region}</td>
+          </tr>
+          <tr>
+            <th>TenantId</th>
+            <td>${this.tenantId}</td>
+          </tr>
+        </table>
       </header>
 
       <main>
