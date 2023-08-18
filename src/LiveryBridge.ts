@@ -4,7 +4,7 @@
 import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
 
-interface LiveryMessage extends Record<string, any> {
+export interface LiveryMessage extends Record<string, any> {
   id: string;
   isLivery: true;
   sourceId: string;
@@ -43,13 +43,17 @@ interface EventMessage extends LiveryMessage {
   value: any;
 }
 
+interface NullMessage extends LiveryMessage {
+  type: 'null';
+}
+
 export interface PostMessagable {
   addEventListener: Window['addEventListener'];
   parent: PostMessagable;
   postMessage: Window['postMessage'];
 }
 
-type Spy = (message: LiveryMessage) => void;
+export type Spy = (message: LiveryMessage) => void;
 
 const version = __VERSION__;
 
@@ -104,14 +108,24 @@ export class LiveryBridge {
    */
   constructor(
     target?: LiveryBridge['target'],
-    ownWindow: PostMessagable = window,
+    options: {
+      handshakeCallback?: () => void;
+      ownWindow?: PostMessagable;
+      spy?: Spy;
+    } = {},
   ) {
     this.target = target;
-    this.window = ownWindow;
+    this.window = options.ownWindow ?? window;
+    if (options.spy) {
+      this.spy(options.spy);
+    }
 
     this.handshakePromise = new Promise<void>((resolve, reject) => {
       this.deferredMap.set(this.sourceId, { resolve, reject });
     });
+    this.handshakePromise
+      .then(options.handshakeCallback)
+      .catch(options.handshakeCallback);
 
     if (target) {
       if (target instanceof LiveryBridge) {
@@ -198,6 +212,10 @@ export class LiveryBridge {
     return true;
   }
 
+  private static isNullMessage(message: LiveryMessage): message is NullMessage {
+    return message.type === 'null';
+  }
+
   private static isRejectMessage(
     message: LiveryMessage,
   ): message is RejectMessage {
@@ -237,6 +255,9 @@ export class LiveryBridge {
     throw new Error(`Unsupported command: ${name}`);
   }
   /* eslint-enable @typescript-eslint/no-unused-vars */
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  protected handshakeDidResolve() {}
 
   /**
    * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
@@ -351,6 +372,7 @@ export class LiveryBridge {
     const deferred = this.deferredMap.get(this.sourceId);
     if (deferred) {
       deferred.resolve(version);
+      this._handshakeState = 'fulfilled';
       this.deferredMap.delete(this.sourceId);
     }
 
@@ -383,6 +405,8 @@ export class LiveryBridge {
       this.handleRejectMessage(message);
     } else if (LiveryBridge.isResolveMessage(message)) {
       this.handleResolveMessage(message);
+    } else if (LiveryBridge.isNullMessage(message)) {
+      // no-op
     } else {
       throw new Error(`Invalid message type: ${message.type}`);
     }

@@ -68,3 +68,57 @@
     </script>
   </body>
 </html>
+
+<!--
+
+  index.html
+  //window.interactiveBridge = <livery-bridge-interactive>
+  <body>
+    <livery-bridge-interactive/> //playerOrigin = "*"
+  </body>
+
+  index.html?mock
+  <body>
+    <livery-bridge-mock>
+      <livery-bridge-interactive/> //playerBridge = <livery-bridge-mock>
+    </livery-bridge-mock>
+  </body>
+
+  index.html?mock=iframe
+  <body>
+    <livery-bridge-mock>
+      <iframe src="index.html">
+    </livery-bridge-mock>
+  </body>
+
+
+  The <livery-bridge-mock> element will always wrap a <livery-bridge-interactive>, either directly or via an iframe
+  The <livery-bridge-interactive> element may stand alone, in which case...
+-->>
+
+<!--
+
+  index.html
+  //window.interactiveBridge = <interactive-bridge-control-panel>
+  <body>
+    <interactive-bridge-control-panel/> //playerOrigin = "*"
+  </body>
+
+  index.html?mock
+  <body>
+    <player-bridge-control-panel>
+      <interactive-bridge-control-panel/> //playerBridge = <player-bridge-control-panel>
+    </player-bridge-control-panel>
+  </body>
+
+  index.html?mock=iframe
+  <body>
+    <player-bridge-control-panel>
+      <iframe src="index.html">
+    </player-bridge-control-panel>
+  </body>
+
+
+  The <player-bridge-control-panel> element will always wrap a <interactive-bridge-control-panel>, either directly or via an iframe
+  The <interactive-bridge-control-panel> element may stand alone, in which case...
+-->>

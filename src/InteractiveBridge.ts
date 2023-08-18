@@ -17,10 +17,13 @@ export class InteractiveBridge extends LiveryBridge {
    */
   constructor(
     target: AbstractPlayerBridge | string,
-    ownWindow: PostMessagable = window,
+    options: {
+      ownWindow?: PostMessagable;
+    } = {},
   ) {
     if (typeof target === 'string') {
-      super({ window: ownWindow.parent, origin: target }, ownWindow);
+      const ownWindow = options.ownWindow || window;
+      super({ window: ownWindow.parent, origin: target }, { ownWindow });
     } else {
       super(target);
     }
