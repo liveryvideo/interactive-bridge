@@ -53,16 +53,27 @@ test('receiving livery message, spy is called', () => {
 });
 
 test('two instances in one window completes handshake', async () => {
-  function createBridgeAndWaitForHandshake(ownWindow: PostMessagable) {
-    return new Promise<void>((resolve) => {
-      new LiveryBridge(
-        { origin: '*', window: ownWindow },
-        { ownWindow, handshakeCallback: resolve },
-      );
-    });
-  }
   const ownWindow = new ListenerCallingFakeWindow();
-  const promise1 = createBridgeAndWaitForHandshake(ownWindow);
-  const promise2 = createBridgeAndWaitForHandshake(ownWindow);
-  await Promise.all([promise1, promise2]);
+  const bridge1 = new LiveryBridge(
+    { origin: '*', window: ownWindow },
+    { ownWindow },
+  );
+  const bridge2 = new LiveryBridge(
+    { origin: '*', window: ownWindow },
+    { ownWindow },
+  );
+  await Promise.all([bridge1.handshakePromise, bridge2.handshakePromise]);
+});
+
+test('two instances without window complete handshake', async () => {
+  // let resolvedHandshakes = 0;
+  // const firstBridge = new LiveryBridge(undefined, {handshakeCallback: ()=>{ resolvedHandshakes += 1 }})
+  // new LiveryBridge(firstBridge, {handshakeCallback: () => { resolvedHandshakes += 1 }})
+  // setTimeout(()=>{
+  //   expect(resolvedHandshakes).toBe(2);
+  // }, 30)
+
+  const bridge1 = new LiveryBridge(undefined);
+  const bridge2 = new LiveryBridge(bridge1);
+  await Promise.all([bridge1.handshakePromise, bridge2.handshakePromise]);
 });

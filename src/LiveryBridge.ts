@@ -66,6 +66,8 @@ function hasOwnProperty<X extends {}, Y extends PropertyKey>(
 }
 
 export class LiveryBridge {
+  handshakePromise: Promise<void>;
+
   private customCommandMap = new Map<
     string,
     (arg: unknown, listener: (value: unknown) => void) => unknown
@@ -78,8 +80,6 @@ export class LiveryBridge {
       resolve: (value: any) => void;
     }
   >();
-
-  private handshakePromise: Promise<void>;
 
   private listenerMap = new Map<string, (value: any) => void>();
 
@@ -109,7 +109,6 @@ export class LiveryBridge {
   constructor(
     target?: LiveryBridge['target'],
     options: {
-      handshakeCallback?: () => void;
       ownWindow?: PostMessagable;
       spy?: Spy;
     } = {},
@@ -123,9 +122,6 @@ export class LiveryBridge {
     this.handshakePromise = new Promise<void>((resolve, reject) => {
       this.deferredMap.set(this.sourceId, { resolve, reject });
     });
-    this.handshakePromise
-      .then(options.handshakeCallback)
-      .catch(options.handshakeCallback);
 
     if (target) {
       if (target instanceof LiveryBridge) {
