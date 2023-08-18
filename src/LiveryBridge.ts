@@ -372,7 +372,6 @@ export class LiveryBridge {
     const deferred = this.deferredMap.get(this.sourceId);
     if (deferred) {
       deferred.resolve(version);
-      this._handshakeState = 'fulfilled';
       this.deferredMap.delete(this.sourceId);
     }
 
