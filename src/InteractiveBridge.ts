@@ -1,4 +1,5 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
+import type { PostMessagable } from './LiveryBridge';
 import { LiveryBridge } from './LiveryBridge';
 import { stringify } from './util/stringify';
 
@@ -14,9 +15,12 @@ export class InteractiveBridge extends LiveryBridge {
    * Constructs `InteractiveBridge` with specified `target: AbstractPlayerBridge` (i.e: `PlayerBridge`)
    * or with `window.parent` as target window and with specified `target: string` as origin.
    */
-  constructor(target: AbstractPlayerBridge | string) {
+  constructor(
+    target: AbstractPlayerBridge | string,
+    ownWindow: PostMessagable = window,
+  ) {
     if (typeof target === 'string') {
-      super({ window: window.parent, origin: target });
+      super({ window: ownWindow.parent, origin: target }, ownWindow);
     } else {
       super(target);
     }

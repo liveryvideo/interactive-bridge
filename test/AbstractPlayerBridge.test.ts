@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import type { AbstractPlayerBridge } from '../src/AbstractPlayerBridge';
 import { InteractiveBridge } from '../src/InteractiveBridge';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 
@@ -15,7 +16,7 @@ function stubWindowLocationSearch(search: string) {
 
 describe('AbstractPlayerBridge', () => {
   // We can't test an abstract class so we'll just access the base class methods through MockPlayerBridge
-  let playerBridge: MockPlayerBridge;
+  let playerBridge: AbstractPlayerBridge;
   let interactiveBridge: InteractiveBridge;
 
   beforeEach(() => {
@@ -30,7 +31,7 @@ describe('AbstractPlayerBridge', () => {
       restoreSearch();
     });
 
-    it('returns query parameters as specified', async () => {
+    test('returns query parameters as specified', async () => {
       restoreSearch = stubWindowLocationSearch(
         '?foo&livery_foo%3Abar=hey+you&livery_no_val&livery_multi=1&livery_multi=2',
       );

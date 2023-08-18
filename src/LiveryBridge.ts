@@ -43,6 +43,12 @@ interface EventMessage extends LiveryMessage {
   value: any;
 }
 
+export interface PostMessagable {
+  addEventListener: Window['addEventListener'];
+  parent: PostMessagable;
+  postMessage: Window['postMessage'];
+}
+
 type Spy = (message: LiveryMessage) => void;
 
 const version = __VERSION__;
@@ -82,8 +88,10 @@ export class LiveryBridge {
     | LiveryBridge
     | {
         origin: string;
-        window: Window;
+        window: PostMessagable;
       };
+
+  private window: PostMessagable;
 
   /**
    * Constructs a LiveryBridge.
@@ -94,8 +102,12 @@ export class LiveryBridge {
    *
    * @param target LiveryBridge target
    */
-  constructor(target?: LiveryBridge['target']) {
+  constructor(
+    target?: LiveryBridge['target'],
+    ownWindow: PostMessagable = window,
+  ) {
     this.target = target;
+    this.window = ownWindow;
 
     this.handshakePromise = new Promise<void>((resolve, reject) => {
       this.deferredMap.set(this.sourceId, { resolve, reject });
@@ -105,7 +117,7 @@ export class LiveryBridge {
       if (target instanceof LiveryBridge) {
         target.target = this;
       } else {
-        window.addEventListener('message', (event) =>
+        this.window.addEventListener('message', (event) =>
           this.handleMessage(event),
         );
       }
