@@ -1,6 +1,14 @@
 import type { Orientation, StreamPhase } from './InteractiveBridge';
 import { LiveryBridge } from './LiveryBridge';
 
+export interface WithLocation {
+  location: Location;
+}
+
+export interface MatchMediable {
+  matchMedia: Window['matchMedia'];
+}
+
 /**
  * Abstract player bridge class which implements part of the player side API based on browser logic
  * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
@@ -9,8 +17,11 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(target?: { origin: string; window: Window }) {
-    super(target);
+  constructor(
+    target?: { origin: string; window: Window },
+    ownWindow: Window = window,
+  ) {
+    super(target, { ownWindow });
   }
 
   /**
@@ -86,10 +97,12 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   private getAppName() {
-    return window.location.hostname;
+    return (this.window as unknown as WithLocation).location.hostname;
   }
 
-  private getLiveryParams(queryString = window.location.search) {
+  private getLiveryParams(
+    queryString = (this.window as unknown as WithLocation).location.search,
+  ) {
     const urlParams = new URLSearchParams(queryString);
     const result: Record<string, string> = {};
     for (const [name, value] of urlParams.entries()) {

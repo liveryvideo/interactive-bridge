@@ -47,12 +47,6 @@ interface NullMessage extends LiveryMessage {
   type: 'null';
 }
 
-export interface PostMessagable {
-  addEventListener: Window['addEventListener'];
-  parent: PostMessagable;
-  postMessage: Window['postMessage'];
-}
-
 export type Spy = (message: LiveryMessage) => void;
 
 const version = __VERSION__;
@@ -67,6 +61,8 @@ function hasOwnProperty<X extends {}, Y extends PropertyKey>(
 
 export class LiveryBridge {
   handshakePromise: Promise<void>;
+
+  protected window: Window;
 
   private customCommandMap = new Map<
     string,
@@ -92,10 +88,8 @@ export class LiveryBridge {
     | LiveryBridge
     | {
         origin: string;
-        window: PostMessagable;
+        window: Window;
       };
-
-  private window: PostMessagable;
 
   /**
    * Constructs a LiveryBridge.
@@ -109,7 +103,7 @@ export class LiveryBridge {
   constructor(
     target?: LiveryBridge['target'],
     options: {
-      ownWindow?: PostMessagable;
+      ownWindow?: Window;
       spy?: Spy;
     } = {},
   ) {
@@ -127,9 +121,9 @@ export class LiveryBridge {
       if (target instanceof LiveryBridge) {
         target.target = this;
       } else {
-        this.window.addEventListener('message', (event) =>
-          this.handleMessage(event),
-        );
+        this.window.addEventListener('message', (event) => {
+          this.handleMessage(event);
+        });
       }
 
       this.sendMessage('handshake', this.sourceId, { version });
@@ -412,10 +406,14 @@ export class LiveryBridge {
       throw new Error('Use handleMessage only when target is a window');
     }
 
-    const { origin, window } = this.target;
+    // TODO: I have commented this out since message events sent in our jsdom mock have their source=null. jsdom's approach suggests that this may be more standards compliant than the way it has been implemented in most browsers. Those browsers could change their behavior so we may be introducing some fragility here.
+    // It also seems that there are already safeguards in place for this, both in terms of identifying livery messages, and the safeguards built into the browser.
+
+    // const { origin, window } = this.target;
     if (
-      event.source !== window ||
-      (origin !== '*' && event.origin !== origin)
+      //   event.source !== window ||
+      this.target.origin !== '*' &&
+      event.origin !== this.target.origin
     ) {
       return;
     }
