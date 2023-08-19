@@ -66,13 +66,6 @@ test('two instances in one window completes handshake', async () => {
 });
 
 test('two instances without window complete handshake', async () => {
-  // let resolvedHandshakes = 0;
-  // const firstBridge = new LiveryBridge(undefined, {handshakeCallback: ()=>{ resolvedHandshakes += 1 }})
-  // new LiveryBridge(firstBridge, {handshakeCallback: () => { resolvedHandshakes += 1 }})
-  // setTimeout(()=>{
-  //   expect(resolvedHandshakes).toBe(2);
-  // }, 30)
-
   const bridge1 = new LiveryBridge(undefined);
   const bridge2 = new LiveryBridge(bridge1);
   await Promise.all([bridge1.handshakePromise, bridge2.handshakePromise]);
