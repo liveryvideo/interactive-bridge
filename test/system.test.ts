@@ -26,7 +26,10 @@ test('handshake completes when player has target', async () => {
 });
 
 function executeSystemTests(
-  createBridgesAndCompleteHandshake: (url?: string) => Promise<BridgePair>,
+  createBridgesAndCompleteHandshake: (
+    playerUrl?: string,
+    interactiveUrl?: string,
+  ) => Promise<BridgePair>,
 ) {
   test('handshake completes', async () => {
     await createBridgesAndCompleteHandshake();
@@ -248,6 +251,36 @@ describe('using postmessage communication in shared window', () => {
     const interactiveBridgeTarget = '*';
     const interactiveBridge = new InteractiveBridge(interactiveBridgeTarget, {
       ownWindow,
+    });
+    await Promise.all([
+      playerBridge.handshakePromise,
+      interactiveBridge.handshakePromise,
+    ]);
+    return [playerBridge, interactiveBridge];
+  };
+  executeSystemTests(createBridgesAndCompleteHandshake);
+});
+
+describe('using postmessage communication with iframe', () => {
+  const createBridgesAndCompleteHandshake = async (
+    playerUrl?: string,
+    interactiveUrl?: string,
+  ): Promise<BridgePair> => {
+    const playerWindow = createJSDOMWindow(playerUrl);
+    const interactiveFrame = playerWindow.document.createElement('iframe');
+    interactiveFrame.src = interactiveUrl ?? 'about:blank';
+    playerWindow.document.body.appendChild(interactiveFrame);
+    const playerBridgeTarget = {
+      origin: '*',
+      window: interactiveFrame.contentWindow!,
+    };
+    const interactiveBridgeTarget = '*';
+    const playerBridge: AbstractPlayerBridge = new MockPlayerBridge(
+      playerBridgeTarget,
+      { ownWindow: playerWindow, latency: 1.23 },
+    );
+    const interactiveBridge = new InteractiveBridge(interactiveBridgeTarget, {
+      ownWindow: interactiveFrame.contentWindow!,
     });
     await Promise.all([
       playerBridge.handshakePromise,
