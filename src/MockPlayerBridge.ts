@@ -6,8 +6,14 @@ import type { StreamPhase } from './InteractiveBridge';
  * And with dummy support for custom command: `subscribeAuthToken` as used on the test page.
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
-  constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
-    super(target);
+  private latency?: number;
+
+  constructor(
+    target?: ConstructorParameters<typeof AbstractPlayerBridge>[0],
+    options?: { latency?: number; ownWindow?: Window },
+  ) {
+    super(target, options?.ownWindow);
+    this.latency = options?.latency;
 
     this.registerCustomCommand('subscribeAuthToken', (arg, listener) => {
       if (typeof arg !== 'string') {
@@ -21,6 +27,30 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     });
   }
 
+  enterFullscreen() {
+    this.onFullscreenChange(true);
+  }
+
+  exitFullscreen() {
+    this.onFullscreenChange(false);
+  }
+
+  setQuality(value: string) {
+    this.onQualitySet(value);
+  }
+
+  startLivePhase() {
+    this.onStreamPhaseChange('LIVE');
+  }
+
+  startPostPhase() {
+    this.onStreamPhaseChange('POST');
+  }
+
+  startPrePhase() {
+    this.onStreamPhaseChange('PRE');
+  }
+
   protected getCustomerId() {
     return 'dummy-customer-id';
   }
@@ -30,7 +60,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected getLatency() {
-    return Math.random() * 6;
+    return this.latency ?? Math.random() * 6;
   }
 
   protected getPlayerVersion() {
@@ -42,6 +72,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected subscribeFullscreen(listener: (value: boolean) => void) {
+    this.onFullscreenChange = listener;
     // Note: LiveryPlayer only listens to itself becoming fullscreen; not just anything
     document.addEventListener('fullscreenchange', () => {
       listener(!!document.fullscreenElement);
@@ -50,14 +81,22 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected subscribeQuality(listener: (value: string) => void) {
+    this.onQualitySet = listener;
     setTimeout(() => listener('dummy-quality-2'), 1500);
     setTimeout(() => listener('dummy-quality-3'), 3000);
     return 'dummy-quality-1';
   }
 
   protected subscribeStreamPhase(listener: (value: StreamPhase) => void) {
+    this.onStreamPhaseChange = listener;
     setTimeout(() => listener('LIVE'), 1500);
     setTimeout(() => listener('POST'), 3000);
     return 'PRE';
   }
+
+  private onFullscreenChange: (value: boolean) => void = () => {};
+
+  private onQualitySet: (value: string) => void = () => {};
+
+  private onStreamPhaseChange: (value: StreamPhase) => void = () => {};
 }
