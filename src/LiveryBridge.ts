@@ -456,7 +456,7 @@ export class LiveryBridge {
     id: string,
     properties: Record<string, unknown>,
   ) {
-    this.transceiver?.sendMessage(
+    this.transceiver?.transmit(
       this.sourceId,
       type,
       id,

@@ -27,7 +27,7 @@ export class Transceiver {
     this.messageHandler = messageHandler
   }
 
-  handleMessage(event: LiveryMessage) {
+  receive(event: LiveryMessage) {
     // check the origin
     // extract the data
     if (this.messageHandler) {
@@ -35,7 +35,7 @@ export class Transceiver {
     }
   }
 
-  sendMessage(
+  transmit(
     sourceId: string,
     type: string,
     id: string,
@@ -54,7 +54,7 @@ export class Transceiver {
     };
 
     if (this.target instanceof LiveryBridge) {
-      this.target.transceiver.handleMessage(message);
+      this.target.transceiver.receive(message);
     } else {
       this.target.window.postMessage(message, this.target.origin);
     }
