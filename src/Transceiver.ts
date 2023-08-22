@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import type { LiveryMessage } from "./LiveryBridge";
 import { LiveryBridge } from "./LiveryBridge";
 
@@ -15,13 +16,17 @@ type TargetDescriptor = {
 type MessageHandler = (event: LiveryMessage) => void
 
 export class Transceiver {
-  target?: LiveryBridge | TargetDescriptor
+  get target() {
+    return this._target;
+  }
 
-  private messageHandler?: MessageHandler
+  protected messageHandler?: MessageHandler
 
-  private ownBridge?: LiveryBridge
+  protected ownBridge?: LiveryBridge
 
-  private ownWindow: Window | undefined;
+  protected ownWindow: Window | undefined;
+
+  private _target?: LiveryBridge | TargetDescriptor
 
   constructor( ownBridge?: LiveryBridge, ownWindow?: Window ) {
     this.ownBridge = ownBridge;
@@ -41,11 +46,25 @@ export class Transceiver {
   }
 
   setTarget( target?: LiveryBridge | TargetDescriptor ) {
-    this.target = target
-    if (target instanceof LiveryBridge && target.transceiver.target !== this.ownBridge) {
-      target.setTarget(this.ownBridge)
-      return;
+    this._target = target
+  }
+
+  transmit(message : LiveryMessage) {
+    if (!this.target) {
+      throw new Error('target undefined');
     }
+  }
+}
+
+
+
+export class PostMessageTransceiver extends Transceiver {
+  constructor(ownWindow: Window) {
+    super(undefined, ownWindow)
+  }
+
+  override setTarget( target?: LiveryBridge | TargetDescriptor ) {
+    super.setTarget(target)
     if (target && target.window && target.origin && this.ownWindow) {
       this.ownWindow.addEventListener('message', (event) => {
         // handleMessage
@@ -70,28 +89,25 @@ export class Transceiver {
     }
   }
 
-  transmit(
-    sourceId: string,
-    type: string,
-    id: string,
-    properties: Record<string, unknown>,
-  ) {
-    if (!this.target) {
-      throw new Error('target undefined');
-    }
+  override transmit(message:LiveryMessage) {
+    super.transmit(message)
+    this.target.window.postMessage(message, this.target.origin);
 
-    const message: LiveryMessage = {
-      isLivery: true,
-      sourceId,
-      type,
-      id,
-      ...properties,
-    };
+  }
+}
 
-    if (this.target instanceof LiveryBridge) {
-      this.target.transceiver.receive(message);
-    } else {
-      this.target.window.postMessage(message, this.target.origin);
-    }
+
+
+export class DirectCallTransceiver extends Transceiver {
+  override setTarget(target?: LiveryBridge | TargetDescriptor | undefined): void {
+      super.setTarget(target)
+      if (target instanceof LiveryBridge && target.transceiver.target !== this.ownBridge) {
+        target.setTarget(this.ownBridge)
+      }
+  }
+
+  override transmit(message:LiveryMessage) {
+    super.transmit(message)
+    this.target.transceiver.receive(message);
   }
 }

@@ -1,7 +1,7 @@
 // We carefully work with unsafe message data within this class, so we will use `any` typed variables and arguments
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Transceiver } from './Transceiver';
+import { DirectCallTransceiver, PostMessageTransceiver, Transceiver } from './Transceiver';
 import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
 
@@ -112,10 +112,18 @@ export class LiveryBridge {
   ) {
     this.window = options.ownWindow ?? window;
     this.target = target;
-    this.transceiver = new Transceiver(this, this.window);
-    if (target) {
-      this.transceiver.setTarget(target)
+    if (target && hasOwnProperty(target, 'origin') && hasOwnProperty(target, 'window')) {
+      this.transceiver = new PostMessageTransceiver(this.window)
+      if (target) {
+        this.transceiver.setTarget(target)
+      }
+    } else {
+      this.transceiver = new DirectCallTransceiver(this, this.window);
+      if (target) {
+        this.transceiver.setTarget(target)
+      }
     }
+
     this.transceiver.setMessageHandler(this.handleLiveryMessage.bind(this))
     if (options.spy) {
       this.spy(options.spy);
@@ -408,28 +416,6 @@ export class LiveryBridge {
     this.sendResolve(message.id, version);
   }
 
-  private handleMessage(event: MessageEvent) {
-    if (!this.target || this.target instanceof LiveryBridge) {
-      throw new Error('Use handleMessage only when target is a window');
-    }
-
-    // TODO: I have commented this out since message events sent in our jsdom mock have their source=null. jsdom's approach suggests that this may be more standards compliant than the way it has been implemented in most browsers. Those browsers could change their behavior so we may be introducing some fragility here.
-    // It also seems that there are already safeguards in place for this, both in terms of identifying livery messages, and the safeguards built into the browser.
-
-    // const { origin, window } = this.target;
-    if (
-      //   event.source !== window ||
-      this.target.origin !== '*' &&
-      event.origin !== this.target.origin
-    ) {
-      return;
-    }
-
-    if (LiveryBridge.isLiveryMessage(event.data)) {
-      this.handleLiveryMessage(event.data);
-    }
-  }
-
   private handleRejectMessage(message: RejectMessage) {
     const deferred = this.deferredMap.get(message.id);
     if (deferred) {
@@ -455,12 +441,14 @@ export class LiveryBridge {
     id: string,
     properties: Record<string, unknown>,
   ) {
-    this.transceiver?.transmit(
-      this.sourceId,
+    const message: LiveryMessage = {
+      isLivery: true,
+      sourceId: this.sourceId,
       type,
       id,
-      properties
-    )
+      ...properties,
+    };
+    this.transceiver?.transmit(message)
   }
 
   private sendReject(id: string, error: string) {

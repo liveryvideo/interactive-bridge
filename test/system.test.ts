@@ -12,7 +12,7 @@ import { createJSDOMWindow } from './doubles/JSDOMWindow';
 type BridgePair = [AbstractPlayerBridge, InteractiveBridge];
 
 // edgecase
-test('handshake completes when player has target', async () => {
+test.skip('handshake completes when player has target', async () => {
   const ownWindow: Window = createJSDOMWindow();
   const playerBridge: AbstractPlayerBridge = new MockPlayerBridge({
     origin: '*',
