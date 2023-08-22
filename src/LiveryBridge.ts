@@ -110,13 +110,13 @@ export class LiveryBridge {
       spy?: Spy;
     } = {},
   ) {
+    this.window = options.ownWindow ?? window;
     this.target = target;
-    this.transceiver = new Transceiver(this);
+    this.transceiver = new Transceiver(this, this.window);
     if (target) {
       this.transceiver.setTarget(target)
     }
     this.transceiver.setMessageHandler(this.handleLiveryMessage.bind(this))
-    this.window = options.ownWindow ?? window;
     if (options.spy) {
       this.spy(options.spy);
     }
@@ -126,15 +126,23 @@ export class LiveryBridge {
     });
 
     if (target) {
-      if (target instanceof LiveryBridge) {
-        // no-op
-      } else {
-        this.window.addEventListener('message', (event) => {
-          this.handleMessage(event);
-        });
-      }
       this.sendMessage('handshake', this.sourceId, { version });
     }
+  }
+
+  static isLiveryMessage(object: unknown): object is LiveryMessage {
+    if (
+      typeof object !== 'object' ||
+      object === null ||
+      !hasOwnProperty(object, 'isLivery') ||
+      object.isLivery !== true
+    ) {
+      return false;
+    }
+    LiveryBridge.assertMessagePropertyType(object, 'id', 'string');
+    LiveryBridge.assertMessagePropertyType(object, 'sourceId', 'string');
+    LiveryBridge.assertMessagePropertyType(object, 'type', 'string');
+    return true;
   }
 
   private static assertMessagePropertyType(
@@ -194,20 +202,7 @@ export class LiveryBridge {
     return true;
   }
 
-  private static isLiveryMessage(object: unknown): object is LiveryMessage {
-    if (
-      typeof object !== 'object' ||
-      object === null ||
-      !hasOwnProperty(object, 'isLivery') ||
-      object.isLivery !== true
-    ) {
-      return false;
-    }
-    LiveryBridge.assertMessagePropertyType(object, 'id', 'string');
-    LiveryBridge.assertMessagePropertyType(object, 'sourceId', 'string');
-    LiveryBridge.assertMessagePropertyType(object, 'type', 'string');
-    return true;
-  }
+
 
   private static isNullMessage(message: LiveryMessage): message is NullMessage {
     return message.type === 'null';

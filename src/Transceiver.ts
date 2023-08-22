@@ -21,8 +21,11 @@ export class Transceiver {
 
   private ownBridge?: LiveryBridge
 
-  constructor( ownBridge?: LiveryBridge ) {
+  private ownWindow: Window | undefined;
+
+  constructor( ownBridge?: LiveryBridge, ownWindow?: Window ) {
     this.ownBridge = ownBridge;
+    this.ownWindow = ownWindow;
   }
 
   receive(event: LiveryMessage) {
@@ -41,6 +44,29 @@ export class Transceiver {
     this.target = target
     if (target instanceof LiveryBridge && target.transceiver.target !== this.ownBridge) {
       target.setTarget(this.ownBridge)
+      return;
+    }
+    if (target && target.window && target.origin && this.ownWindow) {
+      this.ownWindow.addEventListener('message', (event) => {
+        // handleMessage
+
+        // TODO: I have commented this out since message events sent in our jsdom mock have their source=null. jsdom's approach suggests that this may be more standards compliant than the way it has been implemented in most browsers. Those browsers could change their behavior so we may be introducing some fragility here.
+        // It also seems that there are already safeguards in place for this, both in terms of identifying livery messages, and the safeguards built into the browser.
+
+      const { origin, /* window */ } = target;
+        if (
+          // event.source !== window ||
+          origin !== '*' &&
+          event.origin !== origin
+        ) {
+          return;
+        }
+
+        if (LiveryBridge.isLiveryMessage(event.data) && this.messageHandler) {
+          this.messageHandler(event.data)
+        }
+
+      })
     }
   }
 
