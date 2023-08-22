@@ -111,7 +111,11 @@ export class LiveryBridge {
     } = {},
   ) {
     this.target = target;
-    this.transceiver = new Transceiver(target, this, this.handleLiveryMessage.bind(this));
+    this.transceiver = new Transceiver(this);
+    if (target) {
+      this.transceiver.setTarget(target)
+    }
+    this.transceiver.setMessageHandler(this.handleLiveryMessage.bind(this))
     this.window = options.ownWindow ?? window;
     if (options.spy) {
       this.spy(options.spy);
@@ -260,7 +264,7 @@ export class LiveryBridge {
 
   setTarget( target: LiveryBridge['target'] ) {
     this.target = target
-    this.transceiver.target = target;
+    this.transceiver.setTarget(target);
   }
 
   /**

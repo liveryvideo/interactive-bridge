@@ -19,12 +19,10 @@ export class Transceiver {
 
   private messageHandler?: MessageHandler
 
-  constructor( target?: LiveryBridge | TargetDescriptor, ownBridge?: LiveryBridge, messageHandler?: MessageHandler ) {
-    this.target = target;
-    if (target instanceof LiveryBridge) {
-      target.setTarget(ownBridge)
-    }
-    this.messageHandler = messageHandler
+  private ownBridge?: LiveryBridge
+
+  constructor( ownBridge?: LiveryBridge ) {
+    this.ownBridge = ownBridge;
   }
 
   receive(event: LiveryMessage) {
@@ -32,6 +30,17 @@ export class Transceiver {
     // extract the data
     if (this.messageHandler) {
       this.messageHandler(event);
+    }
+  }
+
+  setMessageHandler( messageHandler: MessageHandler ) {
+    this.messageHandler = messageHandler
+  }
+
+  setTarget( target?: LiveryBridge | TargetDescriptor ) {
+    this.target = target
+    if (target instanceof LiveryBridge && target.transceiver.target !== this.ownBridge) {
+      target.setTarget(this.ownBridge)
     }
   }
 
