@@ -20,8 +20,6 @@ export class Transceiver {
 
   protected messageHandler?: MessageHandler
 
-  protected ownBridge?: LiveryBridge
-
   protected ownWindow: Window | undefined;
 
   protected port?: Port;
@@ -31,7 +29,6 @@ export class Transceiver {
   private _targetSpec?: TransceiverTargetSpec
 
   constructor( ownBridge?: LiveryBridge, ownWindow?: Window ) {
-    this.ownBridge = ownBridge;
     this.ownWindow = ownWindow;
   }
 
@@ -203,11 +200,9 @@ class WindowPort extends Port {
       if (!this.isValidSourceWindow(event.source)) {
         return;
       }
-
       if (!this.isValidOrigin(event.origin)) {
         return;
       }
-
       if (LiveryBridge.isLiveryMessage(event.data) && this.messageHandler) {
         this.messageHandler(event.data)
       }
