@@ -3,22 +3,19 @@
 import type { LiveryMessage } from "./LiveryBridge";
 import { LiveryBridge } from "./LiveryBridge";
 
-export interface Message {
-  data: any;
-  origin: string;
-  source: any;
-}
 
 type TargetDescriptor = {
   origin: string;
   window: Window;
 }
 
+type TransceiverTargetSpec = TargetDescriptor | Transceiver
+
 type MessageHandler = (event: LiveryMessage) => void
 
 export class Transceiver {
-  get target() {
-    return this._target;
+  get targetSpec() {
+    return this._targetSpec;
   }
 
   protected messageHandler?: MessageHandler
@@ -27,43 +24,42 @@ export class Transceiver {
 
   protected ownWindow: Window | undefined;
 
-  private _target?: LiveryBridge | TargetDescriptor
+  protected port?: Port;
+
+  protected target?: Target;
+
+  private _targetSpec?: TransceiverTargetSpec
 
   constructor( ownBridge?: LiveryBridge, ownWindow?: Window ) {
     this.ownBridge = ownBridge;
     this.ownWindow = ownWindow;
   }
 
-  receive(event: LiveryMessage) {
-    // delegate to port
-
-    // check the origin
-    // extract the data
-    if (this.messageHandler) {
-      this.messageHandler(event);
+  receive(message: LiveryMessage) {
+    if (this.port) {
+      this.port.receive(message, '')
     }
   }
 
-  setMessageHandler( messageHandler: MessageHandler ) {
-    this.messageHandler = messageHandler
+  setMessageHandler(messageHandler: MessageHandler): void {
+    this.port?.setMessageHandler(messageHandler);
   }
 
-  setTarget( target?: LiveryBridge | TargetDescriptor ) {
-    this._target = target
+  setTarget( target?: TransceiverTargetSpec ) {
+    this._targetSpec = target
   }
 
   transmit(message : LiveryMessage) {
-    if (!this.target) {
+    if (!this.targetSpec) {
       throw new Error('target undefined');
     }
+    this.target?.transmit(message)
   }
 }
 
 
 
 export class PostMessageTransceiver extends Transceiver {
-  private port?: Port;
-
   constructor(ownWindow: Window, validOriginPattern: string) {
     super(undefined, ownWindow)
     this.port = new WindowPort(ownWindow);
@@ -73,60 +69,35 @@ export class PostMessageTransceiver extends Transceiver {
     this.port.listen(validOriginPattern)
   }
 
-  override receive(message: LiveryMessage) {
-    if (this.port) {
-      this.port.receive(message, '')
-    }
-  }
-
-  override setMessageHandler(messageHandler: MessageHandler): void {
-      this.port?.setMessageHandler(messageHandler);
-  }
-
-  override setTarget( target?: LiveryBridge | TargetDescriptor ) {
+  override setTarget( target?: TransceiverTargetSpec ) {
     super.setTarget(target)
     if (target && target.window && target.origin && this.ownWindow) {
-      this.ownWindow.addEventListener('message', (event) => {
-        // handleMessage
-
-        // TODO: I have commented this out since message events sent in our jsdom mock have their source=null. jsdom's approach suggests that this may be more standards compliant than the way it has been implemented in most browsers. Those browsers could change their behavior so we may be introducing some fragility here.
-        // It also seems that there are already safeguards in place for this, both in terms of identifying livery messages, and the safeguards built into the browser.
-
-      const { origin, /* window */ } = target;
-        if (
-          // event.source !== window ||
-          origin !== '*' &&
-          event.origin !== origin
-        ) {
-          return;
-        }
-
-        if (LiveryBridge.isLiveryMessage(event.data) && this.messageHandler) {
-          this.messageHandler(event.data)
-        }
-
-      })
+      this.target = new WindowTarget(target.origin, target.window)
     }
-  }
-
-  override transmit(message:LiveryMessage) {
-    super.transmit(message)
-    this.target.window.postMessage(message, this.target.origin);
-
   }
 }
 
+
+
+
 export class DirectCallTransceiver extends Transceiver {
-  override setTarget(target?: LiveryBridge | TargetDescriptor | undefined): void {
-      super.setTarget(target)
-      if (target instanceof LiveryBridge && target.transceiver.target !== this.ownBridge) {
-        target.setTarget(this.ownBridge)
-      }
+  constructor() {
+    super()
+    this.port = new TransceiverPort()
+    if (this.messageHandler) {
+      this.port.setMessageHandler(this.messageHandler.bind(this))
+    }
+    this.port.listen('*')
   }
 
-  override transmit(message:LiveryMessage) {
-    super.transmit(message)
-    this.target.transceiver.receive(message);
+  override setTarget(target?: TransceiverTargetSpec): void {
+      super.setTarget(target)
+      if (target instanceof Transceiver) {
+        this.target = new TransceiverTarget(target)
+        if (target.targetSpec !== this) {
+          target.setTarget(this)
+        }
+      }
   }
 }
 
@@ -199,6 +170,9 @@ class TransceiverPort extends Port {
   }
 
   private isValidOrigin( origin: string ) {
+    if (this.validOriginPattern === '') {
+      return false;
+    }
     if (this.validOriginPattern === '*') {
       return true;
     }

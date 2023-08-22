@@ -120,8 +120,8 @@ export class LiveryBridge {
       }
     } else {
       this.transceiver = new DirectCallTransceiver(this, this.window);
-      if (target) {
-        this.transceiver.setTarget(target)
+      if (target?.transceiver) {
+        this.transceiver.setTarget(target.transceiver)
       }
     }
 
