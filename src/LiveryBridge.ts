@@ -113,7 +113,8 @@ export class LiveryBridge {
     this.window = options.ownWindow ?? window;
     this.target = target;
     if (target && hasOwnProperty(target, 'origin') && hasOwnProperty(target, 'window')) {
-      this.transceiver = new PostMessageTransceiver(this.window)
+      const origin = (typeof target.origin === 'string') ? target.origin : '';
+      this.transceiver = new PostMessageTransceiver(this.window, origin)
       if (target) {
         this.transceiver.setTarget(target)
       }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable max-classes-per-file */
 import type { LiveryMessage } from "./LiveryBridge";
 import { LiveryBridge } from "./LiveryBridge";
@@ -34,6 +35,8 @@ export class Transceiver {
   }
 
   receive(event: LiveryMessage) {
+    // delegate to port
+
     // check the origin
     // extract the data
     if (this.messageHandler) {
@@ -59,8 +62,25 @@ export class Transceiver {
 
 
 export class PostMessageTransceiver extends Transceiver {
-  constructor(ownWindow: Window) {
+  private port?: Port;
+
+  constructor(ownWindow: Window, validOriginPattern: string) {
     super(undefined, ownWindow)
+    this.port = new WindowPort(ownWindow);
+    if (this.messageHandler) {
+      this.port.setMessageHandler(this.messageHandler.bind(this))
+    }
+    this.port.listen(validOriginPattern)
+  }
+
+  override receive(message: LiveryMessage) {
+    if (this.port) {
+      this.port.receive(message, '')
+    }
+  }
+
+  override setMessageHandler(messageHandler: MessageHandler): void {
+      this.port?.setMessageHandler(messageHandler);
   }
 
   override setTarget( target?: LiveryBridge | TargetDescriptor ) {
@@ -96,8 +116,6 @@ export class PostMessageTransceiver extends Transceiver {
   }
 }
 
-
-
 export class DirectCallTransceiver extends Transceiver {
   override setTarget(target?: LiveryBridge | TargetDescriptor | undefined): void {
       super.setTarget(target)
@@ -109,5 +127,145 @@ export class DirectCallTransceiver extends Transceiver {
   override transmit(message:LiveryMessage) {
     super.transmit(message)
     this.target.transceiver.receive(message);
+  }
+}
+
+
+
+
+
+
+abstract class Target {
+  abstract transmit(message: LiveryMessage): void;
+}
+
+class TransceiverTarget extends Target {
+  targetTransceiver: Transceiver;
+
+  constructor(targetTransceiver: Transceiver) {
+    super()
+    this.targetTransceiver = targetTransceiver;
+  }
+
+  transmit(message: LiveryMessage) {
+    this.targetTransceiver.receive(message)
+  }
+}
+
+class WindowTarget extends Target {
+  private targetOrigin: string;
+
+  private targetWindow: Window;
+
+  constructor(targetOrigin: string, targetWindow: Window) {
+    super()
+    this.targetOrigin = targetOrigin;
+    this.targetWindow = targetWindow;
+  }
+
+  transmit(message: LiveryMessage) {
+    this.targetWindow.postMessage(message, this.targetOrigin);
+  }
+}
+
+
+
+
+
+abstract class Port {
+  protected messageHandler: (message: LiveryMessage) => void = ()=>{}
+
+  abstract listen( originPattern: string ): void;
+
+  abstract receive( message: LiveryMessage , origin: string ): void;
+
+  abstract setMessageHandler(messageHandler: (message: LiveryMessage) => void): void;
+}
+
+class TransceiverPort extends Port {
+  private validOriginPattern: string = '';
+
+  listen( originPattern: string ){
+    this.validOriginPattern = originPattern;
+  }
+
+  receive( message: LiveryMessage, origin: string ) {
+    if (!this.isValidOrigin(origin)) { return; }
+    this.messageHandler(message)
+  }
+
+  setMessageHandler(messageHandler: (message: LiveryMessage) => void) {
+    this.messageHandler = messageHandler;
+  }
+
+  private isValidOrigin( origin: string ) {
+    if (this.validOriginPattern === '*') {
+      return true;
+    }
+    if (this.validOriginPattern === origin) {
+      return true;
+    }
+    return false;
+  }
+}
+
+
+class WindowPort extends Port {
+  private ownWindow: Window;
+
+  private validOriginPattern: string = '';
+
+  private validSourceWindow?: Window;
+
+  constructor(ownWindow: Window, sourceWindow?: Window) {
+    super()
+    this.ownWindow = ownWindow
+    this.validSourceWindow = sourceWindow;
+  }
+
+  listen(originPattern: string): void {
+    this.validOriginPattern = originPattern;
+    this.ownWindow.addEventListener('message', (event) => {
+      if (!this.isValidSourceWindow(event.source)) {
+        return;
+      }
+
+      if (!this.isValidOrigin(event.origin)) {
+        return;
+      }
+
+      if (LiveryBridge.isLiveryMessage(event.data) && this.messageHandler) {
+        this.messageHandler(event.data)
+      }
+    })
+  }
+
+  receive(_message: LiveryMessage, _origin: string): void {
+    // eslint-disable-next-line no-useless-return
+    return;
+  }
+
+  setMessageHandler(messageHandler: (message: LiveryMessage) => void): void {
+    this.messageHandler = messageHandler;
+  }
+
+  private isValidOrigin( origin: string ) {
+    if (this.validOriginPattern === '*') {
+      return true;
+    }
+    if (this.validOriginPattern === origin) {
+      return true;
+    }
+    return false;
+  }
+
+  private isValidSourceWindow( sourceWindow: unknown ) {
+    if (!this.validSourceWindow) {
+      return true;
+    }
+    if (sourceWindow === this.validSourceWindow) {
+      return true;
+    }
+    return false;
   }
 }
