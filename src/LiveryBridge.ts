@@ -1,6 +1,7 @@
 // We carefully work with unsafe message data within this class, so we will use `any` typed variables and arguments
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { Transceiver } from './Transceiver';
 import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
 
@@ -62,6 +63,10 @@ function hasOwnProperty<X extends {}, Y extends PropertyKey>(
 export class LiveryBridge {
   handshakePromise: Promise<void>;
 
+  sourceId = uuid();
+
+  transceiver: Transceiver;
+
   protected window: Window;
 
   private customCommandMap = new Map<
@@ -79,17 +84,15 @@ export class LiveryBridge {
 
   private listenerMap = new Map<string, (value: any) => void>();
 
-  private sourceId = uuid();
-
   private spies: Spy[] = [];
 
   private target:
-    | undefined
-    | LiveryBridge
-    | {
-        origin: string;
-        window: Window;
-      };
+  | undefined
+  | LiveryBridge
+  | {
+      origin: string;
+      window: Window;
+    };
 
   /**
    * Constructs a LiveryBridge.
@@ -108,6 +111,7 @@ export class LiveryBridge {
     } = {},
   ) {
     this.target = target;
+    this.transceiver = new Transceiver(target, this, this.handleLiveryMessage.bind(this));
     this.window = options.ownWindow ?? window;
     if (options.spy) {
       this.spy(options.spy);
@@ -119,13 +123,12 @@ export class LiveryBridge {
 
     if (target) {
       if (target instanceof LiveryBridge) {
-        target.target = this;
+        // no-op
       } else {
         this.window.addEventListener('message', (event) => {
           this.handleMessage(event);
         });
       }
-
       this.sendMessage('handshake', this.sourceId, { version });
     }
   }
@@ -220,6 +223,44 @@ export class LiveryBridge {
     message: LiveryMessage,
   ): message is ResolveMessage {
     return message.type === 'resolve';
+  }
+
+  handleLiveryMessage(message: LiveryMessage) {
+    if (message.sourceId === this.sourceId) {
+      return;
+    }
+
+    for (const spy of this.spies) {
+      try {
+        spy(message);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('LiveryBridge spy callback threw error', error);
+      }
+    }
+
+    if (LiveryBridge.isCommandMessage(message)) {
+      this.handleCommandMessage(message);
+    } else if (LiveryBridge.isCustomCommandMessage(message)) {
+      this.handleCustomCommandMessage(message);
+    } else if (LiveryBridge.isEventMessage(message)) {
+      this.handleEventMessage(message);
+    } else if (LiveryBridge.isHandshakeMessage(message)) {
+      this.handleHandshake(message);
+    } else if (LiveryBridge.isRejectMessage(message)) {
+      this.handleRejectMessage(message);
+    } else if (LiveryBridge.isResolveMessage(message)) {
+      this.handleResolveMessage(message);
+    } else if (LiveryBridge.isNullMessage(message)) {
+      // no-op
+    } else {
+      throw new Error(`Invalid message type: ${message.type}`);
+    }
+  }
+
+  setTarget( target: LiveryBridge['target'] ) {
+    this.target = target
+    this.transceiver.target = target;
   }
 
   /**
@@ -368,39 +409,6 @@ export class LiveryBridge {
     this.sendResolve(message.id, version);
   }
 
-  private handleLiveryMessage(message: LiveryMessage) {
-    if (message.sourceId === this.sourceId) {
-      return;
-    }
-
-    for (const spy of this.spies) {
-      try {
-        spy(message);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('LiveryBridge spy callback threw error', error);
-      }
-    }
-
-    if (LiveryBridge.isCommandMessage(message)) {
-      this.handleCommandMessage(message);
-    } else if (LiveryBridge.isCustomCommandMessage(message)) {
-      this.handleCustomCommandMessage(message);
-    } else if (LiveryBridge.isEventMessage(message)) {
-      this.handleEventMessage(message);
-    } else if (LiveryBridge.isHandshakeMessage(message)) {
-      this.handleHandshake(message);
-    } else if (LiveryBridge.isRejectMessage(message)) {
-      this.handleRejectMessage(message);
-    } else if (LiveryBridge.isResolveMessage(message)) {
-      this.handleResolveMessage(message);
-    } else if (LiveryBridge.isNullMessage(message)) {
-      // no-op
-    } else {
-      throw new Error(`Invalid message type: ${message.type}`);
-    }
-  }
-
   private handleMessage(event: MessageEvent) {
     if (!this.target || this.target instanceof LiveryBridge) {
       throw new Error('Use handleMessage only when target is a window');
@@ -448,23 +456,12 @@ export class LiveryBridge {
     id: string,
     properties: Record<string, unknown>,
   ) {
-    if (!this.target) {
-      throw new Error('target undefined');
-    }
-
-    const message: LiveryMessage = {
-      isLivery: true,
-      sourceId: this.sourceId,
+    this.transceiver?.sendMessage(
+      this.sourceId,
       type,
       id,
-      ...properties,
-    };
-
-    if (this.target instanceof LiveryBridge) {
-      this.target.handleLiveryMessage(message);
-    } else {
-      this.target.window.postMessage(message, this.target.origin);
-    }
+      properties
+    )
   }
 
   private sendReject(id: string, error: string) {
