@@ -57,7 +57,7 @@ class WindowPort extends Port {
       if (!this.isValidOrigin(event.origin)) {
         return;
       }
-      if (isLiveryMessage(event.data) && this.messageHandler) {
+      if (isLiveryMessage(event.data)) {
         this.messageHandler(event.data);
       }
     });

@@ -82,7 +82,7 @@ function createTransceiver(
       targetWindow: target.window,
       type: 'postmessage',
     });
-  } else if (target !== undefined) {
+  } else if (target?.transceiver) {
     transceiver.setPort({
       type: 'direct',
       originPattern: '*',
@@ -91,9 +91,14 @@ function createTransceiver(
       type: 'direct',
       targetTransceiver: target.transceiver,
     });
+    // whenever we create a direct link, force the target to change its target to this
     target.transceiver.setTarget({
       type: 'direct',
       targetTransceiver: transceiver,
+    });
+    target.transceiver.setPort({
+      type: 'direct',
+      originPattern: '*',
     });
   } else {
     transceiver.setPort({
@@ -228,39 +233,6 @@ export class LiveryBridge {
     message: LiveryMessage,
   ): message is ResolveMessage {
     return message.type === 'resolve';
-  }
-
-  handleLiveryMessage(message: LiveryMessage) {
-    if (message.sourceId === this.sourceId) {
-      return;
-    }
-
-    for (const spy of this.spies) {
-      try {
-        spy(message);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('LiveryBridge spy callback threw error', error);
-      }
-    }
-
-    if (LiveryBridge.isCommandMessage(message)) {
-      this.handleCommandMessage(message);
-    } else if (LiveryBridge.isCustomCommandMessage(message)) {
-      this.handleCustomCommandMessage(message);
-    } else if (LiveryBridge.isEventMessage(message)) {
-      this.handleEventMessage(message);
-    } else if (LiveryBridge.isHandshakeMessage(message)) {
-      this.handleHandshake(message);
-    } else if (LiveryBridge.isRejectMessage(message)) {
-      this.handleRejectMessage(message);
-    } else if (LiveryBridge.isResolveMessage(message)) {
-      this.handleResolveMessage(message);
-    } else if (LiveryBridge.isNullMessage(message)) {
-      // no-op
-    } else {
-      throw new Error(`Invalid message type: ${message.type}`);
-    }
   }
 
   /**
@@ -404,6 +376,39 @@ export class LiveryBridge {
     }
 
     this.sendResolve(message.id, version);
+  }
+
+  private handleLiveryMessage(message: LiveryMessage) {
+    if (message.sourceId === this.sourceId) {
+      return;
+    }
+
+    for (const spy of this.spies) {
+      try {
+        spy(message);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('LiveryBridge spy callback threw error', error);
+      }
+    }
+
+    if (LiveryBridge.isCommandMessage(message)) {
+      this.handleCommandMessage(message);
+    } else if (LiveryBridge.isCustomCommandMessage(message)) {
+      this.handleCustomCommandMessage(message);
+    } else if (LiveryBridge.isEventMessage(message)) {
+      this.handleEventMessage(message);
+    } else if (LiveryBridge.isHandshakeMessage(message)) {
+      this.handleHandshake(message);
+    } else if (LiveryBridge.isRejectMessage(message)) {
+      this.handleRejectMessage(message);
+    } else if (LiveryBridge.isResolveMessage(message)) {
+      this.handleResolveMessage(message);
+    } else if (LiveryBridge.isNullMessage(message)) {
+      // no-op
+    } else {
+      throw new Error(`Invalid message type: ${message.type}`);
+    }
   }
 
   private handleRejectMessage(message: RejectMessage) {

@@ -39,13 +39,14 @@ export class Transceiver {
   }
 
   setMessageHandler(messageHandler: MessageHandler): void {
+    this.messageHandler = messageHandler;
     this.port?.setMessageHandler(messageHandler);
   }
 
   setPort(options: PortOptions) {
     this.port = createPort(options);
     if (this.messageHandler) {
-      this.port.setMessageHandler(this.messageHandler.bind(this));
+      this.port.setMessageHandler(this.messageHandler);
     }
     this.port.listen(options.originPattern);
   }
