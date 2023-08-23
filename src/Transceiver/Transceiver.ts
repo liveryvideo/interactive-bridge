@@ -56,11 +56,7 @@ export class Transceiver {
     this.port.listen(options.originPattern)
   }
 
-  setTarget( target?: TransceiverTargetSpec ) {
-    // noop
-  }
-
-  setTargetWithOptions( options: TargetOptions ) {
+  setTarget( options: TargetOptions ) {
     this.target = createTarget(options)
   }
 

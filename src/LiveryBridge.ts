@@ -70,36 +70,33 @@ function isTargetDescriptor(spec?: LiveryBridgeTargetSpec): spec is TargetDescri
 }
 
 function createTransceiver(ownWindow: Window, target?: LiveryBridgeTargetSpec): Transceiver {
-  let transceiver: Transceiver;
+  const transceiver: Transceiver = new Transceiver(ownWindow);
   if (isTargetDescriptor(target)) {
-    transceiver = new Transceiver(ownWindow)
     transceiver.setPort({
       originPattern: target.origin,
       // sourceWindow: target.window, // FIXME: sourceWindow validity test is broken
       ownWindow,
       type: 'postmessage',
     })
-    transceiver.setTargetWithOptions({
+    transceiver.setTarget({
       targetOrigin: target.origin,
       targetWindow: target.window,
       type: 'postmessage',
     })
   } else if (target !== undefined) {
-    transceiver = new Transceiver();
     transceiver.setPort({
       type: 'direct',
       originPattern: '*'
     })
-    transceiver.setTargetWithOptions({
+    transceiver.setTarget({
       type: 'direct',
       targetTransceiver: target.transceiver,
     })
-    target.transceiver.setTargetWithOptions({
+    target.transceiver.setTarget({
       type: 'direct',
       targetTransceiver: transceiver,
     })
   } else {
-    transceiver = new Transceiver();
     transceiver.setPort({
       type: 'direct',
       originPattern: '*'
