@@ -1,9 +1,12 @@
 // We carefully work with unsafe message data within this class, so we will use `any` typed variables and arguments
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { DirectCallTransceiver, PostMessageTransceiver, Transceiver } from './Transceiver';
+import { TargetDescriptor, Transceiver } from './Transceiver/Transceiver';
+import { PostMessageTransceiver, DirectCallTransceiver } from './Transceiver/ConcreteTransceivers'
 import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
+import { hasOwnProperty } from './util/hasOwnProperty';
+import { assertMessagePropertyType } from './LiveryBridgeTypes';
 
 export interface LiveryMessage extends Record<string, any> {
   id: string;
@@ -50,14 +53,46 @@ interface NullMessage extends LiveryMessage {
 
 export type Spy = (message: LiveryMessage) => void;
 
+type LiveryBridgeTargetSpec = LiveryBridge | TargetDescriptor;
+
 const version = __VERSION__;
 
-// eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
-function hasOwnProperty<X extends {}, Y extends PropertyKey>(
-  obj: X,
-  prop: Y,
-): obj is X & Record<Y, unknown> {
-  return Object.hasOwnProperty.call(obj, prop);
+function isTargetDescriptor(spec?: LiveryBridgeTargetSpec): spec is TargetDescriptor {
+  if (
+    spec &&
+    hasOwnProperty(spec, 'origin') &&
+    (typeof spec.origin === 'string') &&
+    hasOwnProperty(spec, 'window')
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function createTransceiver(ownWindow: Window, target?: LiveryBridgeTargetSpec): Transceiver {
+  let transceiver: Transceiver;
+  if (isTargetDescriptor(target)) {
+    transceiver = new PostMessageTransceiver(ownWindow, target.origin)
+    transceiver.setTarget(target)
+  } else if (target !== undefined) {
+    transceiver = new Transceiver();
+    // transceiver.setTarget(target.transceiver)
+    transceiver.setPort({
+      type: 'direct',
+      originPattern: '*'
+    })
+    transceiver.setTargetWithOptions({
+      type: 'direct',
+      targetTransceiver: target.transceiver,
+    })
+    target.transceiver.setTargetWithOptions({
+      type: 'direct',
+      targetTransceiver: transceiver,
+    })
+  } else {
+    transceiver = new DirectCallTransceiver();
+  }
+  return transceiver;
 }
 
 export class LiveryBridge {
@@ -111,19 +146,10 @@ export class LiveryBridge {
     } = {},
   ) {
     this.window = options.ownWindow ?? window;
+
     this.target = target;
-    if (target && hasOwnProperty(target, 'origin') && hasOwnProperty(target, 'window')) {
-      const origin = (typeof target.origin === 'string') ? target.origin : '';
-      this.transceiver = new PostMessageTransceiver(this.window, origin)
-      if (target) {
-        this.transceiver.setTarget(target)
-      }
-    } else {
-      this.transceiver = new DirectCallTransceiver(this, this.window);
-      if (target?.transceiver) {
-        this.transceiver.setTarget(target.transceiver)
-      }
-    }
+
+    this.transceiver = createTransceiver(this.window, this.target)
 
     this.transceiver.setMessageHandler(this.handleLiveryMessage.bind(this))
     if (options.spy) {
@@ -139,49 +165,13 @@ export class LiveryBridge {
     }
   }
 
-  static isLiveryMessage(object: unknown): object is LiveryMessage {
-    if (
-      typeof object !== 'object' ||
-      object === null ||
-      !hasOwnProperty(object, 'isLivery') ||
-      object.isLivery !== true
-    ) {
-      return false;
-    }
-    LiveryBridge.assertMessagePropertyType(object, 'id', 'string');
-    LiveryBridge.assertMessagePropertyType(object, 'sourceId', 'string');
-    LiveryBridge.assertMessagePropertyType(object, 'type', 'string');
-    return true;
-  }
-
-  private static assertMessagePropertyType(
-    // eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
-    message: {},
-    key: string,
-    type: string,
-  ) {
-    const messageType =
-      hasOwnProperty(message, 'type') && typeof message.type === 'string'
-        ? message.type
-        : '';
-    if (!hasOwnProperty(message, key)) {
-      throw new Error(`${messageType} message does not have property: ${key}`);
-    }
-    const actualType = typeof message[key];
-    if (actualType !== type) {
-      throw new Error(
-        `${messageType} message with ${key} property type: ${actualType}, should be: ${type}`,
-      );
-    }
-  }
-
   private static isCommandMessage(
     message: LiveryMessage,
   ): message is CommandMessage {
     if (message.type !== 'command') {
       return false;
     }
-    LiveryBridge.assertMessagePropertyType(message, 'name', 'string');
+    assertMessagePropertyType(message, 'name', 'string');
     return true;
   }
 
@@ -191,7 +181,7 @@ export class LiveryBridge {
     if (message.type !== 'customCommand') {
       return false;
     }
-    LiveryBridge.assertMessagePropertyType(message, 'name', 'string');
+    assertMessagePropertyType(message, 'name', 'string');
     return true;
   }
 
@@ -207,7 +197,7 @@ export class LiveryBridge {
     if (message.type !== 'handshake') {
       return false;
     }
-    LiveryBridge.assertMessagePropertyType(message, 'version', 'string');
+    assertMessagePropertyType(message, 'version', 'string');
     return true;
   }
 
@@ -223,7 +213,7 @@ export class LiveryBridge {
     if (message.type !== 'reject') {
       return false;
     }
-    LiveryBridge.assertMessagePropertyType(message, 'error', 'string');
+    assertMessagePropertyType(message, 'error', 'string');
     return true;
   }
 

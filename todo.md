@@ -1,0 +1,2 @@
+-[ ] replace PostMessageTransceiver with generic Transceiver
+-[ ] reinstate asymmetrical Transceiver test
