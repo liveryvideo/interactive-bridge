@@ -1,31 +1,26 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-use-before-define */
-import type { LiveryMessage } from "../LiveryBridgeTypes";
-import { createPort } from "./createPort";
-import { createTarget } from "./createTarget"
-import type { PortOptions as ConcretePortOptions } from "./createPort";
-import type { TargetOptions } from "./createTarget";
-import type { Target } from "./Target";
-import type { Port } from "./Port";
+import type { LiveryMessage } from '../LiveryBridgeTypes';
+import type { Port } from './Port';
+import type { Target } from './Target';
+import type { PortOptions as ConcretePortOptions } from './createPort';
+import { createPort } from './createPort';
+import type { TargetOptions } from './createTarget';
+import { createTarget } from './createTarget';
 
 export type TargetDescriptor = {
   origin: string;
   window: Window;
-}
+};
 
-export type TransceiverTargetSpec = TargetDescriptor | Transceiver
+export type TransceiverTargetSpec = TargetDescriptor | Transceiver;
 
 interface PortOptions extends ConcretePortOptions {
   originPattern: string;
 }
 
-type MessageHandler = (event: LiveryMessage) => void
+type MessageHandler = (event: LiveryMessage) => void;
 
 export class Transceiver {
-
-  protected messageHandler?: MessageHandler
+  protected messageHandler?: MessageHandler;
 
   protected ownWindow: Window | undefined;
 
@@ -33,14 +28,13 @@ export class Transceiver {
 
   protected target?: Target;
 
-
-  constructor( ownWindow?: Window ) {
+  constructor(ownWindow?: Window) {
     this.ownWindow = ownWindow;
   }
 
   receive(message: LiveryMessage) {
     if (this.port) {
-      this.port.receive(message, '')
+      this.port.receive(message, '');
     }
   }
 
@@ -48,22 +42,22 @@ export class Transceiver {
     this.port?.setMessageHandler(messageHandler);
   }
 
-  setPort( options: PortOptions ) {
-    this.port = createPort(options)
+  setPort(options: PortOptions) {
+    this.port = createPort(options);
     if (this.messageHandler) {
-      this.port.setMessageHandler(this.messageHandler.bind(this))
+      this.port.setMessageHandler(this.messageHandler.bind(this));
     }
-    this.port.listen(options.originPattern)
+    this.port.listen(options.originPattern);
   }
 
-  setTarget( options: TargetOptions ) {
-    this.target = createTarget(options)
+  setTarget(options: TargetOptions) {
+    this.target = createTarget(options);
   }
 
-  transmit(message : LiveryMessage) {
+  transmit(message: LiveryMessage) {
     if (!this.target) {
       throw new Error('target undefined');
     }
-    this.target?.transmit(message)
+    this.target?.transmit(message);
   }
 }

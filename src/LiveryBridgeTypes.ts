@@ -1,6 +1,6 @@
 import { hasOwnProperty } from './util/hasOwnProperty';
 
-export interface LiveryMessage extends Record<string, any> {
+export interface LiveryMessage {
   id: string;
   isLivery: true;
   sourceId: string;

@@ -1,19 +1,13 @@
 // We carefully work with unsafe message data within this class, so we will use `any` typed variables and arguments
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { TargetDescriptor} from './Transceiver/Transceiver';
+import type { LiveryMessage } from './LiveryBridgeTypes';
+import { assertMessagePropertyType } from './LiveryBridgeTypes';
+import type { TargetDescriptor } from './Transceiver/Transceiver';
 import { Transceiver } from './Transceiver/Transceiver';
+import { hasOwnProperty } from './util/hasOwnProperty';
 import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
-import { hasOwnProperty } from './util/hasOwnProperty';
-import { assertMessagePropertyType } from './LiveryBridgeTypes';
-
-export interface LiveryMessage extends Record<string, any> {
-  id: string;
-  isLivery: true;
-  sourceId: string;
-  type: string;
-}
 
 interface HandshakeMessage extends LiveryMessage {
   type: 'handshake';
@@ -57,11 +51,13 @@ type LiveryBridgeTargetSpec = LiveryBridge | TargetDescriptor;
 
 const version = __VERSION__;
 
-function isTargetDescriptor(spec?: LiveryBridgeTargetSpec): spec is TargetDescriptor {
+function isTargetDescriptor(
+  spec?: LiveryBridgeTargetSpec,
+): spec is TargetDescriptor {
   if (
     spec &&
     hasOwnProperty(spec, 'origin') &&
-    (typeof spec.origin === 'string') &&
+    typeof spec.origin === 'string' &&
     hasOwnProperty(spec, 'window')
   ) {
     return true;
@@ -69,7 +65,10 @@ function isTargetDescriptor(spec?: LiveryBridgeTargetSpec): spec is TargetDescri
   return false;
 }
 
-function createTransceiver(ownWindow: Window, target?: LiveryBridgeTargetSpec): Transceiver {
+function createTransceiver(
+  ownWindow: Window,
+  target?: LiveryBridgeTargetSpec,
+): Transceiver {
   const transceiver: Transceiver = new Transceiver(ownWindow);
   if (isTargetDescriptor(target)) {
     transceiver.setPort({
@@ -77,30 +76,30 @@ function createTransceiver(ownWindow: Window, target?: LiveryBridgeTargetSpec): 
       // sourceWindow: target.window, // FIXME: sourceWindow validity test is broken
       ownWindow,
       type: 'postmessage',
-    })
+    });
     transceiver.setTarget({
       targetOrigin: target.origin,
       targetWindow: target.window,
       type: 'postmessage',
-    })
+    });
   } else if (target !== undefined) {
     transceiver.setPort({
       type: 'direct',
-      originPattern: '*'
-    })
+      originPattern: '*',
+    });
     transceiver.setTarget({
       type: 'direct',
       targetTransceiver: target.transceiver,
-    })
+    });
     target.transceiver.setTarget({
       type: 'direct',
       targetTransceiver: transceiver,
-    })
+    });
   } else {
     transceiver.setPort({
       type: 'direct',
-      originPattern: '*'
-    })
+      originPattern: '*',
+    });
   }
   return transceiver;
 }
@@ -132,12 +131,12 @@ export class LiveryBridge {
   private spies: Spy[] = [];
 
   private target:
-  | undefined
-  | LiveryBridge
-  | {
-      origin: string;
-      window: Window;
-    };
+    | undefined
+    | LiveryBridge
+    | {
+        origin: string;
+        window: Window;
+      };
 
   /**
    * Constructs a LiveryBridge.
@@ -159,9 +158,9 @@ export class LiveryBridge {
 
     this.target = target;
 
-    this.transceiver = createTransceiver(this.window, this.target)
+    this.transceiver = createTransceiver(this.window, this.target);
 
-    this.transceiver.setMessageHandler(this.handleLiveryMessage.bind(this))
+    this.transceiver.setMessageHandler(this.handleLiveryMessage.bind(this));
     if (options.spy) {
       this.spy(options.spy);
     }
@@ -210,8 +209,6 @@ export class LiveryBridge {
     assertMessagePropertyType(message, 'version', 'string');
     return true;
   }
-
-
 
   private static isNullMessage(message: LiveryMessage): message is NullMessage {
     return message.type === 'null';
@@ -289,9 +286,6 @@ export class LiveryBridge {
     throw new Error(`Unsupported command: ${name}`);
   }
   /* eslint-enable @typescript-eslint/no-unused-vars */
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected handshakeDidResolve() {}
 
   /**
    * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
@@ -444,7 +438,7 @@ export class LiveryBridge {
       id,
       ...properties,
     };
-    this.transceiver?.transmit(message)
+    this.transceiver?.transmit(message);
   }
 
   private sendReject(id: string, error: string) {

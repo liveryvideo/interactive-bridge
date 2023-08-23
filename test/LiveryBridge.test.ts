@@ -2,8 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-new */
 import { describe, expect, test } from 'vitest';
-import type { LiveryMessage, Spy } from '../src/LiveryBridge';
+import type { Spy } from '../src/LiveryBridge';
 import { LiveryBridge } from '../src/LiveryBridge';
+import type { LiveryMessage } from '../src/LiveryBridgeTypes';
 import { createJSDOMWindow } from './doubles/JSDOMWindow';
 
 describe('one instance in window', () => {

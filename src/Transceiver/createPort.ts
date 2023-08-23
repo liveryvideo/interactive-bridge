@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
-import { Port } from "./Port";
-import type { LiveryMessage } from "../LiveryBridgeTypes";
-import { isLiveryMessage } from "../LiveryBridgeTypes";
+import type { LiveryMessage } from '../LiveryBridgeTypes';
+import { isLiveryMessage } from '../LiveryBridgeTypes';
+import { Port } from './Port';
 
 class TransceiverPort extends Port {
   private validOriginPattern: string = '';
@@ -11,7 +11,9 @@ class TransceiverPort extends Port {
   }
 
   receive(message: LiveryMessage, origin: string) {
-    if (!this.isValidOrigin(origin)) { return; }
+    if (!this.isValidOrigin(origin)) {
+      return;
+    }
     this.messageHandler(message);
   }
 
@@ -61,10 +63,7 @@ class WindowPort extends Port {
     });
   }
 
-  receive(_message: LiveryMessage, _origin: string): void {
-    // eslint-disable-next-line no-useless-return
-    return;
-  }
+  receive(): void {}
 
   setMessageHandler(messageHandler: (message: LiveryMessage) => void): void {
     this.messageHandler = messageHandler;
@@ -100,16 +99,16 @@ export interface PortOptions {
 export function createPort(options: PortOptions): Port {
   switch (options.type) {
     case 'direct':
-      return new TransceiverPort()
+      return new TransceiverPort();
     case 'postmessage':
       if (!options.ownWindow) {
-        throw new Error(`When type is 'postmessage', an ownWindow option must be provided`)
+        throw new Error(
+          `When type is 'postmessage', an ownWindow option must be provided`,
+        );
       }
-      return new WindowPort(options.ownWindow, options.sourceWindow)
+      return new WindowPort(options.ownWindow, options.sourceWindow);
     default:
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      throw new Error(`Invalid port type: ${options.type}`)
+      throw new Error(`Invalid port type: ${options.type}`);
   }
 }
-
-
