@@ -1,8 +1,8 @@
 // We carefully work with unsafe message data within this class, so we will use `any` typed variables and arguments
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { TargetDescriptor, Transceiver } from './Transceiver/Transceiver';
-import { PostMessageTransceiver, DirectCallTransceiver } from './Transceiver/ConcreteTransceivers'
+import type { TargetDescriptor} from './Transceiver/Transceiver';
+import { Transceiver } from './Transceiver/Transceiver';
 import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
 import { hasOwnProperty } from './util/hasOwnProperty';
@@ -72,11 +72,20 @@ function isTargetDescriptor(spec?: LiveryBridgeTargetSpec): spec is TargetDescri
 function createTransceiver(ownWindow: Window, target?: LiveryBridgeTargetSpec): Transceiver {
   let transceiver: Transceiver;
   if (isTargetDescriptor(target)) {
-    transceiver = new PostMessageTransceiver(ownWindow, target.origin)
-    transceiver.setTarget(target)
+    transceiver = new Transceiver(ownWindow)
+    transceiver.setPort({
+      originPattern: target.origin,
+      // sourceWindow: target.window, // FIXME: sourceWindow validity test is broken
+      ownWindow,
+      type: 'postmessage',
+    })
+    transceiver.setTargetWithOptions({
+      targetOrigin: target.origin,
+      targetWindow: target.window,
+      type: 'postmessage',
+    })
   } else if (target !== undefined) {
     transceiver = new Transceiver();
-    // transceiver.setTarget(target.transceiver)
     transceiver.setPort({
       type: 'direct',
       originPattern: '*'
@@ -90,7 +99,11 @@ function createTransceiver(ownWindow: Window, target?: LiveryBridgeTargetSpec): 
       targetTransceiver: transceiver,
     })
   } else {
-    transceiver = new DirectCallTransceiver();
+    transceiver = new Transceiver();
+    transceiver.setPort({
+      type: 'direct',
+      originPattern: '*'
+    })
   }
   return transceiver;
 }
@@ -254,11 +267,6 @@ export class LiveryBridge {
     } else {
       throw new Error(`Invalid message type: ${message.type}`);
     }
-  }
-
-  setTarget( target: LiveryBridge['target'] ) {
-    this.target = target
-    this.transceiver.setTarget(target);
   }
 
   /**

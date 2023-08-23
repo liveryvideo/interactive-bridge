@@ -1,2 +1,4 @@
--[ ] replace PostMessageTransceiver with generic Transceiver
+-[ ] remove Transceiver.setTarget and replace with Transceiver.setTargetWithOptions
 -[ ] reinstate asymmetrical Transceiver test
+-[ ] resolve linting problems
+-[ ] unit tests for Transceivers, Targets and Ports

@@ -2,10 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable max-classes-per-file */
 import type { LiveryMessage } from "../LiveryBridgeTypes";
-import { createPort, createTarget } from "./ConcretePortsTargets";
-import type { PortOptions as ConcretePortOptions, TargetOptions } from "./ConcretePortsTargets";
+import { createPort } from "./createPort";
+import { createTarget } from "./createTarget"
+import type { PortOptions as ConcretePortOptions } from "./createPort";
+import type { TargetOptions } from "./createTarget";
 import type { Target } from "./Target";
 import type { Port } from "./Port";
 
@@ -23,9 +24,6 @@ interface PortOptions extends ConcretePortOptions {
 type MessageHandler = (event: LiveryMessage) => void
 
 export class Transceiver {
-  get targetSpec() {
-    return this._targetSpec;
-  }
 
   protected messageHandler?: MessageHandler
 
@@ -35,7 +33,6 @@ export class Transceiver {
 
   protected target?: Target;
 
-  private _targetSpec?: TransceiverTargetSpec
 
   constructor( ownWindow?: Window ) {
     this.ownWindow = ownWindow;
@@ -60,7 +57,7 @@ export class Transceiver {
   }
 
   setTarget( target?: TransceiverTargetSpec ) {
-    this._targetSpec = target
+    // noop
   }
 
   setTargetWithOptions( options: TargetOptions ) {
