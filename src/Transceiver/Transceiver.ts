@@ -59,6 +59,6 @@ export class Transceiver {
     if (!this.target) {
       throw new Error('target undefined');
     }
-    this.target?.transmit(message);
+    this.target.transmit(message);
   }
 }

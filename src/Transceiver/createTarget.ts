@@ -1,36 +1,8 @@
 /* eslint-disable max-classes-per-file */
-import type { LiveryMessage } from '../LiveryBridgeTypes';
-import { Target } from './Target';
+import type { Target } from './Target';
 import type { Transceiver } from './Transceiver';
-
-class TransceiverTarget extends Target {
-  targetTransceiver: Transceiver;
-
-  constructor(targetTransceiver: Transceiver) {
-    super();
-    this.targetTransceiver = targetTransceiver;
-  }
-
-  transmit(message: LiveryMessage) {
-    this.targetTransceiver.receive(message);
-  }
-}
-
-class WindowTarget extends Target {
-  private targetOrigin: string;
-
-  private targetWindow: Window;
-
-  constructor(targetOrigin: string, targetWindow: Window) {
-    super();
-    this.targetOrigin = targetOrigin;
-    this.targetWindow = targetWindow;
-  }
-
-  transmit(message: LiveryMessage) {
-    this.targetWindow.postMessage(message, this.targetOrigin);
-  }
-}
+import { TransceiverTarget } from './TransceiverTarget';
+import { WindowTarget } from './WindowTarget';
 
 export interface TargetOptions {
   targetOrigin?: string;
