@@ -2,9 +2,21 @@ import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { LiveryBridge } from './LiveryBridge';
 import { stringify } from './util/stringify';
 
-export type Orientation = 'landscape' | 'portrait';
+const knownFeatures = [
+  'AIRPLAY',
+  'CHROMECAST',
+  'CONTACT',
+  'FULLSCREEN',
+  'PIP',
+  'SCRUBBER',
+] as const;
+export type Feature = (typeof knownFeatures)[number];
 
-export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
+const orientations = ['landscape', 'portrait'] as const;
+export type Orientation = (typeof orientations)[number];
+
+const streamPhases = ['LIVE', 'POST', 'PRE'] as const;
+export type StreamPhase = (typeof streamPhases)[number];
 
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
@@ -67,6 +79,36 @@ export class InteractiveBridge extends LiveryBridge {
         );
       }
       return value;
+    });
+  }
+
+  /**
+   * Returns a list of features supported by the LiveryPlayer.
+   * The list will be sanitized such that each entry will be unique and unrecognized entries will be disregarded
+   */
+  getFeatures() {
+    return this.sendCommand('getFeatures').then((value) => {
+      if (value === null) {
+        throw new Error(`getFeatures value type: null, should be: Array`);
+      }
+      if (typeof value !== 'object') {
+        throw new Error(
+          `getFeatures value type: ${typeof value}, should be: Array`,
+        );
+      }
+      if (!(value instanceof Array)) {
+        throw new Error(`getFeatures value type: object, should be: Array`);
+      }
+      const features = new Set<Feature>();
+      for (const feature of value) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        if (knownFeatures.includes(feature)) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          features.add(feature);
+        }
+      }
+      const sanitizedFeatureList: Feature[] = Array.from(features);
+      return sanitizedFeatureList;
     });
   }
 
@@ -195,6 +237,16 @@ export class InteractiveBridge extends LiveryBridge {
   ) {
     return super.sendCustomCommand(name, arg, listener);
   }
+
+  /**
+   *
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  submitUserFeedback(_feedback: {
+    comments: string;
+    email: string;
+    name: string;
+  }) {}
 
   /**
    * Returns promise of current LiveryPlayer fullscreen state

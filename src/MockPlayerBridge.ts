@@ -1,5 +1,5 @@
 import { AbstractPlayerBridge } from './AbstractPlayerBridge';
-import type { StreamPhase } from './InteractiveBridge';
+import type { Feature, StreamPhase } from './InteractiveBridge';
 
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
@@ -57,6 +57,17 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   protected getEndpointId() {
     return 'dummy-endpoint-id';
+  }
+
+  protected getFeatures(): Feature[] {
+    return [
+      'AIRPLAY',
+      'CHROMECAST',
+      'CONTACT',
+      'FULLSCREEN',
+      'PIP',
+      'SCRUBBER',
+    ];
   }
 
   protected getLatency() {
