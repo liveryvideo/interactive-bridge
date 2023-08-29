@@ -1,4 +1,5 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
+import { VideoCommands } from './InteractiveBridge/VideoCommands';
 import { LiveryBridge } from './LiveryBridge';
 import { stringify } from './util/stringify';
 
@@ -22,6 +23,8 @@ export type StreamPhase = (typeof streamPhases)[number];
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
 export class InteractiveBridge extends LiveryBridge {
+  video = new VideoCommands(this.sendCommand.bind(this));
+
   /**
    * Constructs `InteractiveBridge` with specified `target: AbstractPlayerBridge` (i.e: `PlayerBridge`)
    * or with `window.parent` as target window and with specified `target: string` as origin.
@@ -32,12 +35,22 @@ export class InteractiveBridge extends LiveryBridge {
       ownWindow?: Window;
     } = {},
   ) {
+    let superParameters: [
+      target?: LiveryBridge['target'],
+      options?: {
+        ownWindow?: Window;
+      },
+    ];
     if (typeof target === 'string') {
       const ownWindow = options.ownWindow || window;
-      super({ window: ownWindow.parent, origin: target }, { ownWindow });
+      superParameters = [
+        { window: ownWindow.parent, origin: target },
+        { ownWindow },
+      ];
     } else {
-      super(target);
+      superParameters = [target];
     }
+    super(...superParameters);
   }
 
   /**
@@ -84,32 +97,11 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Returns a list of features supported by the LiveryPlayer.
-   * The list will be sanitized such that each entry will be unique and unrecognized entries will be disregarded
+   * The list will be sanitized such that each entry will be unique
+   * and unrecognized entries will be disregarded.
    */
   getFeatures() {
-    return this.sendCommand('getFeatures').then((value) => {
-      if (value === null) {
-        throw new Error(`getFeatures value type: null, should be: Array`);
-      }
-      if (typeof value !== 'object') {
-        throw new Error(
-          `getFeatures value type: ${typeof value}, should be: Array`,
-        );
-      }
-      if (!(value instanceof Array)) {
-        throw new Error(`getFeatures value type: object, should be: Array`);
-      }
-      const features = new Set<Feature>();
-      for (const feature of value) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        if (knownFeatures.includes(feature)) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          features.add(feature);
-        }
-      }
-      const sanitizedFeatureList: Feature[] = Array.from(features);
-      return sanitizedFeatureList;
-    });
+    return this.video.getFeatures();
   }
 
   /**
