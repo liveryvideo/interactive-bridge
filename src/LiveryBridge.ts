@@ -71,37 +71,37 @@ function createTransceiver(
 ): Transceiver {
   const transceiver: Transceiver = new Transceiver(ownWindow);
   if (isTargetDescriptor(target)) {
-    transceiver.setPort({
+    transceiver.createAndSetPort({
       originPattern: target.origin,
       // sourceWindow: target.window, // FIXME: sourceWindow validity test is broken
       ownWindow,
       type: 'postmessage',
     });
-    transceiver.setTarget({
+    transceiver.createAndSetTarget({
       targetOrigin: target.origin,
       targetWindow: target.window,
       type: 'postmessage',
     });
   } else if (target?.transceiver) {
-    transceiver.setPort({
+    transceiver.createAndSetPort({
       type: 'direct',
       originPattern: '*',
     });
-    transceiver.setTarget({
+    transceiver.createAndSetTarget({
       type: 'direct',
       targetTransceiver: target.transceiver,
     });
     // whenever we create a direct link, force the target to change its target to this
-    target.transceiver.setTarget({
+    target.transceiver.createAndSetTarget({
       type: 'direct',
       targetTransceiver: transceiver,
     });
-    target.transceiver.setPort({
+    target.transceiver.createAndSetPort({
       type: 'direct',
       originPattern: '*',
     });
   } else {
-    transceiver.setPort({
+    transceiver.createAndSetPort({
       type: 'direct',
       originPattern: '*',
     });

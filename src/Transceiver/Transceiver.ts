@@ -32,6 +32,18 @@ export class Transceiver {
     this.ownWindow = ownWindow;
   }
 
+  createAndSetPort(options: PortOptions) {
+    this.port = createPort(options);
+    if (this.messageHandler) {
+      this.port.setMessageHandler(this.messageHandler);
+    }
+    this.port.listen(options.originPattern);
+  }
+
+  createAndSetTarget(options: TargetOptions) {
+    this.target = createTarget(options);
+  }
+
   receive(message: LiveryMessage) {
     if (this.port) {
       this.port.receive(message, '');
@@ -41,18 +53,6 @@ export class Transceiver {
   setMessageHandler(messageHandler: MessageHandler): void {
     this.messageHandler = messageHandler;
     this.port?.setMessageHandler(messageHandler);
-  }
-
-  setPort(options: PortOptions) {
-    this.port = createPort(options);
-    if (this.messageHandler) {
-      this.port.setMessageHandler(this.messageHandler);
-    }
-    this.port.listen(options.originPattern);
-  }
-
-  setTarget(options: TargetOptions) {
-    this.target = createTarget(options);
   }
 
   transmit(message: LiveryMessage) {
