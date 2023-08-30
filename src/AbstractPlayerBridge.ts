@@ -9,6 +9,12 @@ export interface MatchMediable {
   matchMedia: Window['matchMedia'];
 }
 
+interface PlaybackDetails {
+  buffer: number;
+  duration: number;
+  position: number;
+}
+
 /**
  * Abstract player bridge class which implements part of the player side API based on browser logic
  * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
@@ -77,6 +83,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'getLiveryParams') {
       return this.getLiveryParams();
     }
+    if (name === 'getPlayback') {
+      return this.getPlayback();
+    }
     if (name === 'getPlayerVersion') {
       return this.getPlayerVersion();
     }
@@ -141,6 +150,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract getFeatures(): Feature[];
 
   protected abstract getLatency(): number;
+
+  protected abstract getPlayback(): PlaybackDetails;
 
   protected abstract getPlayerVersion(): string;
 

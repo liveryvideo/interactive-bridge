@@ -1,4 +1,5 @@
 import type { LiveryBridge } from '../LiveryBridge';
+import { stringify } from '../util/stringify';
 
 const knownPlaybackStates = [
   'BUFFERING',
@@ -27,6 +28,12 @@ export type Orientation = (typeof orientations)[number];
 
 const streamPhases = ['LIVE', 'POST', 'PRE'] as const;
 export type StreamPhase = (typeof streamPhases)[number];
+
+export interface PlaybackDetails {
+  buffer: number;
+  duration: number;
+  position: number;
+}
 
 // type Quality = {
 //   audio?: {
@@ -77,11 +84,46 @@ export class VideoCommands {
 
   /**
    * Returns current playback:
-   *  buffer in seconds ahead of current position
-   *  duration in seconds from start to end of VOD or live stream (e.g: continuously increasing)
-   *  position in seconds since start of stream
+   *  - buffer in seconds ahead of current position
+   *  - duration in seconds from start to end of VOD or live stream (e.g: continuously increasing)
+   *  - position in seconds since start of stream
    */
-  // getPlayback(): { buffer: number, duration: number, position: number } {}
+  getPlayback(): Promise<{
+    buffer: number;
+    duration: number;
+    position: number;
+  }> {
+    return this.sendCommand('getPlayback').then((value) => {
+      if (
+        !(value instanceof Object) ||
+        !(typeof value === 'object') ||
+        value === null
+      ) {
+        throw new Error(
+          `getPlayback value type: ${typeof value}, should be: object`,
+        );
+      }
+      if (
+        !('buffer' in value) ||
+        typeof value.buffer !== 'number' ||
+        !('duration' in value) ||
+        typeof value.duration !== 'number' ||
+        !('position' in value) ||
+        typeof value.position !== 'number'
+      ) {
+        throw new Error(
+          `getPlayback value shape should be: {buffer: number, duration: number, position: number}, found:\n${stringify(
+            value,
+          )}`,
+        );
+      }
+      return {
+        position: value.position,
+        buffer: value.buffer,
+        duration: value.duration,
+      } as PlaybackDetails;
+    });
+  }
 
   /**
    *

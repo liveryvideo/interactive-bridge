@@ -1,23 +1,18 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
+import type {
+  Orientation,
+  StreamPhase,
+} from './InteractiveBridge/VideoCommands';
 import { VideoCommands } from './InteractiveBridge/VideoCommands';
 import { LiveryBridge } from './LiveryBridge';
 import { stringify } from './util/stringify';
 
-const knownFeatures = [
-  'AIRPLAY',
-  'CHROMECAST',
-  'CONTACT',
-  'FULLSCREEN',
-  'PIP',
-  'SCRUBBER',
-] as const;
-export type Feature = (typeof knownFeatures)[number];
-
-const orientations = ['landscape', 'portrait'] as const;
-export type Orientation = (typeof orientations)[number];
-
-const streamPhases = ['LIVE', 'POST', 'PRE'] as const;
-export type StreamPhase = (typeof streamPhases)[number];
+export type {
+  Feature,
+  Orientation,
+  PlaybackDetails,
+  StreamPhase,
+} from './InteractiveBridge/VideoCommands';
 
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
@@ -150,6 +145,10 @@ export class InteractiveBridge extends LiveryBridge {
       }
       return dict;
     });
+  }
+
+  getPlayback() {
+    return this.video.getPlayback();
   }
 
   /**

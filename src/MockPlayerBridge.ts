@@ -74,6 +74,10 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return this.latency ?? Math.random() * 6;
   }
 
+  protected getPlayback() {
+    return { buffer: 0, duration: 0, position: 0 };
+  }
+
   protected getPlayerVersion() {
     return '1.0.0-dummy-version';
   }

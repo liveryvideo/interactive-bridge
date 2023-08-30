@@ -1,13 +1,19 @@
 import { describe, expect, test } from 'vitest';
-import type { Feature } from '../src/InteractiveBridge';
+import type { Feature, PlaybackDetails } from '../src/InteractiveBridge';
 import { InteractiveBridge } from '../src/InteractiveBridge';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 
 class StubPlayerBridge extends MockPlayerBridge {
   features: Feature[] = [];
 
+  playback = { buffer: 0, duration: 0, position: 0 };
+
   protected override getFeatures(): Feature[] {
     return this.features;
+  }
+
+  protected override getPlayback() {
+    return this.playback;
   }
 }
 
@@ -19,10 +25,10 @@ describe.skip('InteractiveBridge.getEndpointId()');
 
 describe('InteractiveBridge.getFeatures()', () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  function arrangeWithStubResponse(features: any): InteractiveBridge {
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  function arrangeWithStubGetFeaturesResponse(response: any) {
     const playerBridge = new StubPlayerBridge();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    playerBridge.features = features;
+    playerBridge.features = response;
     return new InteractiveBridge(playerBridge);
   }
 
@@ -30,20 +36,22 @@ describe('InteractiveBridge.getFeatures()', () => {
     response: any,
     expected: Feature[],
   ) {
-    const interactiveBridge = arrangeWithStubResponse(response);
+    const interactiveBridge = arrangeWithStubGetFeaturesResponse(response);
     const featureList = await interactiveBridge.getFeatures();
     expect(featureList.sort()).toEqual(expected.sort());
   }
 
   async function assertGetFeaturesResponseCausesError(response: any) {
-    const interactiveBridge = arrangeWithStubResponse(response);
+    const interactiveBridge = arrangeWithStubGetFeaturesResponse(response);
     try {
       await interactiveBridge.getFeatures();
-      expect.fail();
     } catch {
       expect(true);
+      return;
     }
+    expect.fail();
   }
+  /* eslint-enable @typescript-eslint/no-unsafe-assignment */
   /* eslint-enable @typescript-eslint/no-explicit-any */
 
   test('getFeatures returns promise of list of features', async () => {
@@ -75,6 +83,95 @@ describe('InteractiveBridge.getFeatures()', () => {
     await assertGetFeaturesResponseCausesError('wrong-type');
     await assertGetFeaturesResponseCausesError({});
     await assertGetFeaturesResponseCausesError(1);
+  });
+});
+
+describe('InteractiveBridge.getPlayback()', () => {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  function arrangeWithStubGetPlaybackResponse(response: any) {
+    const playerBridge = new StubPlayerBridge();
+    playerBridge.playback = response;
+    return new InteractiveBridge(playerBridge);
+  }
+
+  async function assertGetPlaybackResponseYieldsResult(
+    response: any,
+    expected: PlaybackDetails,
+  ) {
+    const interactiveBridge = arrangeWithStubGetPlaybackResponse(response);
+    const playbackDetails = await interactiveBridge.getPlayback();
+    expect(playbackDetails).toEqual(expected);
+  }
+
+  async function assertGetPlaybackResponseYieldsSame(
+    response: PlaybackDetails,
+  ) {
+    await assertGetPlaybackResponseYieldsResult(response, response);
+  }
+
+  async function assertGetPlaybackResponseCausesError(response: any) {
+    const interactiveBridge = arrangeWithStubGetPlaybackResponse(response);
+    try {
+      await interactiveBridge.getPlayback();
+    } catch (error) {
+      expect(true);
+      return;
+    }
+    expect.fail();
+  }
+  /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+
+  test('response resolves to playback object', async () => {
+    await assertGetPlaybackResponseYieldsSame({
+      buffer: 0,
+      duration: 0,
+      position: 0,
+    });
+    await assertGetPlaybackResponseYieldsSame({
+      buffer: 0,
+      duration: 0,
+      position: 1,
+    });
+    await assertGetPlaybackResponseYieldsSame({
+      buffer: 1,
+      duration: 1,
+      position: 1,
+    });
+    await assertGetPlaybackResponseYieldsSame({
+      buffer: 999,
+      duration: 333,
+      position: 111,
+    });
+  });
+
+  test('non object response produces error', async () => {
+    await assertGetPlaybackResponseCausesError(1);
+    await assertGetPlaybackResponseCausesError({});
+    await assertGetPlaybackResponseCausesError({ buffer: 1, duration: 1 });
+    await assertGetPlaybackResponseCausesError({
+      buffer: 1,
+      duration: 1,
+      position: 'a',
+    });
+    await assertGetPlaybackResponseCausesError({
+      buffer: 1,
+      duration: 'a',
+      position: 1,
+    });
+    await assertGetPlaybackResponseCausesError({
+      buffer: 'a',
+      duration: 1,
+      position: 1,
+    });
+  });
+
+  test('additional fields are stripped from response', async () => {
+    await assertGetPlaybackResponseYieldsResult(
+      { buffer: 1, duration: 1, position: 1, sneaky: 1 },
+      { buffer: 1, duration: 1, position: 1 },
+    );
   });
 });
 
