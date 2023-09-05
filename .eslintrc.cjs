@@ -179,6 +179,8 @@ module.exports = {
         ],
         // Make use of deprecated code obvious
         'deprecation/deprecation': 'warn',
+        // Allow harmless language features
+        'no-continue': 'off',
       },
     },
     // Node JS and TS build configs and TypeScript test files can use devDependencies

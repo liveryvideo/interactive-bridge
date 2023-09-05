@@ -1,12 +1,25 @@
+/* eslint-disable max-classes-per-file */
 import { describe, expect, test } from 'vitest';
 import type { Feature, PlaybackDetails } from '../src/InteractiveBridge';
 import { InteractiveBridge } from '../src/InteractiveBridge';
+import type { Quality } from '../src/InteractiveBridge/VideoCommands';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 
 class StubPlayerBridge extends MockPlayerBridge {
   features: Feature[] = [];
 
   playback = { buffer: 0, duration: 0, position: 0 };
+
+  get qualities() {
+    return this._qualities;
+  }
+
+  set qualities(qualities: Array<Quality | undefined>) {
+    this._qualities = qualities;
+    this._qualitiesListener(qualities);
+  }
+
+  private _qualities: Array<Quality | undefined> = [];
 
   protected override getFeatures(): Feature[] {
     return this.features;
@@ -15,6 +28,16 @@ class StubPlayerBridge extends MockPlayerBridge {
   protected override getPlayback() {
     return this.playback;
   }
+
+  protected override subscribeQualities(
+    listener: (value: Array<Quality | undefined>) => void,
+  ): Array<Quality | undefined> {
+    this._qualitiesListener = listener;
+    return this._qualities;
+  }
+
+  private _qualitiesListener: (qualities: Array<Quality | undefined>) => void =
+    () => {};
 }
 
 describe.skip('InteractiveBridge.getAppName()');
@@ -182,3 +205,214 @@ describe.skip('InteractiveBridge.getLiveryParams()');
 describe.skip('InteractiveBridge.getPlayerVersion()');
 
 describe.skip('InteractiveBridge.getStreamId()');
+
+/**
+ * Subscribe commands:
+ * On sending the command a Promise is created that will resolve or reject when a response is received
+ * The resolution of a subscribe command indicates the completion of two actions:
+ * - The listener sent as an argument to the subscribe command has been registered
+ * - The current state of the data structure to which the listener subscribes has been retrieved and is being passed in the resolution to the Promise.
+ *
+ * Whenever the data structure subscribed to changes, the listener will be called synchronously, and the new state of the data structure will be passed in.
+ *
+ * There is no inverse command (i.e. there is no 'unsubscribe' command)
+ *
+ * Listeners should throw if the passed data is invalid. This is usually handled by decorating the listener
+ * with a validate function. E.g.:
+ * ```
+ * subscribeExample( listener: (str: String) => void ) {
+ *  const validatingListener = (possStr: unknown) => {
+ *    // throw if not valid
+ *    if (typeof possStr !== 'string') { throw Error() }
+ *    // invoke original function, with definitely valid data
+ *    return listener(possStr)
+ *  }
+ *  // ask the other side to invoke the validatingListener
+ *  return this.sendCommand('subscribeExample', undefined, validatingListener);
+ * }
+ * ```
+ *
+ * Within validation, when the type of the object returned is not valid, the listener should throw
+ * If the data structure is a collection and the type of any optional member is not valid, that member
+ * should be fixed if possible and purged if not.
+ */
+describe('InteractiveBridge.subscribeQualities', () => {
+  const lowQuality = {
+    audio: {
+      bandwidth: 24_000,
+    },
+    label: '270p',
+    video: {
+      bandwidth: 500_000,
+      height: 270,
+      width: 480,
+    },
+  };
+
+  const medQuality = {
+    audio: {
+      bandwidth: 96_000,
+    },
+    label: '720p',
+    video: {
+      bandwidth: 3_000_000,
+      height: 720,
+      width: 1280,
+    },
+  };
+
+  describe('initial call', () => {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    function arrangeWithStubSubscribeQualitiesResponse(qualities: any) {
+      const playerBridge = new StubPlayerBridge();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      playerBridge.qualities = qualities;
+      return new InteractiveBridge(playerBridge);
+    }
+
+    async function assertSubscribeQualitiesResponseYieldsResult(
+      qualities: any,
+      expected: Quality[],
+    ) {
+      const interactiveBridge =
+        arrangeWithStubSubscribeQualitiesResponse(qualities);
+      const result = await interactiveBridge.subscribeQualities(() => {});
+      expect(result).toEqual(expected);
+    }
+
+    async function assertSubscribeQualitiesResponseCausesError(qualities: any) {
+      const interactiveBridge =
+        arrangeWithStubSubscribeQualitiesResponse(qualities);
+      try {
+        await interactiveBridge.subscribeQualities(() => {});
+      } catch {
+        expect(true);
+        return;
+      }
+      expect.fail();
+    }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    test('call returns promise resolving to quality list', async () => {
+      await assertSubscribeQualitiesResponseYieldsResult([], []);
+      await assertSubscribeQualitiesResponseYieldsResult(
+        [lowQuality],
+        [{ ...lowQuality, index: 0 }],
+      );
+      await assertSubscribeQualitiesResponseYieldsResult(
+        [lowQuality, medQuality],
+        [
+          { ...lowQuality, index: 0 },
+          { ...medQuality, index: 1 },
+        ],
+      );
+    });
+
+    test('non array response throws', async () => {
+      await assertSubscribeQualitiesResponseCausesError(null);
+      await assertSubscribeQualitiesResponseCausesError(undefined);
+      await assertSubscribeQualitiesResponseCausesError(720);
+      await assertSubscribeQualitiesResponseCausesError('1080p');
+      await assertSubscribeQualitiesResponseCausesError({});
+    });
+
+    test('malformed entries are sanitized where possible', async () => {
+      await assertSubscribeQualitiesResponseYieldsResult(
+        ['garbage'],
+        [{ label: '0', index: 0 }],
+      );
+      await assertSubscribeQualitiesResponseYieldsResult([undefined], []);
+      await assertSubscribeQualitiesResponseYieldsResult(
+        [null],
+        [{ label: '0', index: 0 }],
+      );
+    });
+
+    test('sparse arrays are compacted', async () => {
+      await assertSubscribeQualitiesResponseYieldsResult(
+        [undefined, lowQuality],
+        [{ ...lowQuality, index: 1 }],
+      );
+      await assertSubscribeQualitiesResponseYieldsResult(
+        [undefined, 'garbage'],
+        [{ label: '1', index: 1 }],
+      );
+      await assertSubscribeQualitiesResponseYieldsResult(
+        [undefined, 'garbage', undefined, lowQuality],
+        [
+          { label: '1', index: 1 },
+          { ...lowQuality, index: 3 },
+        ],
+      );
+    });
+
+    test('index on response object is overwritten with actual index', async () => {
+      await assertSubscribeQualitiesResponseYieldsResult(
+        [
+          { ...lowQuality, index: 501 },
+          { ...lowQuality, index: NaN },
+        ],
+        [
+          { ...lowQuality, index: 0 },
+          { ...lowQuality, index: 1 },
+        ],
+      );
+    });
+
+    test('if no label given, stringified index is used', async () => {
+      const myQuality: Record<string, unknown> = { ...lowQuality };
+      delete myQuality.label;
+      await assertSubscribeQualitiesResponseYieldsResult(
+        [myQuality],
+        [{ ...myQuality, index: 0, label: '0' } as Quality],
+      );
+    });
+  });
+
+  describe('calls to listener', () => {
+    function arrangeWithStubQualities(qualities: Array<Quality | undefined>) {
+      const playerBridge = new StubPlayerBridge();
+      playerBridge.qualities = qualities;
+      const interactiveBridge = new InteractiveBridge(playerBridge);
+      return { interactiveBridge, playerBridge };
+    }
+
+    class ArgumentStoringListener {
+      calls: unknown[] = [];
+
+      listener = (qualities: Quality[]) => {
+        this.calls.push(qualities);
+      };
+    }
+
+    test('from other side of bridge', async () => {
+      const argStoringListener = new ArgumentStoringListener();
+      const { interactiveBridge, playerBridge } = arrangeWithStubQualities([]);
+      await interactiveBridge.subscribeQualities(argStoringListener.listener);
+      playerBridge.qualities = [{ ...lowQuality, index: NaN }];
+      expect(argStoringListener.calls.length).toBe(1);
+    });
+
+    test('no call on first subscription', async () => {
+      const argStoringListener = new ArgumentStoringListener();
+      const { interactiveBridge } = arrangeWithStubQualities([]);
+      await interactiveBridge.subscribeQualities(argStoringListener.listener);
+      expect(argStoringListener.calls.pop()).toBe(undefined);
+    });
+
+    test('listeners throw given non-array argument', async () => {
+      const argStoringListener = new ArgumentStoringListener();
+      const { interactiveBridge, playerBridge } = arrangeWithStubQualities([]);
+      await interactiveBridge.subscribeQualities(argStoringListener.listener);
+      try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        playerBridge.qualities = 'garbage';
+      } catch {
+        expect(true);
+        return;
+      }
+      expect.fail();
+    });
+  });
+});

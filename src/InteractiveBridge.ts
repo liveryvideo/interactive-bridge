@@ -1,6 +1,7 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import type {
   Orientation,
+  Quality,
   StreamPhase,
 } from './InteractiveBridge/VideoCommands';
 import { VideoCommands } from './InteractiveBridge/VideoCommands';
@@ -276,6 +277,10 @@ export class InteractiveBridge extends LiveryBridge {
     return this.sendCommand('subscribeOrientation', undefined, (value) =>
       listener(validate(value)),
     ).then(validate);
+  }
+
+  subscribeQualities(listener: (value: Quality[]) => void) {
+    return this.video.subscribeQualities(listener);
   }
 
   /**

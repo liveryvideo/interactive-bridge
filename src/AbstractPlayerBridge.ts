@@ -1,4 +1,5 @@
 import type { Feature, Orientation, StreamPhase } from './InteractiveBridge';
+import type { Quality } from './InteractiveBridge/VideoCommands';
 import { LiveryBridge } from './LiveryBridge';
 
 export interface WithLocation {
@@ -98,6 +99,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
     }
+    if (name === 'subscribeQualities') {
+      return this.subscribeQualities(listener);
+    }
     if (name === 'subscribeQuality') {
       return this.subscribeQuality(listener);
     }
@@ -160,6 +164,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
   ): boolean;
+
+  protected abstract subscribeQualities(
+    listener: (value: Array<Quality | undefined>) => void,
+  ): Array<Quality | undefined>;
 
   protected abstract subscribeQuality(
     listener: (value: string) => void,

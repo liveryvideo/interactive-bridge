@@ -35,16 +35,53 @@ export interface PlaybackDetails {
   position: number;
 }
 
-// type Quality = {
-//   audio?: {
-//     bandwidth: number
-//   },
-//   label: string,
-//   video?: {
-//     bandwidth: number,
-//     height: number,
-//     width: number
-//   } }
+export interface Quality {
+  audio?: {
+    bandwidth: number;
+  };
+  index: number;
+  label: string;
+  video?: {
+    bandwidth: number;
+    height: number;
+    width: number;
+  };
+}
+
+function parseToArray(value: unknown, label: string) {
+  if (value === null) {
+    throw new Error(`${label} value type: null, should be: Array`);
+  }
+  if (typeof value !== 'object') {
+    throw new Error(
+      `${label} value type: ${typeof value} (${String(
+        value,
+      )}), should be: Array`,
+    );
+  }
+  if (!(value instanceof Array)) {
+    throw new Error(`${label} value type: object, should be: Array`);
+  }
+  return value as Array<unknown>;
+}
+
+function fieldFromIfTypeWithDefault<T>(
+  field: string,
+  obj: unknown,
+  type: string,
+  fallback: T,
+): T {
+  // eslint-disable-next-line valid-typeof
+  if (
+    obj instanceof Object &&
+    field in obj &&
+    // eslint-disable-next-line valid-typeof
+    typeof Object.getOwnPropertyDescriptor(obj, field)?.value === type
+  ) {
+    return Object.getOwnPropertyDescriptor(obj, field)?.value as T;
+  }
+  return fallback;
+}
 
 export class VideoCommands {
   private sendCommand: LiveryBridge['sendCommand'];
@@ -58,23 +95,12 @@ export class VideoCommands {
    */
   getFeatures(): Promise<Feature[]> {
     return this.sendCommand('getFeatures').then((value) => {
-      if (value === null) {
-        throw new Error(`getFeatures value type: null, should be: Array`);
-      }
-      if (typeof value !== 'object') {
-        throw new Error(
-          `getFeatures value type: ${typeof value}, should be: Array`,
-        );
-      }
-      if (!(value instanceof Array)) {
-        throw new Error(`getFeatures value type: object, should be: Array`);
-      }
+      parseToArray(value, 'getFeatures');
       const features = new Set<Feature>();
-      for (const feature of value) {
+      for (const feature of value as Array<unknown>) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        if (knownFeatures.includes(feature)) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          features.add(feature);
+        if (knownFeatures.includes(feature as Feature)) {
+          features.add(feature as Feature);
         }
       }
       const sanitizedFeatureList: Feature[] = Array.from(features);
@@ -225,7 +251,81 @@ export class VideoCommands {
    * subscribeQualityIndex method or so that returns the index of the quality
    * in the list of qualities returned by subscribeQualities.
    */
-  // subscribeQualities(listener): Quality[] {}
+  subscribeQualities(listener: (value: Quality[]) => void) {
+    function parse(value: unknown) {
+      const array = parseToArray(value, 'subscribeQualities');
+
+      const qualityArray: Quality[] = [];
+      for (let i = 0; i < array.length; i += 1) {
+        if (array[i] === undefined) {
+          continue;
+        }
+        const item = array[i];
+        const label = fieldFromIfTypeWithDefault(
+          'label',
+          item,
+          'string',
+          String(i),
+        );
+
+        let audio: Quality['audio'];
+        if (
+          item instanceof Object &&
+          'audio' in item &&
+          item.audio instanceof Object
+        ) {
+          audio = {
+            bandwidth: fieldFromIfTypeWithDefault(
+              'bandwidth',
+              item.audio,
+              'number',
+              NaN,
+            ),
+          };
+        }
+
+        let video: Quality['video'];
+        if (
+          item instanceof Object &&
+          'video' in item &&
+          item.video instanceof Object
+        ) {
+          video = {
+            bandwidth: fieldFromIfTypeWithDefault(
+              'bandwidth',
+              item.video,
+              'number',
+              NaN,
+            ),
+            height: fieldFromIfTypeWithDefault(
+              'height',
+              item.video,
+              'number',
+              NaN,
+            ),
+            width: fieldFromIfTypeWithDefault(
+              'width',
+              item.video,
+              'number',
+              NaN,
+            ),
+          };
+        }
+
+        qualityArray.push({
+          audio,
+          index: i,
+          label,
+          video,
+        });
+      }
+      return qualityArray;
+    }
+
+    return this.sendCommand('subscribeQualities', undefined, (value) =>
+      listener(parse(value)),
+    ).then(parse);
+  }
 
   /**
    * This indicates the LIVE periods of the stream that can be seeked to
