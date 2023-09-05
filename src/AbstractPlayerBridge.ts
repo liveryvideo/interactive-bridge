@@ -21,10 +21,9 @@ interface PlaybackDetails {
  * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
  */
 export abstract class AbstractPlayerBridge extends LiveryBridge {
-  protected portraitQuery = window.matchMedia('(orientation: portrait)');
+  subscribeQualitiesCommandHandler = new SubscribeQualitiesCommandHandler();
 
-  protected subscribeQualitiesCommandHandler =
-    new SubscribeQualitiesCommandHandler();
+  protected portraitQuery = window.matchMedia('(orientation: portrait)');
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(

@@ -4,6 +4,7 @@ import type { Feature, PlaybackDetails } from '../src/InteractiveBridge';
 import { InteractiveBridge } from '../src/InteractiveBridge';
 import type { Quality } from '../src/InteractiveBridge/VideoCommands';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
+import { InvalidTypeError, SubscriptionError } from '../src/util/errors';
 
 class StubPlayerBridge extends MockPlayerBridge {
   features: Feature[] = [];
@@ -240,32 +241,45 @@ describe('InteractiveBridge.subscribeQualities', () => {
     },
   };
 
+  class ArgumentStoringListener {
+    calls: unknown[] = [];
+
+    listener = (qualities: Quality[]) => {
+      this.calls.push(qualities);
+    };
+  }
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  function arrangeWithStubSubscribeQualitiesResponse(qualities: any) {
+    const playerBridge = new StubPlayerBridge();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    playerBridge.setQualities(qualities);
+    const interactiveBridge = new InteractiveBridge(playerBridge);
+    return { interactiveBridge, playerBridge };
+  }
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+
   describe('initial call', () => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    function arrangeWithStubSubscribeQualitiesResponse(qualities: any) {
-      const playerBridge = new StubPlayerBridge();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      playerBridge.setQualities(qualities);
-      return new InteractiveBridge(playerBridge);
-    }
-
     async function assertSubscribeQualitiesResponseYieldsResult(
       qualities: any,
       expected: Quality[],
     ) {
-      const interactiveBridge =
+      const { interactiveBridge } =
         arrangeWithStubSubscribeQualitiesResponse(qualities);
       const result = await interactiveBridge.subscribeQualities(() => {});
       expect(result).toEqual(expected);
     }
 
-    async function assertSubscribeQualitiesResponseCausesError(qualities: any) {
-      const interactiveBridge =
+    async function assertSubscribeQualitiesResponseCausesInvalidTypeError(
+      qualities: any,
+    ) {
+      const { interactiveBridge } =
         arrangeWithStubSubscribeQualitiesResponse(qualities);
       try {
         await interactiveBridge.subscribeQualities(() => {});
-      } catch {
-        expect(true);
+      } catch (error) {
+        expect(error instanceof InvalidTypeError);
         return;
       }
       expect.fail();
@@ -287,17 +301,27 @@ describe('InteractiveBridge.subscribeQualities', () => {
       );
     });
 
-    test('non array response throws', async () => {
-      await assertSubscribeQualitiesResponseCausesError(null);
-      await assertSubscribeQualitiesResponseCausesError(undefined);
-      await assertSubscribeQualitiesResponseCausesError(720);
-      await assertSubscribeQualitiesResponseCausesError('1080p');
-      await assertSubscribeQualitiesResponseCausesError({});
+    test('non array response throws InvalidType error', async () => {
+      await assertSubscribeQualitiesResponseCausesInvalidTypeError(null);
+      await assertSubscribeQualitiesResponseCausesInvalidTypeError(undefined);
+      await assertSubscribeQualitiesResponseCausesInvalidTypeError(720);
+      await assertSubscribeQualitiesResponseCausesInvalidTypeError('1080p');
+      await assertSubscribeQualitiesResponseCausesInvalidTypeError({});
     });
 
-    test('non array response throws InvalidType error');
-    test('rejection response throws SubscriptionFailed error');
-    test('after InvalidType error, subscription persists');
+    test('after InvalidType error, listener is subscribed', async () => {
+      const argStoringListener = new ArgumentStoringListener();
+      const { interactiveBridge, playerBridge } =
+        arrangeWithStubSubscribeQualitiesResponse(null);
+      try {
+        await interactiveBridge.subscribeQualities(argStoringListener.listener);
+      } catch {
+        // noop
+      }
+      playerBridge.setQualities([]);
+      expect(argStoringListener.calls.length).toBe(1);
+      expect(argStoringListener.calls.pop()).toEqual([]);
+    });
 
     test('malformed entries are sanitized where possible', async () => {
       await assertSubscribeQualitiesResponseYieldsResult(
@@ -353,24 +377,10 @@ describe('InteractiveBridge.subscribeQualities', () => {
   });
 
   describe('calls to listener', () => {
-    function arrangeWithStubQualities(qualities: Array<Quality | undefined>) {
-      const playerBridge = new StubPlayerBridge();
-      playerBridge.setQualities(qualities);
-      const interactiveBridge = new InteractiveBridge(playerBridge);
-      return { interactiveBridge, playerBridge };
-    }
-
-    class ArgumentStoringListener {
-      calls: unknown[] = [];
-
-      listener = (qualities: Quality[]) => {
-        this.calls.push(qualities);
-      };
-    }
-
     test('from other side of bridge', async () => {
       const argStoringListener = new ArgumentStoringListener();
-      const { interactiveBridge, playerBridge } = arrangeWithStubQualities([]);
+      const { interactiveBridge, playerBridge } =
+        arrangeWithStubSubscribeQualitiesResponse([]);
       await interactiveBridge.subscribeQualities(argStoringListener.listener);
       playerBridge.setQualities([{ ...lowQuality, index: NaN }]);
       expect(argStoringListener.calls.length).toBe(1);
@@ -378,14 +388,17 @@ describe('InteractiveBridge.subscribeQualities', () => {
 
     test('no call on first subscription', async () => {
       const argStoringListener = new ArgumentStoringListener();
-      const { interactiveBridge } = arrangeWithStubQualities([]);
+      const { interactiveBridge } = arrangeWithStubSubscribeQualitiesResponse(
+        [],
+      );
       await interactiveBridge.subscribeQualities(argStoringListener.listener);
       expect(argStoringListener.calls.pop()).toBe(undefined);
     });
 
     test('listeners throw given non-array argument', async () => {
       const argStoringListener = new ArgumentStoringListener();
-      const { interactiveBridge, playerBridge } = arrangeWithStubQualities([]);
+      const { interactiveBridge, playerBridge } =
+        arrangeWithStubSubscribeQualitiesResponse([]);
       await interactiveBridge.subscribeQualities(argStoringListener.listener);
       try {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -393,6 +406,27 @@ describe('InteractiveBridge.subscribeQualities', () => {
         playerBridge.setQualities('garbage');
       } catch {
         expect(true);
+        return;
+      }
+      expect.fail();
+    });
+  });
+
+  describe('failing subscription', () => {
+    class RejectingPlayerBridge extends MockPlayerBridge {
+      protected override handleCommand() {
+        throw Error();
+      }
+    }
+
+    test('rejection response throws SubscriptionError', async () => {
+      const argStoringListener = new ArgumentStoringListener();
+      const playerBridge = new RejectingPlayerBridge();
+      const interactiveBridge = new InteractiveBridge(playerBridge);
+      try {
+        await interactiveBridge.subscribeQualities(argStoringListener.listener);
+      } catch (error) {
+        expect(error instanceof SubscriptionError);
         return;
       }
       expect.fail();
