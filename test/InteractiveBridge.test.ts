@@ -295,6 +295,10 @@ describe('InteractiveBridge.subscribeQualities', () => {
       await assertSubscribeQualitiesResponseCausesError({});
     });
 
+    test('non array response throws InvalidType error');
+    test('rejection response throws SubscriptionFailed error');
+    test('after InvalidType error, subscription persists');
+
     test('malformed entries are sanitized where possible', async () => {
       await assertSubscribeQualitiesResponseYieldsResult(
         ['garbage'],

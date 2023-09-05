@@ -1,32 +1,10 @@
 import type { Quality } from './InteractiveBridge/VideoCommands';
+import { SubscribeCommandHandler } from './util/SubscribeCommandHandler';
 
-type Listener = (value: Array<Quality | undefined>) => void;
+type Qualities = Array<Quality | undefined>;
 
-export class SubscribeQualitiesCommandHandler {
-  command = 'subscribeQualities';
-
-  private qualities: Array<Quality | undefined> = [];
-
-  handleCommand(
-    name: string,
-    arg: unknown,
-    listener: (value: unknown) => void,
-  ) {
-    if (name !== this.command) {
-      return undefined;
-    }
-    return this.subscribeQualities(listener);
+export class SubscribeQualitiesCommandHandler extends SubscribeCommandHandler<Qualities> {
+  constructor() {
+    super('subscribeQualities', []);
   }
-
-  setQualities(value: Array<Quality | undefined>) {
-    this.qualities = value;
-    this.listener(value);
-  }
-
-  subscribeQualities(listener: Listener) {
-    this.listener = listener;
-    return this.qualities;
-  }
-
-  private listener: Listener = () => {};
 }

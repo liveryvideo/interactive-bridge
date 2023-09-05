@@ -6,3 +6,5 @@
 - fix source window validity test
 - create documentation for Transceiver
 - refine port and target options interfaces
+
+- unit test SubscribeCommandHandler

@@ -37,7 +37,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   setQualities(value: Array<Quality | undefined>) {
-    this.subscribeQualitiesCommandHandler.setQualities(value);
+    this.subscribeQualitiesCommandHandler.setValue(value);
   }
 
   setQuality(value: string) {

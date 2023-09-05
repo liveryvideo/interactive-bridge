@@ -1,5 +1,8 @@
+// eslint-disable-next-line max-classes-per-file
 import type { LiveryBridge } from '../LiveryBridge';
+import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
+import { QualitiesSubscription } from './QualitiesSubscription';
 
 const knownPlaybackStates = [
   'BUFFERING',
@@ -48,46 +51,16 @@ export interface Quality {
   };
 }
 
-function parseToArray(value: unknown, label: string) {
-  if (value === null) {
-    throw new Error(`${label} value type: null, should be: Array`);
-  }
-  if (typeof value !== 'object') {
-    throw new Error(
-      `${label} value type: ${typeof value} (${String(
-        value,
-      )}), should be: Array`,
-    );
-  }
-  if (!(value instanceof Array)) {
-    throw new Error(`${label} value type: object, should be: Array`);
-  }
-  return value as Array<unknown>;
-}
-
-function fieldFromIfTypeWithDefault<T>(
-  field: string,
-  obj: unknown,
-  type: string,
-  fallback: T,
-): T {
-  // eslint-disable-next-line valid-typeof
-  if (
-    obj instanceof Object &&
-    field in obj &&
-    // eslint-disable-next-line valid-typeof
-    typeof Object.getOwnPropertyDescriptor(obj, field)?.value === type
-  ) {
-    return Object.getOwnPropertyDescriptor(obj, field)?.value as T;
-  }
-  return fallback;
-}
-
 export class VideoCommands {
+  private qualitiesSubscription: QualitiesSubscription;
+
   private sendCommand: LiveryBridge['sendCommand'];
 
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
+    this.qualitiesSubscription = new QualitiesSubscription(
+      this.sendCommand.bind(this),
+    );
   }
 
   /**
@@ -252,79 +225,7 @@ export class VideoCommands {
    * in the list of qualities returned by subscribeQualities.
    */
   subscribeQualities(listener: (value: Quality[]) => void) {
-    function parse(value: unknown) {
-      const array = parseToArray(value, 'subscribeQualities');
-
-      const qualityArray: Quality[] = [];
-      for (let i = 0; i < array.length; i += 1) {
-        if (array[i] === undefined) {
-          continue;
-        }
-        const item = array[i];
-        const label = fieldFromIfTypeWithDefault(
-          'label',
-          item,
-          'string',
-          String(i),
-        );
-
-        let audio: Quality['audio'];
-        if (
-          item instanceof Object &&
-          'audio' in item &&
-          item.audio instanceof Object
-        ) {
-          audio = {
-            bandwidth: fieldFromIfTypeWithDefault(
-              'bandwidth',
-              item.audio,
-              'number',
-              NaN,
-            ),
-          };
-        }
-
-        let video: Quality['video'];
-        if (
-          item instanceof Object &&
-          'video' in item &&
-          item.video instanceof Object
-        ) {
-          video = {
-            bandwidth: fieldFromIfTypeWithDefault(
-              'bandwidth',
-              item.video,
-              'number',
-              NaN,
-            ),
-            height: fieldFromIfTypeWithDefault(
-              'height',
-              item.video,
-              'number',
-              NaN,
-            ),
-            width: fieldFromIfTypeWithDefault(
-              'width',
-              item.video,
-              'number',
-              NaN,
-            ),
-          };
-        }
-
-        qualityArray.push({
-          audio,
-          index: i,
-          label,
-          video,
-        });
-      }
-      return qualityArray;
-    }
-
-    return this.sendCommand('subscribeQualities', undefined, (value) =>
-      listener(parse(value)),
-    ).then(parse);
+    return this.qualitiesSubscription.subscribe(listener);
   }
 
   /**
