@@ -36,7 +36,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     this.onFullscreenChange(false);
   }
 
-  setQualities(value: Quality[]) {
+  setQualities(value: Array<Quality | undefined>) {
     this.onQualitiesSet(value);
   }
 
@@ -90,6 +90,9 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   protected getStreamId() {
     return 'dummy-stream-id';
   }
+
+  protected onQualitiesSet: (value: Array<Quality | undefined>) => void =
+    () => {};
 
   protected subscribeFullscreen(listener: (value: boolean) => void) {
     this.onFullscreenChange = listener;
@@ -195,8 +198,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   private onFullscreenChange: (value: boolean) => void = () => {};
-
-  private onQualitiesSet: (value: Quality[]) => void = () => {};
 
   private onQualitySet: (value: string) => void = () => {};
 

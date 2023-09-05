@@ -10,16 +10,12 @@ class StubPlayerBridge extends MockPlayerBridge {
 
   playback = { buffer: 0, duration: 0, position: 0 };
 
-  get qualities() {
-    return this._qualities;
-  }
-
-  set qualities(qualities: Array<Quality | undefined>) {
-    this._qualities = qualities;
-    this._qualitiesListener(qualities);
-  }
-
   private _qualities: Array<Quality | undefined> = [];
+
+  override setQualities(qualities: Array<Quality | undefined>): void {
+    this._qualities = qualities;
+    this.onQualitiesSet(qualities);
+  }
 
   protected override getFeatures(): Feature[] {
     return this.features;
@@ -32,12 +28,9 @@ class StubPlayerBridge extends MockPlayerBridge {
   protected override subscribeQualities(
     listener: (value: Array<Quality | undefined>) => void,
   ): Array<Quality | undefined> {
-    this._qualitiesListener = listener;
+    this.onQualitiesSet = listener;
     return this._qualities;
   }
-
-  private _qualitiesListener: (qualities: Array<Quality | undefined>) => void =
-    () => {};
 }
 
 describe.skip('InteractiveBridge.getAppName()');
@@ -265,8 +258,8 @@ describe('InteractiveBridge.subscribeQualities', () => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     function arrangeWithStubSubscribeQualitiesResponse(qualities: any) {
       const playerBridge = new StubPlayerBridge();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      playerBridge.qualities = qualities;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      playerBridge.setQualities(qualities);
       return new InteractiveBridge(playerBridge);
     }
 
@@ -372,7 +365,7 @@ describe('InteractiveBridge.subscribeQualities', () => {
   describe('calls to listener', () => {
     function arrangeWithStubQualities(qualities: Array<Quality | undefined>) {
       const playerBridge = new StubPlayerBridge();
-      playerBridge.qualities = qualities;
+      playerBridge.setQualities(qualities);
       const interactiveBridge = new InteractiveBridge(playerBridge);
       return { interactiveBridge, playerBridge };
     }
@@ -389,7 +382,7 @@ describe('InteractiveBridge.subscribeQualities', () => {
       const argStoringListener = new ArgumentStoringListener();
       const { interactiveBridge, playerBridge } = arrangeWithStubQualities([]);
       await interactiveBridge.subscribeQualities(argStoringListener.listener);
-      playerBridge.qualities = [{ ...lowQuality, index: NaN }];
+      playerBridge.setQualities([{ ...lowQuality, index: NaN }]);
       expect(argStoringListener.calls.length).toBe(1);
     });
 
@@ -407,7 +400,7 @@ describe('InteractiveBridge.subscribeQualities', () => {
       try {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        playerBridge.qualities = 'garbage';
+        playerBridge.setQualities('garbage');
       } catch {
         expect(true);
         return;
