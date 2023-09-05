@@ -10,26 +10,12 @@ class StubPlayerBridge extends MockPlayerBridge {
 
   playback = { buffer: 0, duration: 0, position: 0 };
 
-  private _qualities: Array<Quality | undefined> = [];
-
-  override setQualities(qualities: Array<Quality | undefined>): void {
-    this._qualities = qualities;
-    this.onQualitiesSet(qualities);
-  }
-
   protected override getFeatures(): Feature[] {
     return this.features;
   }
 
   protected override getPlayback() {
     return this.playback;
-  }
-
-  protected override subscribeQualities(
-    listener: (value: Array<Quality | undefined>) => void,
-  ): Array<Quality | undefined> {
-    this.onQualitiesSet = listener;
-    return this._qualities;
   }
 }
 

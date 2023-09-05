@@ -37,7 +37,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   setQualities(value: Array<Quality | undefined>) {
-    this.onQualitiesSet(value);
+    this.subscribeQualitiesCommandHandler.setQualities(value);
   }
 
   setQuality(value: string) {
@@ -101,86 +101,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       listener(!!document.fullscreenElement);
     });
     return !!document.fullscreenElement;
-  }
-
-  protected override subscribeQualities(
-    listener: (value: Array<Quality | undefined>) => void,
-  ): Array<Quality | undefined> {
-    const lowQuality = {
-      audio: {
-        bandwidth: 24_000,
-      },
-      index: NaN,
-      label: '270p',
-      video: {
-        bandwidth: 500_000,
-        height: 270,
-        width: 480,
-      },
-    };
-
-    const medLowQuality = {
-      audio: {
-        bandwidth: 48_000,
-      },
-      index: NaN,
-      label: '540p',
-      video: {
-        bandwidth: 1_500_000,
-        height: 540,
-        width: 960,
-      },
-    };
-
-    const medQuality = {
-      audio: {
-        bandwidth: 96_000,
-      },
-      index: NaN,
-      label: '720p',
-      video: {
-        bandwidth: 3_000_000,
-        height: 720,
-        width: 1280,
-      },
-    };
-
-    const medHighQuality = {
-      audio: {
-        bandwidth: 96_000,
-      },
-      index: NaN,
-      label: '1080p',
-      video: {
-        bandwidth: 5_000_000,
-        height: 1080,
-        width: 1920,
-      },
-    };
-
-    const highQuality = {
-      audio: {
-        bandwidth: 96_000,
-      },
-      index: NaN,
-      label: '4K',
-      video: {
-        bandwidth: 12_000_000,
-        height: 2160,
-        width: 3840,
-      },
-    };
-
-    this.onQualitiesSet = listener;
-    setTimeout(
-      () => listener([lowQuality, medLowQuality, medQuality, medHighQuality]),
-      1500,
-    );
-    setTimeout(
-      () => listener([medLowQuality, medHighQuality, highQuality]),
-      3000,
-    );
-    return [lowQuality, medQuality, medHighQuality];
   }
 
   protected subscribeQuality(listener: (value: string) => void) {

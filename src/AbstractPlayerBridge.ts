@@ -1,6 +1,6 @@
 import type { Feature, Orientation, StreamPhase } from './InteractiveBridge';
-import type { Quality } from './InteractiveBridge/VideoCommands';
 import { LiveryBridge } from './LiveryBridge';
+import { SubscribeQualitiesCommandHandler } from './SubscribeQualitiesCommandHandler';
 
 export interface WithLocation {
   location: Location;
@@ -22,6 +22,9 @@ interface PlaybackDetails {
  */
 export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
+
+  protected subscribeQualitiesCommandHandler =
+    new SubscribeQualitiesCommandHandler();
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(
@@ -100,7 +103,11 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       return this.subscribeOrientation(listener);
     }
     if (name === 'subscribeQualities') {
-      return this.subscribeQualities(listener);
+      return this.subscribeQualitiesCommandHandler.handleCommand(
+        name,
+        arg,
+        listener,
+      );
     }
     if (name === 'subscribeQuality') {
       return this.subscribeQuality(listener);
@@ -164,10 +171,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
   ): boolean;
-
-  protected abstract subscribeQualities(
-    listener: (value: Array<Quality | undefined>) => void,
-  ): Array<Quality | undefined>;
 
   protected abstract subscribeQuality(
     listener: (value: string) => void,
