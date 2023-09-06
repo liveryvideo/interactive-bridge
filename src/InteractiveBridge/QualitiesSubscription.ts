@@ -1,4 +1,3 @@
-import type { LiveryBridge } from '../LiveryBridge';
 import { Subscription } from '../util/Subscription';
 import { InvalidTypeError } from '../util/errors';
 import { fieldFromIfTypeWithDefault } from '../util/fieldFromIfTypeWithDefault';
@@ -10,13 +9,6 @@ export class QualitiesSubscription extends Subscription<
   Quality[]
 > {
   protected command = 'subscribeQualities';
-
-  protected sendCommand: LiveryBridge['sendCommand'];
-
-  constructor(sendCommand: LiveryBridge['sendCommand']) {
-    super();
-    this.sendCommand = sendCommand;
-  }
 
   protected parse(value: unknown) {
     let array;

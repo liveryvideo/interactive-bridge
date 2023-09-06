@@ -1,5 +1,5 @@
 type Listener<T> = (value: T) => void;
-export abstract class SubscribeCommandHandler<T> {
+export class SubscribeCommandHandler<T> {
   command: string;
 
   private value: T;
@@ -17,6 +17,9 @@ export abstract class SubscribeCommandHandler<T> {
   }
 
   setValue(value: T) {
+    if (this.value === value) {
+      return;
+    }
     this.value = value;
     this.listener(value);
   }
