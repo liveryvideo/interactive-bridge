@@ -1,12 +1,12 @@
 /* eslint-disable max-classes-per-file */
 import { expect, test } from 'vitest';
 import { SubscribeCommandHandler } from '../src/util/SubscribeCommandHandler';
-import { Subscription } from '../src/util/Subscription';
+import { Subscriber } from '../src/util/Subscriber';
 import { InvalidTypeError } from '../src/util/errors';
 import { ArgumentStoringListener } from './doubles/ArgumentStoringListener';
 import { createSendCommand } from './doubles/createSendCommand';
 
-class NumberSubscription extends Subscription<number, number> {
+class NumberSubscription extends Subscriber<number, number> {
   command = 'subscribeNumber';
 
   parse(value: unknown) {
@@ -17,7 +17,7 @@ class NumberSubscription extends Subscription<number, number> {
   }
 }
 
-class TransformingNumberSubscription extends Subscription<number, number> {
+class TransformingNumberSubscription extends Subscriber<number, number> {
   command = 'subscribeNumber';
 
   parse(value: unknown) {

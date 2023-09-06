@@ -2,7 +2,7 @@
 import type { LiveryBridge } from '../LiveryBridge';
 import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
-import { QualitiesSubscription } from './QualitiesSubscription';
+import { QualitiesSubscriber } from './QualitiesSubscriber';
 
 const knownPlaybackStates = [
   'BUFFERING',
@@ -52,13 +52,13 @@ export interface Quality {
 }
 
 export class VideoCommands {
-  private qualitiesSubscription: QualitiesSubscription;
+  private qualitiesSubscription: QualitiesSubscriber;
 
   private sendCommand: LiveryBridge['sendCommand'];
 
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
-    this.qualitiesSubscription = new QualitiesSubscription(
+    this.qualitiesSubscription = new QualitiesSubscriber(
       this.sendCommand.bind(this),
     );
   }
