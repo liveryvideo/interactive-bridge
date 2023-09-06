@@ -2,29 +2,9 @@
 import { expect, test } from 'vitest';
 import { SubscribeCommandHandler } from '../src/util/SubscribeCommandHandler';
 import { Subscription } from '../src/util/Subscription';
-import { InvalidTypeError, SubscriptionError } from '../src/util/errors';
-
-function createSendCommand<T>(
-  subscribeCommandHandler: SubscribeCommandHandler<T>,
-) {
-  const sendCommand = async (
-    name: string,
-    arg?: unknown,
-    listener?: (value: T) => void,
-    // eslint-disable-next-line @typescript-eslint/require-await
-  ) => {
-    if (listener === undefined) {
-      throw Error();
-    }
-    const result = subscribeCommandHandler.handleCommand(name, arg, listener);
-    if (result === undefined) {
-      throw new SubscriptionError(`Could not subscribe with command '${name}'`);
-    }
-    return result;
-  };
-
-  return sendCommand;
-}
+import { InvalidTypeError } from '../src/util/errors';
+import { ArgumentStoringListener } from './doubles/ArgumentStoringListener';
+import { createSendCommand } from './doubles/createSendCommand';
 
 class NumberSubscription extends Subscription<number, number> {
   command = 'subscribeNumber';
@@ -48,14 +28,6 @@ class TransformingNumberSubscription extends Subscription<number, number> {
   }
 
   transform: (value: number) => number = (value) => value;
-}
-
-class ArgumentStoringListener<T> {
-  calls: unknown[] = [];
-
-  listener = (value: T) => {
-    this.calls.push(value);
-  };
 }
 
 function arrangeWithInitialValue(value: number) {
