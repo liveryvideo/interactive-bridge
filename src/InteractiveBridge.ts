@@ -1,4 +1,5 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
+import { StreamPhaseSubscriber } from './InteractiveBridge/StreamPhaseSubscriber';
 import type {
   Orientation,
   Quality,
@@ -20,6 +21,10 @@ export type {
  */
 export class InteractiveBridge extends LiveryBridge {
   video = new VideoCommands(this.sendCommand.bind(this));
+
+  private streamPhaseSubscriber = new StreamPhaseSubscriber(
+    this.sendCommand.bind(this),
+  );
 
   /**
    * Constructs `InteractiveBridge` with specified `target: AbstractPlayerBridge` (i.e: `PlayerBridge`)
@@ -307,19 +312,7 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent phases.
    */
   subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
-    function validate(value: unknown) {
-      if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
-        const strValue = stringify(value);
-        throw new Error(
-          `subscribeStreamPhase value: ${strValue}, should be: "LIVE" | "POST" | "PRE"`,
-        );
-      }
-      return value;
-    }
-
-    return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+    return this.streamPhaseSubscriber.subscribe(listener);
   }
 
   /**
