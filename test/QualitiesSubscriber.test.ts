@@ -4,9 +4,16 @@ import { QualitiesSubscriber } from '../src/InteractiveBridge/QualitiesSubscribe
 import type { Quality } from '../src/InteractiveBridge/VideoCommands';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 import { SubscribeQualitiesCommandHandler } from '../src/SubscribeQualitiesCommandHandler';
-import { InvalidTypeError, SubscriptionError } from '../src/util/errors';
+import { SubscriptionError } from '../src/util/errors';
+import { noop } from '../src/util/functions';
 import { ArgumentStoringListener } from './doubles/ArgumentStoringListener';
 import { createSendCommand } from './doubles/createSendCommand';
+import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
+
+const tester = new SubscriberTestApparatus(
+  SubscribeQualitiesCommandHandler,
+  QualitiesSubscriber,
+);
 
 describe('InteractiveBridge.subscribeQualities', () => {
   const lowQuality = {
@@ -36,152 +43,31 @@ describe('InteractiveBridge.subscribeQualities', () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   /* eslint-disable @typescript-eslint/no-unsafe-argument */
   function arrangeWithInitialValue(qualities: any) {
-    const subscribeQualitiesCommandHandler =
-      new SubscribeQualitiesCommandHandler(qualities);
-    const sendCommand = createSendCommand(subscribeQualitiesCommandHandler);
-    const qualitiesSubscription = new QualitiesSubscriber(sendCommand);
-    return { qualitiesSubscription, subscribeQualitiesCommandHandler };
+    const handler = new SubscribeQualitiesCommandHandler(qualities);
+    const sendCommand = createSendCommand(handler);
+    const subscriber = new QualitiesSubscriber(sendCommand);
+    return { subscriber, handler };
   }
   /* eslint-enable @typescript-eslint/no-unsafe-argument */
   /* eslint-enable @typescript-eslint/no-explicit-any */
 
-  describe('initial call', () => {
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    async function assertValueYieldsResult(
-      qualities: any,
-      expected: Quality[],
-    ) {
-      const { qualitiesSubscription } = arrangeWithInitialValue(qualities);
-      const result = await qualitiesSubscription.subscribe(() => {});
-      expect(result).toEqual(expected);
-    }
-
-    async function assertValueCausesInvalidTypeError(qualities: any) {
-      const { qualitiesSubscription } = arrangeWithInitialValue(qualities);
-      try {
-        await qualitiesSubscription.subscribe(() => {});
-      } catch (error) {
-        expect(error instanceof InvalidTypeError);
-        return;
-      }
-      expect.fail();
-    }
-    /* eslint-enable @typescript-eslint/no-explicit-any */
-
-    test('call returns promise resolving to quality list', async () => {
-      await assertValueYieldsResult([], []);
-      await assertValueYieldsResult(
-        [lowQuality],
-        [{ ...lowQuality, index: 0 }],
-      );
-      await assertValueYieldsResult(
-        [lowQuality, medQuality],
-        [
-          { ...lowQuality, index: 0 },
-          { ...medQuality, index: 1 },
-        ],
-      );
-    });
-
-    test('non array response throws InvalidType error', async () => {
-      await assertValueCausesInvalidTypeError(null);
-      await assertValueCausesInvalidTypeError(undefined);
-      await assertValueCausesInvalidTypeError(720);
-      await assertValueCausesInvalidTypeError('1080p');
-      await assertValueCausesInvalidTypeError({});
-    });
-
+  describe('abstraction tests', () => {
     test('after InvalidType error, listener is subscribed', async () => {
       const recorder = new ArgumentStoringListener();
-      const { qualitiesSubscription, subscribeQualitiesCommandHandler } =
-        arrangeWithInitialValue(null);
+      const {
+        subscriber: qualitiesSubscription,
+        handler: subscribeQualitiesCommandHandler,
+      } = arrangeWithInitialValue(null);
       try {
         await qualitiesSubscription.subscribe(recorder.listener);
       } catch {
-        // noop
+        noop();
       }
       subscribeQualitiesCommandHandler.setValue([]);
       expect(recorder.calls.length).toBe(1);
       expect(recorder.calls.pop()).toEqual([]);
     });
 
-    test('malformed entries are sanitized where possible', async () => {
-      await assertValueYieldsResult(['garbage'], [{ label: '0', index: 0 }]);
-      await assertValueYieldsResult([undefined], []);
-      await assertValueYieldsResult([null], [{ label: '0', index: 0 }]);
-    });
-
-    test('sparse arrays are compacted', async () => {
-      await assertValueYieldsResult(
-        [undefined, lowQuality],
-        [{ ...lowQuality, index: 1 }],
-      );
-      await assertValueYieldsResult(
-        [undefined, 'garbage'],
-        [{ label: '1', index: 1 }],
-      );
-      await assertValueYieldsResult(
-        [undefined, 'garbage', undefined, lowQuality],
-        [
-          { label: '1', index: 1 },
-          { ...lowQuality, index: 3 },
-        ],
-      );
-    });
-
-    test('index on response object is overwritten with actual index', async () => {
-      await assertValueYieldsResult(
-        [
-          { ...lowQuality, index: 501 },
-          { ...lowQuality, index: NaN },
-        ],
-        [
-          { ...lowQuality, index: 0 },
-          { ...lowQuality, index: 1 },
-        ],
-      );
-    });
-
-    test('if no label given, stringified index is used', async () => {
-      const myQuality: Record<string, unknown> = { ...lowQuality };
-      delete myQuality.label;
-      await assertValueYieldsResult(
-        [myQuality],
-        [{ ...myQuality, index: 0, label: '0' } as Quality],
-      );
-    });
-  });
-
-  describe('calls to listener', () => {
-    test('from other side of bridge', async () => {
-      const recorder = new ArgumentStoringListener();
-      const { qualitiesSubscription, subscribeQualitiesCommandHandler } =
-        arrangeWithInitialValue([]);
-      await qualitiesSubscription.subscribe(recorder.listener);
-      subscribeQualitiesCommandHandler.setValue([
-        { ...lowQuality, index: NaN },
-      ]);
-      expect(recorder.calls).toEqual([[{ ...lowQuality, index: 0 }]]);
-    });
-
-    test('listeners throw given non-array argument', async () => {
-      const recorder = new ArgumentStoringListener();
-      const { qualitiesSubscription, subscribeQualitiesCommandHandler } =
-        arrangeWithInitialValue([]);
-      await qualitiesSubscription.subscribe(recorder.listener);
-      try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        subscribeQualitiesCommandHandler.setValue('garbage');
-      } catch {
-        expect(true);
-        return;
-      }
-      expect.fail();
-    });
-  });
-
-  describe('failing subscription', () => {
     class RejectingPlayerBridge extends MockPlayerBridge {
       protected override handleCommand() {
         throw Error();
@@ -199,6 +85,94 @@ describe('InteractiveBridge.subscribeQualities', () => {
         return;
       }
       expect.fail();
+    });
+  });
+
+  describe('initial call', () => {
+    test('call returns promise resolving to quality list', async () => {
+      await tester.assertValueYieldsResult([], []);
+      await tester.assertValueYieldsResult(
+        [lowQuality],
+        [{ ...lowQuality, index: 0 }],
+      );
+      await tester.assertValueYieldsResult(
+        [lowQuality, medQuality],
+        [
+          { ...lowQuality, index: 0 },
+          { ...medQuality, index: 1 },
+        ],
+      );
+    });
+
+    test('non array response throws InvalidType error', async () => {
+      await tester.assertValueThrowsInvalidTypeError(null);
+      await tester.assertValueThrowsInvalidTypeError(undefined);
+      await tester.assertValueThrowsInvalidTypeError(720);
+      await tester.assertValueThrowsInvalidTypeError('1080p');
+      await tester.assertValueThrowsInvalidTypeError({});
+    });
+
+    test('malformed entries are sanitized where possible', async () => {
+      await tester.assertValueYieldsResult(
+        ['garbage'],
+        [{ label: '0', index: 0 }],
+      );
+      await tester.assertValueYieldsResult([undefined], []);
+      await tester.assertValueYieldsResult([null], [{ label: '0', index: 0 }]);
+    });
+
+    test('sparse arrays are compacted', async () => {
+      await tester.assertValueYieldsResult(
+        [undefined, lowQuality],
+        [{ ...lowQuality, index: 1 }],
+      );
+      await tester.assertValueYieldsResult(
+        [undefined, 'garbage'],
+        [{ label: '1', index: 1 }],
+      );
+      await tester.assertValueYieldsResult(
+        [undefined, 'garbage', undefined, lowQuality],
+        [
+          { label: '1', index: 1 },
+          { ...lowQuality, index: 3 },
+        ],
+      );
+    });
+
+    test('index on response object is overwritten with actual index', async () => {
+      await tester.assertValueYieldsResult(
+        [
+          { ...lowQuality, index: 501 },
+          { ...lowQuality, index: NaN },
+        ],
+        [
+          { ...lowQuality, index: 0 },
+          { ...lowQuality, index: 1 },
+        ],
+      );
+    });
+
+    test('if no label given, stringified index is used', async () => {
+      const myQuality: Record<string, unknown> = { ...lowQuality };
+      delete myQuality.label;
+      await tester.assertValueYieldsResult(
+        [myQuality],
+        [{ ...myQuality, index: 0, label: '0' } as Quality],
+      );
+    });
+  });
+
+  describe('calls to listener', () => {
+    test('given subscribed listener, set value calls listener with value', async () => {
+      await tester.assertSetValueCallsListenerWithArgument(
+        [],
+        [{ ...lowQuality, index: NaN }],
+        [{ ...lowQuality, index: 0 }],
+      );
+    });
+
+    test('listeners throw given non-array argument', async () => {
+      await tester.assertSetValueThrowsInvalidTypeError([], 'garbage');
     });
   });
 });

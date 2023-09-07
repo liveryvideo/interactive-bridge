@@ -1,4 +1,5 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
+import { FullscreenSubscriber } from './InteractiveBridge/FullscreenSubscriber';
 import { StreamPhaseSubscriber } from './InteractiveBridge/StreamPhaseSubscriber';
 import type {
   Orientation,
@@ -21,6 +22,10 @@ export type {
  */
 export class InteractiveBridge extends LiveryBridge {
   video = new VideoCommands(this.sendCommand.bind(this));
+
+  private fullscreenSubscriber = new FullscreenSubscriber(
+    this.sendCommand.bind(this),
+  );
 
   private streamPhaseSubscriber = new StreamPhaseSubscriber(
     this.sendCommand.bind(this),
@@ -250,18 +255,7 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent state changes.
    */
   subscribeFullscreen(listener: (value: boolean) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'boolean') {
-        throw new Error(
-          `subscribeFullscreen value type: ${typeof value}, should be: boolean`,
-        );
-      }
-      return value;
-    }
-
-    return this.sendCommand('subscribeFullscreen', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+    return this.fullscreenSubscriber.subscribe(listener);
   }
 
   /**
