@@ -23,3 +23,6 @@ CHANGELOG.md
 
 ## dist
 /dist/
+
+## test coverage reports
+/coverage/

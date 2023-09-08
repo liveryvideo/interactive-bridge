@@ -16,3 +16,6 @@
 
 ## dist
 /dist/
+
+## test coverage reports
+/coverage/
