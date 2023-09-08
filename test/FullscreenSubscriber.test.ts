@@ -8,12 +8,12 @@ const tester = new SubscriberTestApparatus(
   FullscreenSubscriber,
 );
 
-test('given value, command subscribeStreamPhase yields response', async () => {
+test('given value, command subscribeFullscreen yields response', async () => {
   await tester.assertValueYieldsResult(true, true);
   await tester.assertValueYieldsResult(false, false);
 });
 
-test('given invalid value, command subscribeStreamPhase throws InvalidTypeError', async () => {
+test('given invalid value, command subscribeFullscreen throws InvalidTypeError', async () => {
   await tester.assertValueThrowsInvalidTypeError(null);
   await tester.assertValueThrowsInvalidTypeError(undefined);
   await tester.assertValueThrowsInvalidTypeError(0);
