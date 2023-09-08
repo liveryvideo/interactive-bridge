@@ -34,18 +34,26 @@ import { SubscriptionError } from './errors';
  * should be fixed if possible and purged if not.
  */
 
-export abstract class Subscriber<InType, OutType> {
+export class Subscriber<InType, OutType> {
+  protected command: string;
+
+  protected parser: Parser<OutType>;
+
   protected sendCommand: SendCommand<InType>;
 
-  protected abstract command: string;
-
-  constructor(sendCommand: SendCommand<InType>) {
+  constructor(
+    commandName: string,
+    parser: Parser<OutType>,
+    sendCommand: SendCommand<InType>,
+  ) {
     this.sendCommand = sendCommand;
+    this.command = commandName;
+    this.parser = parser;
   }
 
   subscribe(listener: (value: OutType) => void) {
     return this.sendCommand(this.command, undefined, (value: InType) =>
-      listener(this.parse(value)),
+      listener(this.parser.parse(value)),
     )
       .catch((error) => {
         throw new SubscriptionError(
@@ -54,27 +62,6 @@ export abstract class Subscriber<InType, OutType> {
             : `${this.command} failed for unknown reason.`,
         );
       })
-      .then(this.parse.bind(this));
-  }
-
-  protected abstract parse(value: unknown): OutType;
-}
-
-export class StrategicSubscriber<InType, OutType> extends Subscriber<
-  InType,
-  OutType
-> {
-  protected command: string;
-
-  protected parse: (value: unknown) => OutType;
-
-  constructor(
-    commandName: string,
-    parser: Parser<OutType>,
-    sendCommand: SendCommand<InType>,
-  ) {
-    super(sendCommand);
-    this.command = commandName;
-    this.parse = parser.parse;
+      .then((value) => this.parser.parse(value));
   }
 }

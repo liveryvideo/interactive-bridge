@@ -1,10 +1,10 @@
 // eslint-disable-next-line max-classes-per-file
 import type { SendCommand } from '../types';
-import { StrategicSubscriber } from '../util/Subscriber';
+import { Subscriber } from '../util/Subscriber';
 import { StreamPhaseParser } from './StreamPhaseParser';
 import type { StreamPhase } from './VideoCommands';
 
-export class StreamPhaseSubscriber extends StrategicSubscriber<
+export class StreamPhaseSubscriber extends Subscriber<
   StreamPhase,
   StreamPhase
 > {

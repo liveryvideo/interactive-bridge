@@ -4,7 +4,7 @@ import { QualitiesParser } from '../src/InteractiveBridge/QualitiesParser';
 import type { Quality } from '../src/InteractiveBridge/VideoCommands';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 import { SubscribeQualitiesCommandHandler } from '../src/SubscribeQualitiesCommandHandler';
-import { StrategicSubscriber } from '../src/util/Subscriber';
+import { Subscriber } from '../src/util/Subscriber';
 import { SubscriptionError } from '../src/util/errors';
 import { noop } from '../src/util/functions';
 import { ArgumentStoringListener } from './doubles/ArgumentStoringListener';
@@ -47,7 +47,7 @@ describe('InteractiveBridge.subscribeQualities', () => {
   function arrangeWithInitialValue(qualities: any) {
     const handler = new SubscribeQualitiesCommandHandler(qualities);
     const sendCommand = createSendCommand(handler);
-    const subscriber = new StrategicSubscriber(
+    const subscriber = new Subscriber(
       'subscribeQualities',
       new QualitiesParser(),
       sendCommand,

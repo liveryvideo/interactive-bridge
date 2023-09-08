@@ -1,14 +1,14 @@
 /* eslint-disable max-classes-per-file */
 import { expect, test } from 'vitest';
+import type { Parser } from '../src/util/Parser';
 import { SubscribeCommandHandler } from '../src/util/SubscribeCommandHandler';
 import { Subscriber } from '../src/util/Subscriber';
 import { InvalidTypeError } from '../src/util/errors';
+import { identity } from '../src/util/functions';
 import { ArgumentStoringListener } from './doubles/ArgumentStoringListener';
 import { createSendCommand } from './doubles/createSendCommand';
 
-class NumberSubscription extends Subscriber<number, number> {
-  command = 'subscribeNumber';
-
+class NumberParser implements Parser<number> {
   parse(value: unknown) {
     if (typeof value !== 'number') {
       throw new InvalidTypeError(value);
@@ -17,8 +17,8 @@ class NumberSubscription extends Subscriber<number, number> {
   }
 }
 
-class TransformingNumberSubscription extends Subscriber<number, number> {
-  command = 'subscribeNumber';
+class TransformingNumberParser implements Parser<number> {
+  transform = identity<number>;
 
   parse(value: unknown) {
     if (typeof value !== 'number') {
@@ -26,8 +26,6 @@ class TransformingNumberSubscription extends Subscriber<number, number> {
     }
     return this.transform(value);
   }
-
-  transform: (value: number) => number = (value) => value;
 }
 
 function arrangeWithInitialValue(value: number) {
@@ -36,7 +34,11 @@ function arrangeWithInitialValue(value: number) {
     value,
   );
   const sendCommand = createSendCommand(subscribeNumberCommandHandler);
-  const subscriber = new NumberSubscription(sendCommand);
+  const subscriber = new Subscriber<number, number>(
+    'subscribeNumber',
+    new NumberParser(),
+    sendCommand,
+  );
   const argStoringListener = new ArgumentStoringListener<number>();
 
   return {
@@ -114,8 +116,9 @@ test('when value is set listener is called with value as argument', async () => 
 test('set values are parsed before being handed to listener', async () => {
   const handler = new SubscribeCommandHandler('subscribeNumber', 0);
   const sendCommand = createSendCommand(handler);
-  const subscriber = new TransformingNumberSubscription(sendCommand);
-  subscriber.transform = (v) => v + 1;
+  const parser = new TransformingNumberParser();
+  parser.transform = (v) => v + 1;
+  const subscriber = new Subscriber('subscribeNumber', parser, sendCommand);
   const recorder = new ArgumentStoringListener<number>();
   await subscriber.subscribe(recorder.listener);
   handler.setValue(10);

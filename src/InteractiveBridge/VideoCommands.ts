@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import type { LiveryBridge } from '../LiveryBridge';
-import { StrategicSubscriber } from '../util/Subscriber';
+import { Subscriber } from '../util/Subscriber';
 import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
 import { AirplayParser } from './AirplayParser';
@@ -59,64 +59,58 @@ export interface Quality {
 }
 
 export class VideoCommands {
-  private airplaySubscriber: StrategicSubscriber<boolean, boolean>;
+  private airplaySubscriber: Subscriber<boolean, boolean>;
 
-  private chromecastSubscriber: StrategicSubscriber<
+  private chromecastSubscriber: Subscriber<
     string | undefined,
     string | undefined
   >;
 
-  private controlsSubscriber: StrategicSubscriber<Controls, Controls>;
+  private controlsSubscriber: Subscriber<Controls, Controls>;
 
-  private mutedSubscriber: StrategicSubscriber<boolean, boolean>;
+  private mutedSubscriber: Subscriber<boolean, boolean>;
 
-  private pictureInPictureSubscriber: StrategicSubscriber<boolean, boolean>;
+  private pictureInPictureSubscriber: Subscriber<boolean, boolean>;
 
-  private qualitiesSubscriber: StrategicSubscriber<
-    (Quality | undefined)[],
-    Quality[]
-  >;
+  private qualitiesSubscriber: Subscriber<(Quality | undefined)[], Quality[]>;
 
   private sendCommand: LiveryBridge['sendCommand'];
 
-  private unmuteRequiresInteractionSubscription: StrategicSubscriber<
-    boolean,
-    boolean
-  >;
+  private unmuteRequiresInteractionSubscription: Subscriber<boolean, boolean>;
 
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
-    this.airplaySubscriber = new StrategicSubscriber(
+    this.airplaySubscriber = new Subscriber(
       'subscribeAirplay',
       new AirplayParser(),
       this.sendCommand.bind(this),
     );
-    this.chromecastSubscriber = new StrategicSubscriber(
+    this.chromecastSubscriber = new Subscriber(
       'subscribeChromecast',
       new ChromecastParser(),
       this.sendCommand.bind(this),
     );
-    this.controlsSubscriber = new StrategicSubscriber(
+    this.controlsSubscriber = new Subscriber(
       'subscribeControls',
       new ControlsParser(),
       this.sendCommand.bind(this),
     );
-    this.mutedSubscriber = new StrategicSubscriber(
+    this.mutedSubscriber = new Subscriber(
       'subscribeMuted',
       new MutedParser(),
       this.sendCommand.bind(this),
     );
-    this.pictureInPictureSubscriber = new StrategicSubscriber(
+    this.pictureInPictureSubscriber = new Subscriber(
       'subscribePictureInPicture',
       new PictureInPictureParser(),
       this.sendCommand.bind(this),
     );
-    this.qualitiesSubscriber = new StrategicSubscriber(
+    this.qualitiesSubscriber = new Subscriber(
       'subscribeQualities',
       new QualitiesParser(),
       this.sendCommand.bind(this),
     );
-    this.unmuteRequiresInteractionSubscription = new StrategicSubscriber(
+    this.unmuteRequiresInteractionSubscription = new Subscriber(
       'subscribeUnmuteRequiresInteraction',
       new UnmuteRequiresInteractionParser(),
       this.sendCommand.bind(this),

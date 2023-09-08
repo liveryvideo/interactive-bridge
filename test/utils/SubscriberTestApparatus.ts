@@ -6,7 +6,7 @@
 import { expect } from 'vitest';
 import type { Parser } from '../../src/util/Parser';
 import type { SubscribeCommandHandler } from '../../src/util/SubscribeCommandHandler';
-import { StrategicSubscriber } from '../../src/util/Subscriber';
+import { Subscriber } from '../../src/util/Subscriber';
 import { InvalidTypeError } from '../../src/util/errors';
 import { noop } from '../../src/util/functions';
 import { ArgumentStoringListener } from '../doubles/ArgumentStoringListener';
@@ -75,7 +75,7 @@ export class SubscriberTestApparatus<T, OutType> {
       initialValue,
     );
     const sendCommand = createSendCommand(handler);
-    const subscriber = new StrategicSubscriber(
+    const subscriber = new Subscriber(
       this.commandName,
       new this.ParserClass(),
       sendCommand,
