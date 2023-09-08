@@ -1,17 +1,13 @@
-import { Subscriber } from '../util/Subscriber';
+/* eslint-disable max-classes-per-file */
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import { ChromecastParser } from './ChromecastParser';
 
-export class ChromecastSubscriber extends Subscriber<
+export class ChromecastSubscriber extends StrategicSubscriber<
   string | undefined,
   string | undefined
 > {
-  protected command = 'subscribeChromecast';
-
-  parse(value: unknown) {
-    if (value !== undefined && typeof value !== 'string') {
-      throw new Error(
-        `subscribeChromecast value type: ${typeof value}, should be: string | undefined`,
-      );
-    }
-    return value;
+  constructor(sendCommand: SendCommand<string | undefined>) {
+    super('subscribeChromecast', new ChromecastParser(), sendCommand);
   }
 }

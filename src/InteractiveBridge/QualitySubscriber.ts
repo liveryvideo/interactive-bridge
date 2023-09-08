@@ -1,14 +1,10 @@
-import { Subscriber } from '../util/Subscriber';
+// eslint-disable-next-line max-classes-per-file
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import { QualityParser } from './QualityParser';
 
-export class QualitySubscriber extends Subscriber<string, string> {
-  protected command = 'subscribeQuality';
-
-  parse(value: unknown) {
-    if (typeof value !== 'string') {
-      throw new Error(
-        `subscribeQuality value type: ${typeof value}, should be: string`,
-      );
-    }
-    return value;
+export class QualitySubscriber extends StrategicSubscriber<string, string> {
+  constructor(sendCommand: SendCommand<string>) {
+    super('subscribeQuality', new QualityParser(), sendCommand);
   }
 }

@@ -1,16 +1,10 @@
-import { Subscriber } from '../util/Subscriber';
-import { stringify } from '../util/stringify';
+/* eslint-disable max-classes-per-file */
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import { AirplayParser } from './AirplayParser';
 
-export class AirplaySubscriber extends Subscriber<boolean, boolean> {
-  protected command = 'subscribeAirplay';
-
-  parse(value: unknown) {
-    if (typeof value !== 'boolean') {
-      const strValue = stringify(value);
-      throw new Error(
-        `subscribeAirplay value: ${strValue}, should be: boolean`,
-      );
-    }
-    return value;
+export class AirplaySubscriber extends StrategicSubscriber<boolean, boolean> {
+  constructor(sendCommand: SendCommand<boolean>) {
+    super('subscribeAirplay', new AirplayParser(), sendCommand);
   }
 }

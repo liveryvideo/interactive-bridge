@@ -1,16 +1,13 @@
-import { Subscriber } from '../util/Subscriber';
-import { stringify } from '../util/stringify';
+/* eslint-disable max-classes-per-file */
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import { FullscreenParser } from './FullscreenParser';
 
-export class FullscreenSubscriber extends Subscriber<boolean, boolean> {
-  protected command = 'subscribeFullscreen';
-
-  parse(value: unknown) {
-    if (typeof value !== 'boolean') {
-      const strValue = stringify(value);
-      throw new Error(
-        `subscribeFullscreen value: ${strValue}, should be: boolean`,
-      );
-    }
-    return value;
+export class FullscreenSubscriber extends StrategicSubscriber<
+  boolean,
+  boolean
+> {
+  constructor(sendCommand: SendCommand<boolean>) {
+    super('subscribeFullscreen', new FullscreenParser(), sendCommand);
   }
 }

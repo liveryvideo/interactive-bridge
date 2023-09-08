@@ -1,5 +1,5 @@
 import { describe, test } from 'vitest';
-import type { Controls } from '../src/InteractiveBridge/ControlsSubscriber';
+import type { Controls } from '../src/InteractiveBridge/ControlsParser';
 import { ControlsSubscriber } from '../src/InteractiveBridge/ControlsSubscriber';
 import { SubscribeControlsCommandHandler } from '../src/SubscribeControlsCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';

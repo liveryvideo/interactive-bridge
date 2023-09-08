@@ -1,20 +1,14 @@
+// eslint-disable-next-line max-classes-per-file
 import type { Orientation } from '../InteractiveBridge';
-import { Subscriber } from '../util/Subscriber';
-import { stringify } from '../util/stringify';
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import { OrientationParser } from './OrientationParser';
 
-export class OrientationSubscriber extends Subscriber<
+export class OrientationSubscriber extends StrategicSubscriber<
   Orientation,
   Orientation
 > {
-  protected command = 'subscribeOrientation';
-
-  parse(value: unknown) {
-    if (value !== 'landscape' && value !== 'portrait') {
-      const strValue = stringify(value);
-      throw new Error(
-        `subscribeOrientation value: ${strValue}, should be: "landscape" | "portrait"`,
-      );
-    }
-    return value;
+  constructor(sendCommand: SendCommand<Orientation>) {
+    super('subscribeOrientation', new OrientationParser(), sendCommand);
   }
 }

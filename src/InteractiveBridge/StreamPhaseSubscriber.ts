@@ -1,20 +1,14 @@
-import { Subscriber } from '../util/Subscriber';
-import { stringify } from '../util/stringify';
+// eslint-disable-next-line max-classes-per-file
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import { StreamPhaseParser } from './StreamPhaseParser';
 import type { StreamPhase } from './VideoCommands';
 
-export class StreamPhaseSubscriber extends Subscriber<
+export class StreamPhaseSubscriber extends StrategicSubscriber<
   StreamPhase,
   StreamPhase
 > {
-  protected command = 'subscribeStreamPhase';
-
-  parse(value: unknown) {
-    if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
-      const strValue = stringify(value);
-      throw new Error(
-        `subscribeStreamPhase value: ${strValue}, should be: "LIVE" | "POST" | "PRE"`,
-      );
-    }
-    return value;
+  constructor(sendCommand: SendCommand<StreamPhase>) {
+    super('subscribeStreamPhase', new StreamPhaseParser(), sendCommand);
   }
 }

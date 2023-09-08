@@ -1,19 +1,17 @@
-import { Subscriber } from '../util/Subscriber';
-import { stringify } from '../util/stringify';
+// eslint-disable-next-line max-classes-per-file
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import { UnmuteRequiresInteractionParser } from './UnmuteRequiresInteractionParser';
 
-export class UnmuteRequiresInteractionSubscriber extends Subscriber<
+export class UnmuteRequiresInteractionSubscriber extends StrategicSubscriber<
   boolean,
   boolean
 > {
-  protected command = 'subscribeUnmuteRequiresInteraction';
-
-  parse(value: unknown) {
-    if (typeof value !== 'boolean') {
-      const strValue = stringify(value);
-      throw new Error(
-        `subscribeUnmuteRequiresInteraction value: ${strValue}, should be: boolean`,
-      );
-    }
-    return value;
+  constructor(sendCommand: SendCommand<boolean>) {
+    super(
+      'subscribeUnmuteRequiresInteraction',
+      new UnmuteRequiresInteractionParser(),
+      sendCommand,
+    );
   }
 }

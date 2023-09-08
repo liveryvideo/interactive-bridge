@@ -1,14 +1,10 @@
-import { Subscriber } from '../util/Subscriber';
-import { stringify } from '../util/stringify';
+/* eslint-disable max-classes-per-file */
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import { MutedParser } from './MutedParser';
 
-export class MutedSubscriber extends Subscriber<boolean, boolean> {
-  protected command = 'subscribeMuted';
-
-  parse(value: unknown) {
-    if (typeof value !== 'boolean') {
-      const strValue = stringify(value);
-      throw new Error(`subscribeMuted value: ${strValue}, should be: boolean`);
-    }
-    return value;
+export class MutedSubscriber extends StrategicSubscriber<boolean, boolean> {
+  constructor(sendCommand: SendCommand<boolean>) {
+    super('subscribeMuted', new MutedParser(), sendCommand);
   }
 }

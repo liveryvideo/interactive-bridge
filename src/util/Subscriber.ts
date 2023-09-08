@@ -1,4 +1,6 @@
+// eslint-disable-next-line max-classes-per-file
 import type { SendCommand } from '../types';
+import type { Parser } from './Parser';
 import { SubscriptionError } from './errors';
 
 /**
@@ -56,4 +58,23 @@ export abstract class Subscriber<InType, OutType> {
   }
 
   protected abstract parse(value: unknown): OutType;
+}
+
+export class StrategicSubscriber<InType, OutType> extends Subscriber<
+  InType,
+  OutType
+> {
+  protected command: string;
+
+  protected parse: (value: unknown) => OutType;
+
+  constructor(
+    commandName: string,
+    parser: Parser<OutType>,
+    sendCommand: SendCommand<InType>,
+  ) {
+    super(sendCommand);
+    this.command = commandName;
+    this.parse = parser.parse;
+  }
 }

@@ -1,53 +1,14 @@
-import { Subscriber } from '../util/Subscriber';
-import { InvalidTypeError } from '../util/errors';
-import { fieldFromIfTypeWithDefault } from '../util/fieldFromIfTypeWithDefault';
+/* eslint-disable max-classes-per-file */
+import type { SendCommand } from '../types';
+import { StrategicSubscriber } from '../util/Subscriber';
+import type { Controls } from './ControlsParser';
+import { ControlsParser } from './ControlsParser';
 
-export const controls = [
-  'cast',
-  'contact',
-  'error',
-  'fullscreen',
-  'mute',
-  'pip',
-  'play',
-  'quality',
-  'scrubber',
-] as const;
-export type Control = (typeof controls)[number];
-export type Controls = Record<Control, boolean>;
-
-export class ControlsSubscriber extends Subscriber<Controls, Controls> {
-  protected command = 'subscribeControls';
-
-  protected parse(value: unknown) {
-    if (typeof value !== 'object') {
-      throw new InvalidTypeError(
-        value,
-        `getLiveryParams value type: ${typeof value}, should be: object`,
-      );
-    }
-    if (value === null) {
-      throw new InvalidTypeError(
-        value,
-        `getLiveryParams value type: null, should be: object`,
-      );
-    }
-    if (value instanceof Array) {
-      throw new InvalidTypeError(
-        value,
-        `getLiveryParams value type: Array, should be: Object`,
-      );
-    }
-    const output: Record<string, boolean> = {};
-    controls.forEach((control) => {
-      output[control] = fieldFromIfTypeWithDefault(
-        control,
-        value,
-        'boolean',
-        false,
-      );
-    });
-
-    return output as Controls;
+export class ControlsSubscriber extends StrategicSubscriber<
+  Controls,
+  Controls
+> {
+  constructor(sendCommand: SendCommand<Controls>) {
+    super('subscribeControls', new ControlsParser(), sendCommand);
   }
 }

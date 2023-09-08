@@ -4,7 +4,7 @@ import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
 import { AirplaySubscriber } from './AirplaySubscriber';
 import { ChromecastSubscriber } from './ChromecastSubscriber';
-import type { Controls } from './ControlsSubscriber';
+import type { Controls } from './ControlsParser';
 import { ControlsSubscriber } from './ControlsSubscriber';
 import { MutedSubscriber } from './MutedSubscriber';
 import { PictureInPictureSubscriber } from './PictureInPictureSubscriber';
