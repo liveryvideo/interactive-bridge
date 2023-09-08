@@ -3,6 +3,7 @@ import type { LiveryBridge } from '../LiveryBridge';
 import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
 import { AirplaySubscriber } from './AirplaySubscriber';
+import { MutedSubscriber } from './MutedSubscriber';
 import { QualitiesSubscriber } from './QualitiesSubscriber';
 
 const knownPlaybackStates = [
@@ -55,16 +56,19 @@ export interface Quality {
 export class VideoCommands {
   private airplaySubscription: AirplaySubscriber;
 
+  private mutedSubscription: MutedSubscriber;
+
   private qualitiesSubscription: QualitiesSubscriber;
 
   private sendCommand: LiveryBridge['sendCommand'];
 
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
-    this.qualitiesSubscription = new QualitiesSubscriber(
+    this.airplaySubscription = new AirplaySubscriber(
       this.sendCommand.bind(this),
     );
-    this.airplaySubscription = new AirplaySubscriber(
+    this.mutedSubscription = new MutedSubscriber(this.sendCommand.bind(this));
+    this.qualitiesSubscription = new QualitiesSubscriber(
       this.sendCommand.bind(this),
     );
   }
@@ -207,7 +211,9 @@ export class VideoCommands {
    */
   // subscribeError(listener): string | undefined {}
 
-  // subscribeMuted(listener): boolean {}
+  subscribeMuted(listener: (value: boolean) => void) {
+    return this.mutedSubscription.subscribe(listener);
+  }
 
   // subscribePictureInPicture(listener): boolean {}
 

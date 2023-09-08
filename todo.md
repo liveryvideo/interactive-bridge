@@ -7,4 +7,18 @@
 - create documentation for Transceiver
 - refine port and target options interfaces
 
-- unit test SubscribeCommandHandler
+/\*
+handleCommand could yield
+{
+value: T,
+done: boolean,
+} | undefined
+
+listener shoud receive
+{
+value: T,
+done: boolean
+}
+
+To help with composite pattern
+\*/
