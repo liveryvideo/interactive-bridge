@@ -2,6 +2,7 @@
 import type { LiveryBridge } from '../LiveryBridge';
 import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
+import { AirplaySubscriber } from './AirplaySubscriber';
 import { QualitiesSubscriber } from './QualitiesSubscriber';
 
 const knownPlaybackStates = [
@@ -52,6 +53,8 @@ export interface Quality {
 }
 
 export class VideoCommands {
+  private airplaySubscription: AirplaySubscriber;
+
   private qualitiesSubscription: QualitiesSubscriber;
 
   private sendCommand: LiveryBridge['sendCommand'];
@@ -59,6 +62,9 @@ export class VideoCommands {
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
     this.qualitiesSubscription = new QualitiesSubscriber(
+      this.sendCommand.bind(this),
+    );
+    this.airplaySubscription = new AirplaySubscriber(
       this.sendCommand.bind(this),
     );
   }
@@ -181,7 +187,9 @@ export class VideoCommands {
   /**
    * Returns true when Airplay is being used, false otherwise
    */
-  // subscribeAirplay(listener): boolean {}
+  subscribeAirplay(listener: (value: boolean) => void) {
+    return this.airplaySubscription.subscribe(listener);
+  }
 
   /**
    * Returns name of device that is being cast to or undefined
