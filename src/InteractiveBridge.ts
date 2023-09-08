@@ -1,5 +1,6 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { FullscreenSubscriber } from './InteractiveBridge/FullscreenSubscriber';
+import { OrientationSubscriber } from './InteractiveBridge/OrientationSubscriber';
 import { StreamPhaseSubscriber } from './InteractiveBridge/StreamPhaseSubscriber';
 import type {
   Orientation,
@@ -8,7 +9,6 @@ import type {
 } from './InteractiveBridge/VideoCommands';
 import { VideoCommands } from './InteractiveBridge/VideoCommands';
 import { LiveryBridge } from './LiveryBridge';
-import { stringify } from './util/stringify';
 
 export type {
   Feature,
@@ -24,6 +24,10 @@ export class InteractiveBridge extends LiveryBridge {
   video = new VideoCommands(this.sendCommand.bind(this));
 
   private fullscreenSubscriber = new FullscreenSubscriber(
+    this.sendCommand.bind(this),
+  );
+
+  private orientationSubscriber = new OrientationSubscriber(
     this.sendCommand.bind(this),
   );
 
@@ -263,19 +267,7 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent orientations.
    */
   subscribeOrientation(listener: (orientation: Orientation) => void) {
-    function validate(value: unknown) {
-      if (value !== 'landscape' && value !== 'portrait') {
-        const strValue = stringify(value);
-        throw new Error(
-          `subscribeOrientation value: ${strValue}, should be: "landscape" | "portrait"`,
-        );
-      }
-      return value;
-    }
-
-    return this.sendCommand('subscribeOrientation', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+    return this.orientationSubscriber.subscribe(listener);
   }
 
   subscribeQualities(listener: (value: Quality[]) => void) {
