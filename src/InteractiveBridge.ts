@@ -1,6 +1,7 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { FullscreenSubscriber } from './InteractiveBridge/FullscreenSubscriber';
 import { OrientationSubscriber } from './InteractiveBridge/OrientationSubscriber';
+import { QualitySubscriber } from './InteractiveBridge/QualitySubscriber';
 import { StreamPhaseSubscriber } from './InteractiveBridge/StreamPhaseSubscriber';
 import type {
   Orientation,
@@ -28,6 +29,10 @@ export class InteractiveBridge extends LiveryBridge {
   );
 
   private orientationSubscriber = new OrientationSubscriber(
+    this.sendCommand.bind(this),
+  );
+
+  private qualitySubscriber = new QualitySubscriber(
     this.sendCommand.bind(this),
   );
 
@@ -279,18 +284,7 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent quality changes.
    */
   subscribeQuality(listener: (value: string) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `subscribeQuality value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    }
-
-    return this.sendCommand('subscribeQuality', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+    return this.qualitySubscriber.subscribe(listener);
   }
 
   /**
