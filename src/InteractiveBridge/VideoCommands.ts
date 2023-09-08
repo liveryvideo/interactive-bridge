@@ -4,6 +4,7 @@ import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
 import { AirplaySubscriber } from './AirplaySubscriber';
 import { MutedSubscriber } from './MutedSubscriber';
+import { PictureInPictureSubscriber } from './PictureInPictureSubscriber';
 import { QualitiesSubscriber } from './QualitiesSubscriber';
 
 const knownPlaybackStates = [
@@ -58,6 +59,8 @@ export class VideoCommands {
 
   private mutedSubscription: MutedSubscriber;
 
+  private pictureInPictureSubscription: PictureInPictureSubscriber;
+
   private qualitiesSubscription: QualitiesSubscriber;
 
   private sendCommand: LiveryBridge['sendCommand'];
@@ -68,6 +71,9 @@ export class VideoCommands {
       this.sendCommand.bind(this),
     );
     this.mutedSubscription = new MutedSubscriber(this.sendCommand.bind(this));
+    this.pictureInPictureSubscription = new PictureInPictureSubscriber(
+      this.sendCommand.bind(this),
+    );
     this.qualitiesSubscription = new QualitiesSubscriber(
       this.sendCommand.bind(this),
     );
@@ -215,7 +221,9 @@ export class VideoCommands {
     return this.mutedSubscription.subscribe(listener);
   }
 
-  // subscribePictureInPicture(listener): boolean {}
+  subscribePictureInPicture(listener: (value: boolean) => void) {
+    return this.pictureInPictureSubscription.subscribe(listener);
+  }
 
   /**
    * Returns current mode of playback, e.g: buffering, syncing, ABR, stall management, etc.
