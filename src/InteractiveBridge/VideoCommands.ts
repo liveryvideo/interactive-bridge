@@ -4,6 +4,8 @@ import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
 import { AirplaySubscriber } from './AirplaySubscriber';
 import { ChromecastSubscriber } from './ChromecastSubscriber';
+import type { Controls } from './ControlsSubscriber';
+import { ControlsSubscriber } from './ControlsSubscriber';
 import { MutedSubscriber } from './MutedSubscriber';
 import { PictureInPictureSubscriber } from './PictureInPictureSubscriber';
 import { QualitiesSubscriber } from './QualitiesSubscriber';
@@ -57,15 +59,17 @@ export interface Quality {
 }
 
 export class VideoCommands {
-  private airplaySubscription: AirplaySubscriber;
+  private airplaySubscriber: AirplaySubscriber;
 
-  private chromecastSubscription: ChromecastSubscriber;
+  private chromecastSubscriber: ChromecastSubscriber;
 
-  private mutedSubscription: MutedSubscriber;
+  private controlsSubscriber: ControlsSubscriber;
 
-  private pictureInPictureSubscription: PictureInPictureSubscriber;
+  private mutedSubscriber: MutedSubscriber;
 
-  private qualitiesSubscription: QualitiesSubscriber;
+  private pictureInPictureSubscriber: PictureInPictureSubscriber;
+
+  private qualitiesSubscriber: QualitiesSubscriber;
 
   private sendCommand: LiveryBridge['sendCommand'];
 
@@ -73,17 +77,18 @@ export class VideoCommands {
 
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
-    this.airplaySubscription = new AirplaySubscriber(
+    this.airplaySubscriber = new AirplaySubscriber(this.sendCommand.bind(this));
+    this.chromecastSubscriber = new ChromecastSubscriber(
       this.sendCommand.bind(this),
     );
-    this.chromecastSubscription = new ChromecastSubscriber(
+    this.controlsSubscriber = new ControlsSubscriber(
       this.sendCommand.bind(this),
     );
-    this.mutedSubscription = new MutedSubscriber(this.sendCommand.bind(this));
-    this.pictureInPictureSubscription = new PictureInPictureSubscriber(
+    this.mutedSubscriber = new MutedSubscriber(this.sendCommand.bind(this));
+    this.pictureInPictureSubscriber = new PictureInPictureSubscriber(
       this.sendCommand.bind(this),
     );
-    this.qualitiesSubscription = new QualitiesSubscriber(
+    this.qualitiesSubscriber = new QualitiesSubscriber(
       this.sendCommand.bind(this),
     );
     this.unmuteRequiresInteractionSubscription =
@@ -209,21 +214,23 @@ export class VideoCommands {
    * Returns true when Airplay is being used, false otherwise
    */
   subscribeAirplay(listener: (value: boolean) => void) {
-    return this.airplaySubscription.subscribe(listener);
+    return this.airplaySubscriber.subscribe(listener);
   }
 
   /**
    * Returns name of device that is being cast to or undefined
    */
   subscribeChromecast(listener: (value: string | undefined) => void) {
-    return this.chromecastSubscription.subscribe(listener);
+    return this.chromecastSubscriber.subscribe(listener);
   }
 
   /**
    * Where Controls is an object with boolean properties:
    * cast, contact, error, fullscreen, mute, pip, play, quality, scrubber
    */
-  // subscribeControls(listener): Controls {}
+  subscribeControls(listener: (value: Controls) => void) {
+    return this.controlsSubscriber.subscribe(listener);
+  }
 
   /**
    * Current player error message or undefined
@@ -231,11 +238,11 @@ export class VideoCommands {
   // subscribeError(listener): string | undefined {}
 
   subscribeMuted(listener: (value: boolean) => void) {
-    return this.mutedSubscription.subscribe(listener);
+    return this.mutedSubscriber.subscribe(listener);
   }
 
   subscribePictureInPicture(listener: (value: boolean) => void) {
-    return this.pictureInPictureSubscription.subscribe(listener);
+    return this.pictureInPictureSubscriber.subscribe(listener);
   }
 
   /**
@@ -260,7 +267,7 @@ export class VideoCommands {
    * in the list of qualities returned by subscribeQualities.
    */
   subscribeQualities(listener: (value: Quality[]) => void) {
-    return this.qualitiesSubscription.subscribe(listener);
+    return this.qualitiesSubscriber.subscribe(listener);
   }
 
   /**
