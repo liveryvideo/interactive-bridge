@@ -6,6 +6,7 @@ import { AirplaySubscriber } from './AirplaySubscriber';
 import { MutedSubscriber } from './MutedSubscriber';
 import { PictureInPictureSubscriber } from './PictureInPictureSubscriber';
 import { QualitiesSubscriber } from './QualitiesSubscriber';
+import { UnmuteRequiresInteractionSubscriber } from './UnmuteRequiresInteractionSubscriber';
 
 const knownPlaybackStates = [
   'BUFFERING',
@@ -65,6 +66,8 @@ export class VideoCommands {
 
   private sendCommand: LiveryBridge['sendCommand'];
 
+  private unmuteRequiresInteractionSubscription: UnmuteRequiresInteractionSubscriber;
+
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
     this.airplaySubscription = new AirplaySubscriber(
@@ -77,6 +80,8 @@ export class VideoCommands {
     this.qualitiesSubscription = new QualitiesSubscriber(
       this.sendCommand.bind(this),
     );
+    this.unmuteRequiresInteractionSubscription =
+      new UnmuteRequiresInteractionSubscriber(this.sendCommand.bind(this));
   }
 
   /**
@@ -263,5 +268,7 @@ export class VideoCommands {
    * In this case the web player currently shows a special unmute button
    * to highlight this fact to users and facilitate unmuting.
    */
-  // subscribeUnmuteRequiresInteraction(listener): boolean {}
+  subscribeUnmuteRequiresInteraction(listener: (value: boolean) => void) {
+    return this.unmuteRequiresInteractionSubscription.subscribe(listener);
+  }
 }
