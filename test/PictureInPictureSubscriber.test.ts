@@ -1,11 +1,12 @@
 import { test } from 'vitest';
-import { PictureInPictureSubscriber } from '../src/InteractiveBridge/PictureInPictureSubscriber';
+import { PictureInPictureParser } from '../src/InteractiveBridge/PictureInPictureParser';
 import { SubscribePictureInPictureCommandHandler } from '../src/SubscribePictureInPictureCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
+  'subscribePictureInPicture',
+  PictureInPictureParser,
   SubscribePictureInPictureCommandHandler,
-  PictureInPictureSubscriber,
 );
 
 test('given value, command subscribePictureInPicture yields response', async () => {

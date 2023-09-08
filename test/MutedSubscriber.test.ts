@@ -1,11 +1,12 @@
 import { test } from 'vitest';
-import { MutedSubscriber } from '../src/InteractiveBridge/MutedSubscriber';
+import { MutedParser } from '../src/InteractiveBridge/MutedParser';
 import { SubscribeMutedCommandHandler } from '../src/SubscribeMutedCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
+  'subscribeMuted',
+  MutedParser,
   SubscribeMutedCommandHandler,
-  MutedSubscriber,
 );
 
 test('given value, command subscribeMuted yields response', async () => {

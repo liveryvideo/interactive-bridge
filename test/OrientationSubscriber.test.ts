@@ -1,11 +1,12 @@
 import { test } from 'vitest';
-import { OrientationSubscriber } from '../src/InteractiveBridge/OrientationSubscriber';
+import { OrientationParser } from '../src/InteractiveBridge/OrientationParser';
 import { SubscribeOrientationCommandHandler } from '../src/SubscribeOrientationCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
+  'subscribeOrientation',
+  OrientationParser,
   SubscribeOrientationCommandHandler,
-  OrientationSubscriber,
 );
 
 test('given value, command subscribeOrientation yields response', async () => {

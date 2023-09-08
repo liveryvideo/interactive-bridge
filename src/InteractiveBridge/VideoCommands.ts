@@ -1,15 +1,15 @@
 // eslint-disable-next-line max-classes-per-file
 import type { LiveryBridge } from '../LiveryBridge';
+import { StrategicSubscriber } from '../util/Subscriber';
 import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
-import { AirplaySubscriber } from './AirplaySubscriber';
-import { ChromecastSubscriber } from './ChromecastSubscriber';
-import type { Controls } from './ControlsParser';
-import { ControlsSubscriber } from './ControlsSubscriber';
-import { MutedSubscriber } from './MutedSubscriber';
-import { PictureInPictureSubscriber } from './PictureInPictureSubscriber';
-import { QualitiesSubscriber } from './QualitiesSubscriber';
-import { UnmuteRequiresInteractionSubscriber } from './UnmuteRequiresInteractionSubscriber';
+import { AirplayParser } from './AirplayParser';
+import { ChromecastParser } from './ChromecastParser';
+import { ControlsParser, type Controls } from './ControlsParser';
+import { MutedParser } from './MutedParser';
+import { PictureInPictureParser } from './PictureInPictureParser';
+import { QualitiesParser } from './QualitiesParser';
+import { UnmuteRequiresInteractionParser } from './UnmuteRequiresInteractionParser';
 
 const knownPlaybackStates = [
   'BUFFERING',
@@ -59,40 +59,68 @@ export interface Quality {
 }
 
 export class VideoCommands {
-  private airplaySubscriber: AirplaySubscriber;
+  private airplaySubscriber: StrategicSubscriber<boolean, boolean>;
 
-  private chromecastSubscriber: ChromecastSubscriber;
+  private chromecastSubscriber: StrategicSubscriber<
+    string | undefined,
+    string | undefined
+  >;
 
-  private controlsSubscriber: ControlsSubscriber;
+  private controlsSubscriber: StrategicSubscriber<Controls, Controls>;
 
-  private mutedSubscriber: MutedSubscriber;
+  private mutedSubscriber: StrategicSubscriber<boolean, boolean>;
 
-  private pictureInPictureSubscriber: PictureInPictureSubscriber;
+  private pictureInPictureSubscriber: StrategicSubscriber<boolean, boolean>;
 
-  private qualitiesSubscriber: QualitiesSubscriber;
+  private qualitiesSubscriber: StrategicSubscriber<
+    (Quality | undefined)[],
+    Quality[]
+  >;
 
   private sendCommand: LiveryBridge['sendCommand'];
 
-  private unmuteRequiresInteractionSubscription: UnmuteRequiresInteractionSubscriber;
+  private unmuteRequiresInteractionSubscription: StrategicSubscriber<
+    boolean,
+    boolean
+  >;
 
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
-    this.airplaySubscriber = new AirplaySubscriber(this.sendCommand.bind(this));
-    this.chromecastSubscriber = new ChromecastSubscriber(
+    this.airplaySubscriber = new StrategicSubscriber(
+      'subscribeAirplay',
+      new AirplayParser(),
       this.sendCommand.bind(this),
     );
-    this.controlsSubscriber = new ControlsSubscriber(
+    this.chromecastSubscriber = new StrategicSubscriber(
+      'subscribeChromecast',
+      new ChromecastParser(),
       this.sendCommand.bind(this),
     );
-    this.mutedSubscriber = new MutedSubscriber(this.sendCommand.bind(this));
-    this.pictureInPictureSubscriber = new PictureInPictureSubscriber(
+    this.controlsSubscriber = new StrategicSubscriber(
+      'subscribeControls',
+      new ControlsParser(),
       this.sendCommand.bind(this),
     );
-    this.qualitiesSubscriber = new QualitiesSubscriber(
+    this.mutedSubscriber = new StrategicSubscriber(
+      'subscribeMuted',
+      new MutedParser(),
       this.sendCommand.bind(this),
     );
-    this.unmuteRequiresInteractionSubscription =
-      new UnmuteRequiresInteractionSubscriber(this.sendCommand.bind(this));
+    this.pictureInPictureSubscriber = new StrategicSubscriber(
+      'subscribePictureInPicture',
+      new PictureInPictureParser(),
+      this.sendCommand.bind(this),
+    );
+    this.qualitiesSubscriber = new StrategicSubscriber(
+      'subscribeQualities',
+      new QualitiesParser(),
+      this.sendCommand.bind(this),
+    );
+    this.unmuteRequiresInteractionSubscription = new StrategicSubscriber(
+      'subscribeUnmuteRequiresInteraction',
+      new UnmuteRequiresInteractionParser(),
+      this.sendCommand.bind(this),
+    );
   }
 
   /**

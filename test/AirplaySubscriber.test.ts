@@ -1,11 +1,12 @@
 import { test } from 'vitest';
-import { AirplaySubscriber } from '../src/InteractiveBridge/AirplaySubscriber';
+import { AirplayParser } from '../src/InteractiveBridge/AirplayParser';
 import { SubscribeAirplayCommandHandler } from '../src/SubscribeAirplayCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
+  'subscribeAirplay',
+  AirplayParser,
   SubscribeAirplayCommandHandler,
-  AirplaySubscriber,
 );
 
 test('given value, command subscribeAirplay yields response', async () => {

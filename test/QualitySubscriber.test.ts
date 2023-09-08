@@ -1,11 +1,12 @@
 import { test } from 'vitest';
-import { QualitySubscriber } from '../src/InteractiveBridge/QualitySubscriber';
+import { QualityParser } from '../src/InteractiveBridge/QualityParser';
 import { SubscribeQualityCommandHandler } from '../src/SubscribeQualityCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
+  'subscribeQuality',
+  QualityParser,
   SubscribeQualityCommandHandler,
-  QualitySubscriber,
 );
 
 test('given value, command subscribeQuality yields response', async () => {

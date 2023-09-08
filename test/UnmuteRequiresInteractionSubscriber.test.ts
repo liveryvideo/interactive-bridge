@@ -1,11 +1,12 @@
 import { test } from 'vitest';
-import { UnmuteRequiresInteractionSubscriber } from '../src/InteractiveBridge/UnmuteRequiresInteractionSubscriber';
+import { UnmuteRequiresInteractionParser } from '../src/InteractiveBridge/UnmuteRequiresInteractionParser';
 import { SubscribeUnmuteRequiresInteractionCommandHandler } from '../src/SubscribeUnmuteRequiresInteractionCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
+  'subscribeUnmuteRequiresInteraction',
+  UnmuteRequiresInteractionParser,
   SubscribeUnmuteRequiresInteractionCommandHandler,
-  UnmuteRequiresInteractionSubscriber,
 );
 
 test('given value, command subscribeUnmuteRequiresInteraction yields response', async () => {

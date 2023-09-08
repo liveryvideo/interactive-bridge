@@ -1,12 +1,16 @@
 import { describe, test } from 'vitest';
-import type { Controls } from '../src/InteractiveBridge/ControlsParser';
-import { ControlsSubscriber } from '../src/InteractiveBridge/ControlsSubscriber';
+import {
+  ControlsParser,
+  type Controls,
+} from '../src/InteractiveBridge/ControlsParser';
+
 import { SubscribeControlsCommandHandler } from '../src/SubscribeControlsCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
+  'subscribeControls',
+  ControlsParser,
   SubscribeControlsCommandHandler,
-  ControlsSubscriber,
 );
 
 const allFalse: Controls = {

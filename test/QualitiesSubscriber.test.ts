@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
 import { InteractiveBridge } from '../src/InteractiveBridge';
-import { QualitiesSubscriber } from '../src/InteractiveBridge/QualitiesSubscriber';
+import { QualitiesParser } from '../src/InteractiveBridge/QualitiesParser';
 import type { Quality } from '../src/InteractiveBridge/VideoCommands';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 import { SubscribeQualitiesCommandHandler } from '../src/SubscribeQualitiesCommandHandler';
+import { StrategicSubscriber } from '../src/util/Subscriber';
 import { SubscriptionError } from '../src/util/errors';
 import { noop } from '../src/util/functions';
 import { ArgumentStoringListener } from './doubles/ArgumentStoringListener';
@@ -11,8 +12,9 @@ import { createSendCommand } from './doubles/createSendCommand';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
+  'subscribeQualities',
+  QualitiesParser,
   SubscribeQualitiesCommandHandler,
-  QualitiesSubscriber,
 );
 
 describe('InteractiveBridge.subscribeQualities', () => {
@@ -45,7 +47,11 @@ describe('InteractiveBridge.subscribeQualities', () => {
   function arrangeWithInitialValue(qualities: any) {
     const handler = new SubscribeQualitiesCommandHandler(qualities);
     const sendCommand = createSendCommand(handler);
-    const subscriber = new QualitiesSubscriber(sendCommand);
+    const subscriber = new StrategicSubscriber(
+      'subscribeQualities',
+      new QualitiesParser(),
+      sendCommand,
+    );
     return { subscriber, handler };
   }
   /* eslint-enable @typescript-eslint/no-unsafe-argument */

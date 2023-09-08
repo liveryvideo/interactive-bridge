@@ -1,28 +1,32 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { expect } from 'vitest';
+import type { Parser } from '../../src/util/Parser';
 import type { SubscribeCommandHandler } from '../../src/util/SubscribeCommandHandler';
-import type { Subscriber } from '../../src/util/Subscriber';
+import { StrategicSubscriber } from '../../src/util/Subscriber';
 import { InvalidTypeError } from '../../src/util/errors';
 import { noop } from '../../src/util/functions';
 import { ArgumentStoringListener } from '../doubles/ArgumentStoringListener';
 import { createSendCommand } from '../doubles/createSendCommand';
 
-export class SubscriberTestApparatus<T, InType, OutType> {
-  private SubscribeCommandHandlerClass: new (
-    ...args: any[]
-  ) => SubscribeCommandHandler<T>;
+export class SubscriberTestApparatus<T, OutType> {
+  private commandName: string;
 
-  private SubscriberClass: new (...args: any[]) => Subscriber<InType, OutType>;
+  private ParserClass: new (...args: any[]) => Parser<OutType>;
+
+  private HandlerClass: new (...args: any[]) => SubscribeCommandHandler<T>;
 
   constructor(
+    commandName: string,
+    ParserClass: new (...args: any[]) => Parser<OutType>,
     HandlerClass: new (...args: any[]) => SubscribeCommandHandler<T>,
-    SubscriberClass: new (...args: any[]) => Subscriber<InType, OutType>,
   ) {
-    this.SubscribeCommandHandlerClass = HandlerClass;
-    this.SubscriberClass = SubscriberClass;
+    this.commandName = commandName;
+    this.ParserClass = ParserClass;
+    this.HandlerClass = HandlerClass;
   }
 
   async assertSetValueCallsListenerWithArgument(
@@ -67,10 +71,15 @@ export class SubscriberTestApparatus<T, InType, OutType> {
   }
 
   private arrangeWithInitialValue(initialValue: any) {
-    const handler: SubscribeCommandHandler<T> =
-      new this.SubscribeCommandHandlerClass(initialValue);
+    const handler: SubscribeCommandHandler<T> = new this.HandlerClass(
+      initialValue,
+    );
     const sendCommand = createSendCommand(handler);
-    const subscriber = new this.SubscriberClass(sendCommand);
+    const subscriber = new StrategicSubscriber(
+      this.commandName,
+      new this.ParserClass(),
+      sendCommand,
+    );
     return { subscriber, handler };
   }
 }
