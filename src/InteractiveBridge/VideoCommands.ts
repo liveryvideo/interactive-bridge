@@ -3,6 +3,7 @@ import type { LiveryBridge } from '../LiveryBridge';
 import { parseToArray } from '../util/parseToArray';
 import { stringify } from '../util/stringify';
 import { AirplaySubscriber } from './AirplaySubscriber';
+import { ChromecastSubscriber } from './ChromecastSubscriber';
 import { MutedSubscriber } from './MutedSubscriber';
 import { PictureInPictureSubscriber } from './PictureInPictureSubscriber';
 import { QualitiesSubscriber } from './QualitiesSubscriber';
@@ -58,6 +59,8 @@ export interface Quality {
 export class VideoCommands {
   private airplaySubscription: AirplaySubscriber;
 
+  private chromecastSubscription: ChromecastSubscriber;
+
   private mutedSubscription: MutedSubscriber;
 
   private pictureInPictureSubscription: PictureInPictureSubscriber;
@@ -71,6 +74,9 @@ export class VideoCommands {
   constructor(sendCommand: LiveryBridge['sendCommand']) {
     this.sendCommand = sendCommand;
     this.airplaySubscription = new AirplaySubscriber(
+      this.sendCommand.bind(this),
+    );
+    this.chromecastSubscription = new ChromecastSubscriber(
       this.sendCommand.bind(this),
     );
     this.mutedSubscription = new MutedSubscriber(this.sendCommand.bind(this));
@@ -209,7 +215,9 @@ export class VideoCommands {
   /**
    * Returns name of device that is being cast to or undefined
    */
-  // subscribeChromecast(listener): string | undefined {}
+  subscribeChromecast(listener: (value: string | undefined) => void) {
+    return this.chromecastSubscription.subscribe(listener);
+  }
 
   /**
    * Where Controls is an object with boolean properties:

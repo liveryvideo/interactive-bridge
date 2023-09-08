@@ -1,3 +1,5 @@
+import { SubscriptionError } from './errors';
+
 type Listener<T> = (value: T) => void;
 export class SubscribeCommandHandler<T> {
   command: string;
@@ -11,7 +13,9 @@ export class SubscribeCommandHandler<T> {
 
   handleCommand(name: string, arg: unknown, listener: (value: T) => void) {
     if (name !== this.command) {
-      return undefined;
+      throw new SubscriptionError(
+        `Handler for command '${this.command}' cannot handle command '${name}'`,
+      );
     }
     return this.subscribe(listener);
   }
