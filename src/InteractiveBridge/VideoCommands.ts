@@ -9,6 +9,8 @@ import { ControlsParser, type Controls } from './ControlsParser';
 import { ErrorParser } from './ErrorParser';
 import { MutedParser } from './MutedParser';
 import { PictureInPictureParser } from './PictureInPictureParser';
+import type { PlaybackMode } from './PlaybackModeParser';
+import { PlaybackModeParser } from './PlaybackModeParser';
 import { QualitiesParser } from './QualitiesParser';
 import { UnmuteRequiresInteractionParser } from './UnmuteRequiresInteractionParser';
 
@@ -75,6 +77,8 @@ export class VideoCommands {
 
   private pictureInPictureSubscriber: Subscriber<boolean, boolean>;
 
+  private playbackModeSubscriber: Subscriber<PlaybackMode, PlaybackMode>;
+
   private qualitiesSubscriber: Subscriber<(Quality | undefined)[], Quality[]>;
 
   private sendCommand: LiveryBridge['sendCommand'];
@@ -111,6 +115,11 @@ export class VideoCommands {
     this.pictureInPictureSubscriber = new Subscriber(
       'subscribePictureInPicture',
       new PictureInPictureParser(),
+      this.sendCommand.bind(this),
+    );
+    this.playbackModeSubscriber = new Subscriber(
+      'subscribePlaybackMode',
+      new PlaybackModeParser(),
       this.sendCommand.bind(this),
     );
     this.qualitiesSubscriber = new Subscriber(
@@ -280,7 +289,9 @@ export class VideoCommands {
   /**
    * Returns current mode of playback, e.g: buffering, syncing, ABR, stall management, etc.
    */
-  // subscribePlaybackMode(listener): 'CATCHUP' | 'LIVE' | 'UNKNOWN' | 'VOD' {}
+  subscribePlaybackMode(listener: (value: PlaybackMode) => void) {
+    return this.playbackModeSubscriber.subscribe(listener);
+  }
 
   /**
    * Stalled (loading) states are: 'BUFFERING', 'SEEKING'

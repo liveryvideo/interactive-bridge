@@ -7,12 +7,19 @@
 - create documentation for Transceiver
 - refine port and target options interfaces
 
-- convert subscribe command handlers from subclasses to abstraction
-
-  - change subscriber test apparatus
-  - remove subscribe command handler classes
-
--
+- subscribePlaybackMode
+- subscribePlaybackState
+- subscribeStreamPhaseTimeline
+- play
+- pause
+- reload
+- seek
+- selectQuality
+- setAirplay
+- setChromecast
+- setFullscreen
+- setMuted
+- setPictureInPicture
 
 /\*
 handleCommand could yield
