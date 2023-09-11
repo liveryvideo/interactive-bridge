@@ -7,8 +7,6 @@
 - create documentation for Transceiver
 - refine port and target options interfaces
 
-- subscribePlaybackMode
-- subscribePlaybackState
 - subscribeStreamPhaseTimeline
 - play
 - pause
@@ -20,6 +18,8 @@
 - setFullscreen
 - setMuted
 - setPictureInPicture
+
+- make sure all types are exported from parser modules
 
 /\*
 handleCommand could yield

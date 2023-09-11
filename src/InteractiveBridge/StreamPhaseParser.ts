@@ -1,6 +1,8 @@
 import type { Parser } from '../util/Parser';
 import { stringify } from '../util/stringify';
-import type { StreamPhase } from './VideoCommands';
+
+export const knownStreamPhases = ['LIVE', 'POST', 'PRE'] as const;
+export type StreamPhase = (typeof knownStreamPhases)[number];
 
 export class StreamPhaseParser implements Parser<StreamPhase> {
   parse(value: unknown) {

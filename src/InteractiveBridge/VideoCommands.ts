@@ -11,20 +11,13 @@ import { MutedParser } from './MutedParser';
 import { PictureInPictureParser } from './PictureInPictureParser';
 import type { PlaybackMode } from './PlaybackModeParser';
 import { PlaybackModeParser } from './PlaybackModeParser';
+import { PlaybackStateParser, type PlaybackState } from './PlaybackStateParser';
 import { QualitiesParser } from './QualitiesParser';
+import {
+  StreamPhaseTimelineParser,
+  type StreamPhaseTimeline,
+} from './StreamPhaseTimelineParser';
 import { UnmuteRequiresInteractionParser } from './UnmuteRequiresInteractionParser';
-
-const knownPlaybackStates = [
-  'BUFFERING',
-  'ENDED',
-  'FAST_FORWARD',
-  'PAUSED',
-  'PLAYING',
-  'REWIND',
-  'SEEKING',
-  'SLOW_MO',
-] as const;
-export type PlaybackState = (typeof knownPlaybackStates)[number];
 
 const knownFeatures = [
   'AIRPLAY',
@@ -38,9 +31,6 @@ export type Feature = (typeof knownFeatures)[number];
 
 const orientations = ['landscape', 'portrait'] as const;
 export type Orientation = (typeof orientations)[number];
-
-const streamPhases = ['LIVE', 'POST', 'PRE'] as const;
-export type StreamPhase = (typeof streamPhases)[number];
 
 export interface PlaybackDetails {
   buffer: number;
@@ -79,9 +69,16 @@ export class VideoCommands {
 
   private playbackModeSubscriber: Subscriber<PlaybackMode, PlaybackMode>;
 
+  private playbackStateSubscriber: Subscriber<PlaybackState, PlaybackState>;
+
   private qualitiesSubscriber: Subscriber<(Quality | undefined)[], Quality[]>;
 
   private sendCommand: LiveryBridge['sendCommand'];
+
+  private streamPhaseTimelineSubscriber: Subscriber<
+    StreamPhaseTimeline,
+    StreamPhaseTimeline
+  >;
 
   private unmuteRequiresInteractionSubscription: Subscriber<boolean, boolean>;
 
@@ -122,9 +119,19 @@ export class VideoCommands {
       new PlaybackModeParser(),
       this.sendCommand.bind(this),
     );
+    this.playbackStateSubscriber = new Subscriber(
+      'subscribePlaybackState',
+      new PlaybackStateParser(),
+      this.sendCommand.bind(this),
+    );
     this.qualitiesSubscriber = new Subscriber(
       'subscribeQualities',
       new QualitiesParser(),
+      this.sendCommand.bind(this),
+    );
+    this.streamPhaseTimelineSubscriber = new Subscriber(
+      'subscribeStreamPhaseTimeline',
+      new StreamPhaseTimelineParser(),
       this.sendCommand.bind(this),
     );
     this.unmuteRequiresInteractionSubscription = new Subscriber(
@@ -299,7 +306,9 @@ export class VideoCommands {
    * Playing states are: 'FAST_FORWARD', 'PLAYING', 'REWIND', 'SLOW_MO'
    * Though practically we only use 'PLAYING' for now
    */
-  // subscribePlaybackState(listener): PlaybackState {}
+  subscribePlaybackState(listener: (value: PlaybackState) => void) {
+    return this.playbackStateSubscriber.subscribe(listener);
+  }
 
   /**
    * Note that the existing subscribeQuality method only returns the label
@@ -317,7 +326,9 @@ export class VideoCommands {
    * This indicates the LIVE periods of the stream that can be seeked to
    * I.e: from the start of LIVE timestamp to the first non-LIVE timestamp
    */
-  // subscribeStreamPhaseTimeline(listener): Record<number, StreamPhase> {}
+  subscribeStreamPhaseTimeline(listener: (value: StreamPhaseTimeline) => void) {
+    return this.streamPhaseTimelineSubscriber.subscribe(listener);
+  }
 
   /**
    *

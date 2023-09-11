@@ -2,20 +2,18 @@ import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { FullscreenSubscriber } from './InteractiveBridge/FullscreenSubscriber';
 import { OrientationSubscriber } from './InteractiveBridge/OrientationSubscriber';
 import { QualitySubscriber } from './InteractiveBridge/QualitySubscriber';
+import type { StreamPhase } from './InteractiveBridge/StreamPhaseParser';
 import { StreamPhaseSubscriber } from './InteractiveBridge/StreamPhaseSubscriber';
-import type {
-  Orientation,
-  Quality,
-  StreamPhase,
-} from './InteractiveBridge/VideoCommands';
+import type { Orientation, Quality } from './InteractiveBridge/VideoCommands';
 import { VideoCommands } from './InteractiveBridge/VideoCommands';
 import { LiveryBridge } from './LiveryBridge';
 
+export type { StreamPhase } from './InteractiveBridge/StreamPhaseParser';
+export type { StreamPhaseTimeline } from './InteractiveBridge/StreamPhaseTimelineParser';
 export type {
   Feature,
   Orientation,
   PlaybackDetails,
-  StreamPhase,
 } from './InteractiveBridge/VideoCommands';
 
 /**
