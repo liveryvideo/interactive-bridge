@@ -2,7 +2,7 @@ import type { Parser } from '../util/Parser';
 import { InvalidTypeError } from '../util/errors';
 import { fieldFromIfTypeWithDefault } from '../util/fieldFromIfTypeWithDefault';
 
-export const controls = [
+export const knownControls = [
   'cast',
   'contact',
   'error',
@@ -13,7 +13,7 @@ export const controls = [
   'quality',
   'scrubber',
 ] as const;
-export type Control = (typeof controls)[number];
+export type Control = (typeof knownControls)[number];
 export type Controls = Record<Control, boolean>;
 
 export class ControlsParser implements Parser<Controls> {
@@ -37,7 +37,7 @@ export class ControlsParser implements Parser<Controls> {
       );
     }
     const output: Record<string, boolean> = {};
-    controls.forEach((control) => {
+    knownControls.forEach((control) => {
       output[control] = fieldFromIfTypeWithDefault(
         control,
         value,

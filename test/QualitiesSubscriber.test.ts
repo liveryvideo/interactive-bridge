@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { InteractiveBridge } from '../src/InteractiveBridge';
+import type { Quality } from '../src/InteractiveBridge/QualitiesParser';
 import { QualitiesParser } from '../src/InteractiveBridge/QualitiesParser';
-import type { Quality } from '../src/InteractiveBridge/VideoCommands';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 import { SubscribeCommandHandler } from '../src/util/SubscribeCommandHandler';
 import { Subscriber } from '../src/util/Subscriber';

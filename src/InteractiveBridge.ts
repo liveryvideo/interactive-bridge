@@ -1,20 +1,26 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
-import { FullscreenSubscriber } from './InteractiveBridge/FullscreenSubscriber';
-import { OrientationSubscriber } from './InteractiveBridge/OrientationSubscriber';
-import { QualitySubscriber } from './InteractiveBridge/QualitySubscriber';
+import { FullscreenParser } from './InteractiveBridge/FullscreenParser';
+import {
+  OrientationParser,
+  type Orientation,
+} from './InteractiveBridge/OrientationParser';
+import type { Quality } from './InteractiveBridge/QualitiesParser';
+import { QualityParser } from './InteractiveBridge/QualityParser';
 import type { StreamPhase } from './InteractiveBridge/StreamPhaseParser';
-import { StreamPhaseSubscriber } from './InteractiveBridge/StreamPhaseSubscriber';
-import type { Orientation, Quality } from './InteractiveBridge/VideoCommands';
+import { StreamPhaseParser } from './InteractiveBridge/StreamPhaseParser';
 import { VideoCommands } from './InteractiveBridge/VideoCommands';
 import { LiveryBridge } from './LiveryBridge';
+import { Subscriber } from './util/Subscriber';
 
+export type { Control, Controls } from './InteractiveBridge/ControlsParser';
+export type { Feature } from './InteractiveBridge/FeaturesParser';
+export type { Orientation } from './InteractiveBridge/OrientationParser';
+export type { PlaybackMode } from './InteractiveBridge/PlaybackModeParser';
+export type { PlaybackDetails } from './InteractiveBridge/PlaybackParser';
+export type { PlaybackState } from './InteractiveBridge/PlaybackStateParser';
+export type { Quality } from './InteractiveBridge/QualitiesParser';
 export type { StreamPhase } from './InteractiveBridge/StreamPhaseParser';
 export type { StreamPhaseTimeline } from './InteractiveBridge/StreamPhaseTimelineParser';
-export type {
-  Feature,
-  Orientation,
-  PlaybackDetails,
-} from './InteractiveBridge/VideoCommands';
 
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
@@ -22,19 +28,27 @@ export type {
 export class InteractiveBridge extends LiveryBridge {
   video = new VideoCommands(this.sendCommand.bind(this));
 
-  private fullscreenSubscriber = new FullscreenSubscriber(
+  private fullscreenSubscriber = new Subscriber<boolean, boolean>(
+    'subscribeFullscreen',
+    new FullscreenParser(),
     this.sendCommand.bind(this),
   );
 
-  private orientationSubscriber = new OrientationSubscriber(
+  private orientationSubscriber = new Subscriber<Orientation, Orientation>(
+    'subscribeOrientation',
+    new OrientationParser(),
     this.sendCommand.bind(this),
   );
 
-  private qualitySubscriber = new QualitySubscriber(
+  private qualitySubscriber = new Subscriber<string, string>(
+    'subscribeQuality',
+    new QualityParser(),
     this.sendCommand.bind(this),
   );
 
-  private streamPhaseSubscriber = new StreamPhaseSubscriber(
+  private streamPhaseSubscriber = new Subscriber<StreamPhase, StreamPhase>(
+    'subscribeStreamPhase',
+    new StreamPhaseParser(),
     this.sendCommand.bind(this),
   );
 

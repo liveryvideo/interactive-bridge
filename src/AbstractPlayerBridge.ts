@@ -1,5 +1,9 @@
-import type { Feature, Orientation, StreamPhase } from './InteractiveBridge';
-import type { Quality } from './InteractiveBridge/VideoCommands';
+import type {
+  Feature,
+  Orientation,
+  Quality,
+  StreamPhase,
+} from './InteractiveBridge';
 import { LiveryBridge } from './LiveryBridge';
 import { SubscribeCommandHandler } from './util/SubscribeCommandHandler';
 

@@ -1,6 +1,5 @@
 import { AbstractPlayerBridge } from './AbstractPlayerBridge';
-import type { Feature, StreamPhase } from './InteractiveBridge';
-import type { Quality } from './InteractiveBridge/VideoCommands';
+import type { Feature, Quality, StreamPhase } from './InteractiveBridge';
 
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.

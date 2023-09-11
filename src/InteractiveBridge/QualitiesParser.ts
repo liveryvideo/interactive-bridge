@@ -2,7 +2,19 @@ import type { Parser } from '../util/Parser';
 import { InvalidTypeError } from '../util/errors';
 import { fieldFromIfTypeWithDefault } from '../util/fieldFromIfTypeWithDefault';
 import { parseToArray } from '../util/parseToArray';
-import type { Quality } from './VideoCommands';
+
+export interface Quality {
+  audio?: {
+    bandwidth: number;
+  };
+  index: number;
+  label: string;
+  video?: {
+    bandwidth: number;
+    height: number;
+    width: number;
+  };
+}
 
 export class QualitiesParser implements Parser<Quality[]> {
   parse(value: unknown) {

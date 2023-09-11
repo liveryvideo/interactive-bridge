@@ -1,55 +1,25 @@
 // eslint-disable-next-line max-classes-per-file
 import type { LiveryBridge } from '../LiveryBridge';
 import { Subscriber } from '../util/Subscriber';
-import { parseToArray } from '../util/parseToArray';
-import { stringify } from '../util/stringify';
 import { AirplayParser } from './AirplayParser';
 import { ChromecastParser } from './ChromecastParser';
 import { ControlsParser, type Controls } from './ControlsParser';
 import { ErrorParser } from './ErrorParser';
+import type { Feature } from './FeaturesParser';
+import { FeaturesParser } from './FeaturesParser';
 import { MutedParser } from './MutedParser';
 import { PictureInPictureParser } from './PictureInPictureParser';
 import type { PlaybackMode } from './PlaybackModeParser';
 import { PlaybackModeParser } from './PlaybackModeParser';
+import { PlaybackParser } from './PlaybackParser';
 import { PlaybackStateParser, type PlaybackState } from './PlaybackStateParser';
+import type { Quality } from './QualitiesParser';
 import { QualitiesParser } from './QualitiesParser';
 import {
   StreamPhaseTimelineParser,
   type StreamPhaseTimeline,
 } from './StreamPhaseTimelineParser';
 import { UnmuteRequiresInteractionParser } from './UnmuteRequiresInteractionParser';
-
-const knownFeatures = [
-  'AIRPLAY',
-  'CHROMECAST',
-  'CONTACT',
-  'FULLSCREEN',
-  'PIP',
-  'SCRUBBER',
-] as const;
-export type Feature = (typeof knownFeatures)[number];
-
-const orientations = ['landscape', 'portrait'] as const;
-export type Orientation = (typeof orientations)[number];
-
-export interface PlaybackDetails {
-  buffer: number;
-  duration: number;
-  position: number;
-}
-
-export interface Quality {
-  audio?: {
-    bandwidth: number;
-  };
-  index: number;
-  label: string;
-  video?: {
-    bandwidth: number;
-    height: number;
-    width: number;
-  };
-}
 
 export class VideoCommands {
   private airplaySubscriber: Subscriber<boolean, boolean>;
@@ -145,18 +115,9 @@ export class VideoCommands {
    * Returns a list of features supported by the video player
    */
   getFeatures(): Promise<Feature[]> {
-    return this.sendCommand('getFeatures').then((value) => {
-      parseToArray(value, 'getFeatures');
-      const features = new Set<Feature>();
-      for (const feature of value as Array<unknown>) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        if (knownFeatures.includes(feature as Feature)) {
-          features.add(feature as Feature);
-        }
-      }
-      const sanitizedFeatureList: Feature[] = Array.from(features);
-      return sanitizedFeatureList;
-    });
+    return this.sendCommand('getFeatures').then((value) =>
+      new FeaturesParser().parse(value),
+    );
   }
 
   /**
@@ -170,36 +131,9 @@ export class VideoCommands {
     duration: number;
     position: number;
   }> {
-    return this.sendCommand('getPlayback').then((value) => {
-      if (
-        !(value instanceof Object) ||
-        !(typeof value === 'object') ||
-        value === null
-      ) {
-        throw new Error(
-          `getPlayback value type: ${typeof value}, should be: object`,
-        );
-      }
-      if (
-        !('buffer' in value) ||
-        typeof value.buffer !== 'number' ||
-        !('duration' in value) ||
-        typeof value.duration !== 'number' ||
-        !('position' in value) ||
-        typeof value.position !== 'number'
-      ) {
-        throw new Error(
-          `getPlayback value shape should be: {buffer: number, duration: number, position: number}, found:\n${stringify(
-            value,
-          )}`,
-        );
-      }
-      return {
-        position: value.position,
-        buffer: value.buffer,
-        duration: value.duration,
-      } as PlaybackDetails;
-    });
+    return this.sendCommand('getPlayback').then((value) =>
+      new PlaybackParser().parse(value),
+    );
   }
 
   /**
