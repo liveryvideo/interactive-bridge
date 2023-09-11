@@ -6,6 +6,7 @@ import { stringify } from '../util/stringify';
 import { AirplayParser } from './AirplayParser';
 import { ChromecastParser } from './ChromecastParser';
 import { ControlsParser, type Controls } from './ControlsParser';
+import { ErrorParser } from './ErrorParser';
 import { MutedParser } from './MutedParser';
 import { PictureInPictureParser } from './PictureInPictureParser';
 import { QualitiesParser } from './QualitiesParser';
@@ -68,6 +69,8 @@ export class VideoCommands {
 
   private controlsSubscriber: Subscriber<Controls, Controls>;
 
+  private errorSubscriber: Subscriber<string | undefined, string | undefined>;
+
   private mutedSubscriber: Subscriber<boolean, boolean>;
 
   private pictureInPictureSubscriber: Subscriber<boolean, boolean>;
@@ -93,6 +96,11 @@ export class VideoCommands {
     this.controlsSubscriber = new Subscriber(
       'subscribeControls',
       new ControlsParser(),
+      this.sendCommand.bind(this),
+    );
+    this.errorSubscriber = new Subscriber(
+      'subscribeError',
+      new ErrorParser(),
       this.sendCommand.bind(this),
     );
     this.mutedSubscriber = new Subscriber(
@@ -255,9 +263,11 @@ export class VideoCommands {
   }
 
   /**
-   * Current player error message or undefined
+   * Current player error message or undefined if none
    */
-  // subscribeError(listener): string | undefined {}
+  subscribeError(listener: (value: string | undefined) => void) {
+    return this.errorSubscriber.subscribe(listener);
+  }
 
   subscribeMuted(listener: (value: boolean) => void) {
     return this.mutedSubscriber.subscribe(listener);
