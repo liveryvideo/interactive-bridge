@@ -205,56 +205,76 @@ export class VideoCommands {
   /**
    *
    */
-  // pause(){}
+  pause() {
+    return this.sendCommand('pause');
+  }
 
   /**
    * Can require direct user interaction
    * If starting unmuted playback fails this will fall back to muted playback
    * and notify subscribeUnmuteRequiresInteraction listeners.
    */
-  // play(){}
+  play() {
+    return this.sendCommand('play');
+  }
 
   /**
    * Reloads player, e.g: to try to recover from an error
    */
-  // reload(){}
+  reload() {
+    return this.sendCommand('reload');
+  }
 
   /**
    *
    * Seek to specified position in seconds since start of stream/vod
    * If position is not within a LIVE stream phase period this will return an error
    */
-  // seek(position: number){}
+  seek(position: number) {
+    return this.sendCommand('seek', position);
+  }
 
   /**
    * Select index of quality to play, or -1 to use ABR
    */
-  // selectQuality(index: number){}
+  selectQuality(index: number) {
+    return this.sendCommand('selectQuality', index);
+  }
 
   /**
    *
    */
-  // setAirplay(active: boolean){}
+  setAirplay(active: boolean) {
+    return this.sendCommand('setAirplay', active);
+  }
 
   /**
    *
    */
-  // setChromecast(active: boolean){}
+  setChromecast(active: boolean) {
+    return this.sendCommand('setChromecast', active);
+  }
 
   /**
    * Can require direct user interaction
    */
-  // setFullscreen(active: boolean){}
+  setFullscreen(active: boolean) {
+    return this.sendCommand('setFullscreen', active);
+  }
 
   /**
    * Can require direct user interaction
    */
-  // setMuted(muted: boolean){}
+  setMuted(muted: boolean) {
+    return this.sendCommand('setMuted', muted);
+  }
 
   /**
    * Can require direct user interaction
    */
-  // setPictureInPicture(active: boolean){}
+  setPictureInPicture(active: boolean) {
+    return this.sendCommand('setPictureInPicture', active);
+  }
 
   /**
    * Returns true when Airplay is being used, false otherwise

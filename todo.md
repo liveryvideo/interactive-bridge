@@ -7,19 +7,10 @@
 - create documentation for Transceiver
 - refine port and target options interfaces
 
-- subscribeStreamPhaseTimeline
-- play
-- pause
-- reload
-- seek
-- selectQuality
-- setAirplay
-- setChromecast
-- setFullscreen
-- setMuted
-- setPictureInPicture
-
 - make sure all types are exported from parser modules
+- test the parsers rather than the individual subscribers
+
+- add integration tests for setters and imperative commands
 
 /\*
 handleCommand could yield
