@@ -1,12 +1,10 @@
 import { test } from 'vitest';
 import { FullscreenParser } from '../src/InteractiveBridge/FullscreenParser';
-import { SubscribeFullscreenCommandHandler } from '../src/SubscribeFullscreenCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
   'subscribeFullscreen',
   FullscreenParser,
-  SubscribeFullscreenCommandHandler,
 );
 
 test('given value, command subscribeFullscreen yields response', async () => {

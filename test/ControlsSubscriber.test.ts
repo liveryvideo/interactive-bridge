@@ -3,15 +3,9 @@ import {
   ControlsParser,
   type Controls,
 } from '../src/InteractiveBridge/ControlsParser';
-
-import { SubscribeControlsCommandHandler } from '../src/SubscribeControlsCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
-const tester = new SubscriberTestApparatus(
-  'subscribeControls',
-  ControlsParser,
-  SubscribeControlsCommandHandler,
-);
+const tester = new SubscriberTestApparatus('subscribeControls', ControlsParser);
 
 const allFalse: Controls = {
   cast: false,

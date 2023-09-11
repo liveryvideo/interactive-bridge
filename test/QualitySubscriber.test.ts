@@ -1,13 +1,8 @@
 import { test } from 'vitest';
 import { QualityParser } from '../src/InteractiveBridge/QualityParser';
-import { SubscribeQualityCommandHandler } from '../src/SubscribeQualityCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
-const tester = new SubscriberTestApparatus(
-  'subscribeQuality',
-  QualityParser,
-  SubscribeQualityCommandHandler,
-);
+const tester = new SubscriberTestApparatus('subscribeQuality', QualityParser);
 
 test('given value, command subscribeQuality yields response', async () => {
   await tester.assertValueYieldsResult('', '');

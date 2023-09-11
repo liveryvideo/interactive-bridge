@@ -1,13 +1,8 @@
 import { test } from 'vitest';
 import { ErrorParser } from '../src/InteractiveBridge/ErrorParser';
-import { SubscribeErrorCommandHandler } from '../src/SubscribeErrorCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
-const tester = new SubscriberTestApparatus(
-  'subscribeError',
-  ErrorParser,
-  SubscribeErrorCommandHandler,
-);
+const tester = new SubscriberTestApparatus('subscribeError', ErrorParser);
 
 test('given value, command subscribeError yields response', async () => {
   await tester.assertValueYieldsResult('', '');

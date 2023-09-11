@@ -1,13 +1,8 @@
 import { test } from 'vitest';
 import { MutedParser } from '../src/InteractiveBridge/MutedParser';
-import { SubscribeMutedCommandHandler } from '../src/SubscribeMutedCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
-const tester = new SubscriberTestApparatus(
-  'subscribeMuted',
-  MutedParser,
-  SubscribeMutedCommandHandler,
-);
+const tester = new SubscriberTestApparatus('subscribeMuted', MutedParser);
 
 test('given value, command subscribeMuted yields response', async () => {
   await tester.assertValueYieldsResult(true, true);

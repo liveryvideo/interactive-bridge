@@ -1,13 +1,8 @@
 import { test } from 'vitest';
 import { AirplayParser } from '../src/InteractiveBridge/AirplayParser';
-import { SubscribeAirplayCommandHandler } from '../src/SubscribeAirplayCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
-const tester = new SubscriberTestApparatus(
-  'subscribeAirplay',
-  AirplayParser,
-  SubscribeAirplayCommandHandler,
-);
+const tester = new SubscriberTestApparatus('subscribeAirplay', AirplayParser);
 
 test('given value, command subscribeAirplay yields response', async () => {
   await tester.assertValueYieldsResult(true, true);

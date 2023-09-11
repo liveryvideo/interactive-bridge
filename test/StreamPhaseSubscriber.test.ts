@@ -1,12 +1,10 @@
 import { test } from 'vitest';
 import { StreamPhaseParser } from '../src/InteractiveBridge/StreamPhaseParser';
-import { SubscribeStreamPhaseCommandHandler } from '../src/SubscribeStreamPhaseCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
   'subscribeStreamPhase',
   StreamPhaseParser,
-  SubscribeStreamPhaseCommandHandler,
 );
 
 test('given value, command subscribeStreamPhase yields response', async () => {

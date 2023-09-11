@@ -1,6 +1,7 @@
 import type { Feature, Orientation, StreamPhase } from './InteractiveBridge';
+import type { Quality } from './InteractiveBridge/VideoCommands';
 import { LiveryBridge } from './LiveryBridge';
-import { SubscribeQualitiesCommandHandler } from './SubscribeQualitiesCommandHandler';
+import { SubscribeCommandHandler } from './util/SubscribeCommandHandler';
 
 export interface WithLocation {
   location: Location;
@@ -21,7 +22,9 @@ interface PlaybackDetails {
  * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
  */
 export abstract class AbstractPlayerBridge extends LiveryBridge {
-  subscribeQualitiesCommandHandler = new SubscribeQualitiesCommandHandler([]);
+  subscribeQualitiesCommandHandler = new SubscribeCommandHandler<
+    Array<Quality | undefined>
+  >('subscribeQualities', []);
 
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
 

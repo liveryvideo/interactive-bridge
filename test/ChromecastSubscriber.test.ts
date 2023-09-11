@@ -1,12 +1,10 @@
 import { test } from 'vitest';
 import { ChromecastParser } from '../src/InteractiveBridge/ChromecastParser';
-import { SubscribeChromecastCommandHandler } from '../src/SubscribeChromecastCommandHandler';
 import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 
 const tester = new SubscriberTestApparatus(
   'subscribeChromecast',
   ChromecastParser,
-  SubscribeChromecastCommandHandler,
 );
 
 test('given value, command subscribeChromecast yields response', async () => {

@@ -3,7 +3,7 @@ import { InteractiveBridge } from '../src/InteractiveBridge';
 import { QualitiesParser } from '../src/InteractiveBridge/QualitiesParser';
 import type { Quality } from '../src/InteractiveBridge/VideoCommands';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
-import { SubscribeQualitiesCommandHandler } from '../src/SubscribeQualitiesCommandHandler';
+import { SubscribeCommandHandler } from '../src/util/SubscribeCommandHandler';
 import { Subscriber } from '../src/util/Subscriber';
 import { SubscriptionError } from '../src/util/errors';
 import { noop } from '../src/util/functions';
@@ -14,7 +14,6 @@ import { SubscriberTestApparatus } from './utils/SubscriberTestApparatus';
 const tester = new SubscriberTestApparatus(
   'subscribeQualities',
   QualitiesParser,
-  SubscribeQualitiesCommandHandler,
 );
 
 describe('InteractiveBridge.subscribeQualities', () => {
@@ -45,7 +44,10 @@ describe('InteractiveBridge.subscribeQualities', () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   /* eslint-disable @typescript-eslint/no-unsafe-argument */
   function arrangeWithInitialValue(qualities: any) {
-    const handler = new SubscribeQualitiesCommandHandler(qualities);
+    const handler = new SubscribeCommandHandler(
+      'subscribeQualities',
+      qualities,
+    );
     const sendCommand = createSendCommand(handler);
     const subscriber = new Subscriber(
       'subscribeQualities',

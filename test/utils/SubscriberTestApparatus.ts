@@ -5,7 +5,7 @@
 
 import { expect } from 'vitest';
 import type { Parser } from '../../src/util/Parser';
-import type { SubscribeCommandHandler } from '../../src/util/SubscribeCommandHandler';
+import { SubscribeCommandHandler } from '../../src/util/SubscribeCommandHandler';
 import { Subscriber } from '../../src/util/Subscriber';
 import { InvalidTypeError } from '../../src/util/errors';
 import { noop } from '../../src/util/functions';
@@ -17,16 +17,12 @@ export class SubscriberTestApparatus<T, OutType> {
 
   private ParserClass: new (...args: any[]) => Parser<OutType>;
 
-  private HandlerClass: new (...args: any[]) => SubscribeCommandHandler<T>;
-
   constructor(
     commandName: string,
     ParserClass: new (...args: any[]) => Parser<OutType>,
-    HandlerClass: new (...args: any[]) => SubscribeCommandHandler<T>,
   ) {
     this.commandName = commandName;
     this.ParserClass = ParserClass;
-    this.HandlerClass = HandlerClass;
   }
 
   async assertSetValueCallsListenerWithArgument(
@@ -71,7 +67,8 @@ export class SubscriberTestApparatus<T, OutType> {
   }
 
   private arrangeWithInitialValue(initialValue: any) {
-    const handler: SubscribeCommandHandler<T> = new this.HandlerClass(
+    const handler: SubscribeCommandHandler<T> = new SubscribeCommandHandler(
+      this.commandName,
       initialValue,
     );
     const sendCommand = createSendCommand(handler);
