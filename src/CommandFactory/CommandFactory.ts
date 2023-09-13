@@ -1,7 +1,7 @@
+import { IdentityParser } from '../Parser/IdentityParser';
+import type { Parser } from '../Parser/Parser';
 import type { Command } from '../types';
-import type { Parser } from '../util/Parser';
 import { ApplicationCommands } from './ApplicationCommands';
-import { IdentityParser } from './IdentityParser';
 import { VideoApplicationCommands } from './VideoApplicationCommands';
 import { VideoControlCommands } from './VideoControlCommands';
 

@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { QualitiesParser } from '../../src/InteractiveBridge/QualitiesParser';
+import { QualitiesParser } from '../../src/Parser/QualitiesParser';
 import { ParserTestApparatus } from '../utils/ParserTestApparatus';
 
 const tester = new ParserTestApparatus(new QualitiesParser());

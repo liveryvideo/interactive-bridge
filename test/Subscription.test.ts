@@ -1,9 +1,9 @@
 /* eslint-disable max-classes-per-file */
 import { expect, test } from 'vitest';
-import type { Parser } from '../src/util/Parser';
+import type { Parser } from '../src/Parser/Parser';
+import { InvalidTypeError } from '../src/errors';
 import { SubscribeCommandHandler } from '../src/util/SubscribeCommandHandler';
 import { Subscriber } from '../src/util/Subscriber';
-import { InvalidTypeError } from '../src/util/errors';
 import { identity } from '../src/util/functions';
 import { ArgumentStoringListener } from './doubles/ArgumentStoringListener';
 import { createSendCommand } from './doubles/createSendCommand';

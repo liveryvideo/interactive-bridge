@@ -4,12 +4,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, test } from 'vitest';
 import type { AbstractPlayerBridge } from '../src/AbstractPlayerBridge';
-import type { StreamPhase } from '../src/InteractiveBridge';
-import { InteractiveBridge } from '../src/InteractiveBridge';
+import type { StreamPhase } from '../src/InteractiveBridgeFacade';
+import { InteractiveBridgeFacade } from '../src/InteractiveBridgeFacade';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 import { createJSDOMWindow } from './doubles/JSDOMWindow';
 
-type BridgePair = [AbstractPlayerBridge, InteractiveBridge];
+type BridgePair = [AbstractPlayerBridge, InteractiveBridgeFacade];
 
 // edgecase
 test('handshake completes when player has target', async () => {
@@ -18,7 +18,7 @@ test('handshake completes when player has target', async () => {
     origin: '*',
     window: ownWindow,
   });
-  const interactiveBridge = new InteractiveBridge(playerBridge);
+  const interactiveBridge = new InteractiveBridgeFacade(playerBridge);
   await Promise.all([
     playerBridge.handshakePromise,
     interactiveBridge.handshakePromise,
@@ -90,7 +90,7 @@ function executeSystemTests(
     async function assertInteractiveCommands(
       commands: CommandSpecification[],
       playerBridge: AbstractPlayerBridge,
-      interactiveBridge: InteractiveBridge,
+      interactiveBridge: InteractiveBridgeFacade,
     ) {
       const results = new Array<any>(commands.length);
       for (let i = 0; i < commands.length; i++) {
@@ -227,9 +227,12 @@ describe('using direct communication', () => {
       latency: 1.23,
     });
     const interactiveBridgeTarget = playerBridge;
-    const interactiveBridge = new InteractiveBridge(interactiveBridgeTarget, {
-      ownWindow,
-    });
+    const interactiveBridge = new InteractiveBridgeFacade(
+      interactiveBridgeTarget,
+      {
+        ownWindow,
+      },
+    );
     await Promise.all([
       playerBridge.handshakePromise,
       interactiveBridge.handshakePromise,
@@ -250,9 +253,12 @@ describe('using postmessage communication in shared window', () => {
       { ownWindow, latency: 1.23 },
     );
     const interactiveBridgeTarget = '*';
-    const interactiveBridge = new InteractiveBridge(interactiveBridgeTarget, {
-      ownWindow,
-    });
+    const interactiveBridge = new InteractiveBridgeFacade(
+      interactiveBridgeTarget,
+      {
+        ownWindow,
+      },
+    );
     await Promise.all([
       playerBridge.handshakePromise,
       interactiveBridge.handshakePromise,
@@ -280,9 +286,12 @@ describe('using postmessage communication with iframe', () => {
       playerBridgeTarget,
       { ownWindow: playerWindow, latency: 1.23 },
     );
-    const interactiveBridge = new InteractiveBridge(interactiveBridgeTarget, {
-      ownWindow: interactiveFrame.contentWindow!,
-    });
+    const interactiveBridge = new InteractiveBridgeFacade(
+      interactiveBridgeTarget,
+      {
+        ownWindow: interactiveFrame.contentWindow!,
+      },
+    );
     await Promise.all([
       playerBridge.handshakePromise,
       interactiveBridge.handshakePromise,

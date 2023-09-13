@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { StreamPhaseParser } from '../../src/InteractiveBridge/StreamPhaseParser';
+import { StreamPhaseParser } from '../../src/Parser/StreamPhaseParser';
 import { ParserTestApparatus } from '../utils/ParserTestApparatus';
 
 const tester = new ParserTestApparatus(new StreamPhaseParser());

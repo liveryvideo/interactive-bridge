@@ -1,4 +1,4 @@
-import type { Parser } from './util/Parser';
+import type { Parser } from './Parser/Parser';
 
 export type SendCommand<T> = (
   name: string,

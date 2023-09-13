@@ -3,7 +3,7 @@ import type {
   Orientation,
   Quality,
   StreamPhase,
-} from './InteractiveBridge';
+} from './InteractiveBridgeFacade';
 import { LiveryBridge } from './LiveryBridge';
 import { SubscribeCommandHandler } from './util/SubscribeCommandHandler';
 

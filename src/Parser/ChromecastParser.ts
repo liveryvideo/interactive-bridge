@@ -1,4 +1,4 @@
-import type { Parser } from '../util/Parser';
+import type { Parser } from './Parser';
 
 export class ChromecastParser implements Parser<string | undefined> {
   parse(value: unknown) {

@@ -1,5 +1,5 @@
-import type { Parser } from '../util/Parser';
 import { stringify } from '../util/stringify';
+import type { Parser } from './Parser';
 
 const knownPlaybackStates = [
   'BUFFERING',

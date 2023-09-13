@@ -1,5 +1,5 @@
-import type { Parser } from '../util/Parser';
 import { stringify } from '../util/stringify';
+import type { Parser } from './Parser';
 
 export const knownStreamPhases = ['LIVE', 'POST', 'PRE'] as const;
 export type StreamPhase = (typeof knownStreamPhases)[number];

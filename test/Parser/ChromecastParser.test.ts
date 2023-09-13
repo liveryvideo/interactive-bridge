@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { ChromecastParser } from '../../src/InteractiveBridge/ChromecastParser';
+import { ChromecastParser } from '../../src/Parser/ChromecastParser';
 import { ParserTestApparatus } from '../utils/ParserTestApparatus';
 
 const tester = new ParserTestApparatus(new ChromecastParser());

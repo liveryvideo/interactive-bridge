@@ -1,5 +1,5 @@
-import type { Parser } from '../util/Parser';
-import { InvalidTypeError } from '../util/errors';
+import { InvalidTypeError } from '../errors';
+import type { Parser } from './Parser';
 import { knownStreamPhases, type StreamPhase } from './StreamPhaseParser';
 
 export type StreamPhaseTimeline = Record<number, StreamPhase>;

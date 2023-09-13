@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { BooleanParser } from '../../src/InteractiveBridge/BooleanParser';
+import { BooleanParser } from '../../src/Parser/BooleanParser';
 import { ParserTestApparatus } from '../utils/ParserTestApparatus';
 
 const tester = new ParserTestApparatus(new BooleanParser('test'));

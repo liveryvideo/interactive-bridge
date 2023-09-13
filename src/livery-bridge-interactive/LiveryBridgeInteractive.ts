@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { AbstractPlayerBridge } from '../AbstractPlayerBridge';
-import { InteractiveBridge } from '../InteractiveBridge';
+import { InteractiveBridgeFacade } from '../InteractiveBridgeFacade';
 import '../livery-bridge-log/LiveryBridgeLog';
 import { stringify } from '../util/stringify';
 
@@ -118,7 +118,7 @@ export class LiveryBridgeInteractive extends LitElement {
    * InteractiveBridge instance created by this element on first DOM connect.
    */
   @property({ type: Object })
-  interactiveBridge?: InteractiveBridge;
+  interactiveBridge?: InteractiveBridgeFacade;
 
   /**
    * `PlayerBridge` to use as target for `interactiveBridge`.
@@ -154,7 +154,9 @@ export class LiveryBridgeInteractive extends LitElement {
     super.connectedCallback();
 
     if (!this.interactiveBridge) {
-      this.interactiveBridge = new InteractiveBridge(this.playerBridge ?? '*');
+      this.interactiveBridge = new InteractiveBridgeFacade(
+        this.playerBridge ?? '*',
+      );
 
       this.interactiveBridge.registerInteractiveCommand(
         'test',

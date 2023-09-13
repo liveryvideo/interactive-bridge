@@ -4,8 +4,8 @@
 export const version = __VERSION__;
 
 export { AbstractPlayerBridge } from './src/AbstractPlayerBridge';
-export { InteractiveBridge } from './src/InteractiveBridge';
-export type { Orientation, StreamPhase } from './src/InteractiveBridge';
+export { InteractiveBridgeFacade as InteractiveBridge } from './src/InteractiveBridgeFacade';
+export type { Orientation, StreamPhase } from './src/InteractiveBridgeFacade';
 export { LiveryBridge } from './src/LiveryBridge';
 export { MockPlayerBridge } from './src/MockPlayerBridge';
 export { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive';

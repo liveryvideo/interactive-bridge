@@ -1,6 +1,6 @@
 import { expect } from 'vitest';
-import type { Parser } from '../../src/util/Parser';
-import { InvalidTypeError } from '../../src/util/errors';
+import type { Parser } from '../../src/Parser/Parser';
+import { InvalidTypeError } from '../../src/errors';
 
 export class ParserTestApparatus<OutType> {
   private parser: Parser<OutType>;

@@ -1,13 +1,13 @@
-import { BooleanParser } from './BooleanParser';
+import { BooleanParser } from '../Parser/BooleanParser';
+import { FeaturesParser } from '../Parser/FeaturesParser';
+import { LiveryParamsParser } from '../Parser/LiveryParamsParser';
+import { OrientationParser } from '../Parser/OrientationParser';
+import { PlaybackParser } from '../Parser/PlaybackParser';
+import { QualitiesParser } from '../Parser/QualitiesParser';
+import { StreamPhaseParser } from '../Parser/StreamPhaseParser';
+import { StringParser } from '../Parser/StringParser';
+import { VoidParser } from '../Parser/VoidParser';
 import type { CommandLibrary } from './CommandFactory';
-import { FeaturesParser } from './FeaturesParser';
-import { LiveryParamsParser } from './LiveryParamsParser';
-import { OrientationParser } from './OrientationParser';
-import { PlaybackParser } from './PlaybackParser';
-import { QualitiesParser } from './QualitiesParser';
-import { StreamPhaseParser } from './StreamPhaseParser';
-import { StringParser } from './StringParser';
-import { VoidParser } from './VoidParser';
 
 export class ApplicationCommands implements CommandLibrary {
   commandsTable = {

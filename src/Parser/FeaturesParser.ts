@@ -1,5 +1,5 @@
-import type { Parser } from '../util/Parser';
 import { parseToArray } from '../util/parseToArray';
+import type { Parser } from './Parser';
 
 export const knownFeatures = [
   'AIRPLAY',

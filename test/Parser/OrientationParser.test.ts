@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { OrientationParser } from '../../src/InteractiveBridge/OrientationParser';
+import { OrientationParser } from '../../src/Parser/OrientationParser';
 import { ParserTestApparatus } from '../utils/ParserTestApparatus';
 
 const tester = new ParserTestApparatus(new OrientationParser());

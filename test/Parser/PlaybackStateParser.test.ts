@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { PlaybackStateParser } from '../../src/InteractiveBridge/PlaybackStateParser';
+import { PlaybackStateParser } from '../../src/Parser/PlaybackStateParser';
 import { ParserTestApparatus } from '../utils/ParserTestApparatus';
 
 const tester = new ParserTestApparatus(new PlaybackStateParser());

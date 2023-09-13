@@ -1,15 +1,15 @@
-import { BooleanParser } from './BooleanParser';
-import { ChromecastParser } from './ChromecastParser';
+import { BooleanParser } from '../Parser/BooleanParser';
+import { ChromecastParser } from '../Parser/ChromecastParser';
+import { ControlsParser } from '../Parser/ControlsParser';
+import { ErrorParser } from '../Parser/ErrorParser';
+import { FeaturesParser } from '../Parser/FeaturesParser';
+import { PlaybackModeParser } from '../Parser/PlaybackModeParser';
+import { PlaybackParser } from '../Parser/PlaybackParser';
+import { PlaybackStateParser } from '../Parser/PlaybackStateParser';
+import { QualitiesParser } from '../Parser/QualitiesParser';
+import { StreamPhaseTimelineParser } from '../Parser/StreamPhaseTimelineParser';
+import { VoidParser } from '../Parser/VoidParser';
 import type { CommandLibrary } from './CommandFactory';
-import { ControlsParser } from './ControlsParser';
-import { ErrorParser } from './ErrorParser';
-import { FeaturesParser } from './FeaturesParser';
-import { PlaybackModeParser } from './PlaybackModeParser';
-import { PlaybackParser } from './PlaybackParser';
-import { PlaybackStateParser } from './PlaybackStateParser';
-import { QualitiesParser } from './QualitiesParser';
-import { StreamPhaseTimelineParser } from './StreamPhaseTimelineParser';
-import { VoidParser } from './VoidParser';
 
 export class VideoControlCommands implements CommandLibrary {
   commandsTable = {

@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { ErrorParser } from '../../src/InteractiveBridge/ErrorParser';
+import { ErrorParser } from '../../src/Parser/ErrorParser';
 import { ParserTestApparatus } from '../utils/ParserTestApparatus';
 
 const tester = new ParserTestApparatus(new ErrorParser());

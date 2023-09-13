@@ -1,6 +1,6 @@
-import type { Parser } from '../util/Parser';
-import { InvalidTypeError } from '../util/errors';
+import { InvalidTypeError } from '../errors';
 import { fieldFromIfTypeWithDefault } from '../util/fieldFromIfTypeWithDefault';
+import type { Parser } from './Parser';
 
 export const knownControls = [
   'cast',

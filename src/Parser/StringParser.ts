@@ -1,4 +1,4 @@
-import type { Parser } from '../util/Parser';
+import type { Parser } from './Parser';
 
 export class StringParser implements Parser<string> {
   private label: string;

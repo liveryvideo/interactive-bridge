@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
+import type { Parser } from '../Parser/Parser';
+import { SubscriptionError } from '../errors';
 import type { SendCommand } from '../types';
-import type { Parser } from './Parser';
-import { SubscriptionError } from './errors';
 
 /**
  * Subscribe commands:

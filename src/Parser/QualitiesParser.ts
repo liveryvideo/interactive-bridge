@@ -1,7 +1,7 @@
-import type { Parser } from '../util/Parser';
-import { InvalidTypeError } from '../util/errors';
+import { InvalidTypeError } from '../errors';
 import { fieldFromIfTypeWithDefault } from '../util/fieldFromIfTypeWithDefault';
 import { parseToArray } from '../util/parseToArray';
+import type { Parser } from './Parser';
 
 export interface Quality {
   audio?: {

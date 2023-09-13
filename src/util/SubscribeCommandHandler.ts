@@ -1,4 +1,4 @@
-import { SubscriptionError } from './errors';
+import { SubscriptionError } from '../errors';
 
 type Listener<T> = (value: T) => void;
 export class SubscribeCommandHandler<T> {

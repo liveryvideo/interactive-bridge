@@ -1,5 +1,5 @@
-import type { Parser } from '../util/Parser';
 import { stringify } from '../util/stringify';
+import type { Parser } from './Parser';
 
 const orientations = ['landscape', 'portrait'] as const;
 export type Orientation = (typeof orientations)[number];

@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { describe, expect, test } from 'vitest';
-import type { Feature, PlaybackDetails } from '../src/InteractiveBridge';
-import { InteractiveBridge } from '../src/InteractiveBridge';
+import type { Feature, PlaybackDetails } from '../src/InteractiveBridgeFacade';
+import { InteractiveBridgeFacade } from '../src/InteractiveBridgeFacade';
 import { MockPlayerBridge } from '../src/MockPlayerBridge';
 
 export class StubPlayerBridge extends MockPlayerBridge {
@@ -30,7 +30,7 @@ describe('InteractiveBridge.getFeatures()', () => {
   function arrangeWithStubGetFeaturesResponse(response: any) {
     const playerBridge = new StubPlayerBridge();
     playerBridge.features = response;
-    return new InteractiveBridge(playerBridge);
+    return new InteractiveBridgeFacade(playerBridge);
   }
 
   async function assertGetFeaturesResponseYieldsResult(
@@ -93,7 +93,7 @@ describe('InteractiveBridge.getPlayback()', () => {
   function arrangeWithStubGetPlaybackResponse(response: any) {
     const playerBridge = new StubPlayerBridge();
     playerBridge.playback = response;
-    return new InteractiveBridge(playerBridge);
+    return new InteractiveBridgeFacade(playerBridge);
   }
 
   async function assertGetPlaybackResponseYieldsResult(

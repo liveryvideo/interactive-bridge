@@ -1,6 +1,6 @@
 import { describe, test } from 'vitest';
-import type { Controls } from '../../src/InteractiveBridge/ControlsParser';
-import { ControlsParser } from '../../src/InteractiveBridge/ControlsParser';
+import type { Controls } from '../../src/Parser/ControlsParser';
+import { ControlsParser } from '../../src/Parser/ControlsParser';
 import { ParserTestApparatus } from '../utils/ParserTestApparatus';
 
 const allFalse: Controls = {
