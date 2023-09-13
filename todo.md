@@ -1,5 +1,8 @@
 # Todo
 
+- Fix typing
+- separate InteractiveBridge facade from its LiveryBridge delegate
+
 - unit tests for Transceivers, Targets and Ports
   - createPort creates the appropriate Port
   - createTarget creates the appropriate Target
@@ -27,3 +30,7 @@ done: boolean
 
 To help with composite pattern
 \*/
+
+The real focus here is separating the high-level policy from the low level details. And to do so in such a way that the two are independently testable.
+
+We want to separate the specific commands from the sending and receiving of those commands

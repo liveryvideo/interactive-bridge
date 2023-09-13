@@ -1,16 +1,15 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
-import { FullscreenParser } from './InteractiveBridge/FullscreenParser';
-import {
-  OrientationParser,
-  type Orientation,
-} from './InteractiveBridge/OrientationParser';
+import { CommandFactory } from './InteractiveBridge/CommandFactory';
+import type { Controls } from './InteractiveBridge/ControlsParser';
+import type { Feature } from './InteractiveBridge/FeaturesParser';
+import type { Orientation } from './InteractiveBridge/OrientationParser';
+import type { PlaybackMode } from './InteractiveBridge/PlaybackModeParser';
+import type { PlaybackState } from './InteractiveBridge/PlaybackStateParser';
 import type { Quality } from './InteractiveBridge/QualitiesParser';
-import { QualityParser } from './InteractiveBridge/QualityParser';
 import type { StreamPhase } from './InteractiveBridge/StreamPhaseParser';
-import { StreamPhaseParser } from './InteractiveBridge/StreamPhaseParser';
-import { VideoCommands } from './InteractiveBridge/VideoCommands';
-import { LiveryBridge } from './LiveryBridge';
-import { Subscriber } from './util/Subscriber';
+import type { StreamPhaseTimeline } from './InteractiveBridge/StreamPhaseTimelineParser';
+import { InteractiveLiveryBridge } from './InteractiveLiveryBridge';
+import type { Command } from './types';
 
 export type { Control, Controls } from './InteractiveBridge/ControlsParser';
 export type { Feature } from './InteractiveBridge/FeaturesParser';
@@ -22,35 +21,21 @@ export type { Quality } from './InteractiveBridge/QualitiesParser';
 export type { StreamPhase } from './InteractiveBridge/StreamPhaseParser';
 export type { StreamPhaseTimeline } from './InteractiveBridge/StreamPhaseTimelineParser';
 
+export interface SendCommandObjectable {
+  sendCommandObject<T>(command: Command<T>): Promise<T>;
+}
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
-export class InteractiveBridge extends LiveryBridge {
-  video = new VideoCommands(this.sendCommand.bind(this));
+export class InteractiveBridge implements SendCommandObjectable {
+  get handshakePromise() {
+    return this.bridge.handshakePromise;
+  }
 
-  private fullscreenSubscriber = new Subscriber<boolean, boolean>(
-    'subscribeFullscreen',
-    new FullscreenParser(),
-    this.sendCommand.bind(this),
-  );
+  private bridge: InteractiveLiveryBridge;
 
-  private orientationSubscriber = new Subscriber<Orientation, Orientation>(
-    'subscribeOrientation',
-    new OrientationParser(),
-    this.sendCommand.bind(this),
-  );
-
-  private qualitySubscriber = new Subscriber<string, string>(
-    'subscribeQuality',
-    new QualityParser(),
-    this.sendCommand.bind(this),
-  );
-
-  private streamPhaseSubscriber = new Subscriber<StreamPhase, StreamPhase>(
-    'subscribeStreamPhase',
-    new StreamPhaseParser(),
-    this.sendCommand.bind(this),
-  );
+  private commandFactory = new CommandFactory();
 
   /**
    * Constructs `InteractiveBridge` with specified `target: AbstractPlayerBridge` (i.e: `PlayerBridge`)
@@ -62,64 +47,31 @@ export class InteractiveBridge extends LiveryBridge {
       ownWindow?: Window;
     } = {},
   ) {
-    let superParameters: [
-      target?: LiveryBridge['target'],
-      options?: {
-        ownWindow?: Window;
-      },
-    ];
-    if (typeof target === 'string') {
-      const ownWindow = options.ownWindow || window;
-      superParameters = [
-        { window: ownWindow.parent, origin: target },
-        { ownWindow },
-      ];
-    } else {
-      superParameters = [target];
-    }
-    super(...superParameters);
+    this.bridge = new InteractiveLiveryBridge(target, options);
   }
 
   /**
    * Returns promise of LiveryPlayer application name.
    */
   getAppName() {
-    return this.sendCommand('getAppName').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getAppName value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    const command = this.commandFactory.makeCommand('getAppName');
+    return this.sendCommandObject(command);
   }
 
   /**
    * Returns promise of LiveryPlayer customer id.
    */
   getCustomerId() {
-    return this.sendCommand('getCustomerId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getCustomerId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    const command = this.commandFactory.makeCommand('getCustomerId');
+    return this.sendCommandObject(command);
   }
 
   /**
    * Returns promise of LiveryPlayer Pinpoint analytics endpoint id.
    */
   getEndpointId() {
-    return this.sendCommand('getEndpointId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getEndpointId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    const command = this.commandFactory.makeCommand('getEndpointId');
+    return this.sendCommandObject(command);
   }
 
   /**
@@ -128,21 +80,16 @@ export class InteractiveBridge extends LiveryBridge {
    * and unrecognized entries will be disregarded.
    */
   getFeatures() {
-    return this.video.getFeatures();
+    const command = this.commandFactory.makeCommand<Feature[]>('getFeatures');
+    return this.sendCommandObject(command);
   }
 
   /**
    * Returns promise of current LiveryPlayer latency in seconds.
    */
   getLatency() {
-    return this.sendCommand('getLatency').then((value) => {
-      if (typeof value !== 'number') {
-        throw new Error(
-          `getLatency value type: ${typeof value}, should be: number`,
-        );
-      }
-      return value;
-    });
+    const command = this.commandFactory.makeCommand('getLatency');
+    return this.sendCommandObject(command);
   }
 
   /**
@@ -160,55 +107,56 @@ export class InteractiveBridge extends LiveryBridge {
    * this will return: `{ 'foo:bar': 'hey you', no_val: '', multi: '1' }`.
    */
   getLiveryParams(): Promise<Record<string, string>> {
-    return this.sendCommand('getLiveryParams').then((value) => {
-      if (typeof value !== 'object') {
-        throw new Error(
-          `getLiveryParams value type: ${typeof value}, should be: object`,
-        );
-      }
-      if (value === null) {
-        throw new Error(`getLiveryParams value type: null, should be: object`);
-      }
-      const dict: Record<string, string> = {};
-      for (const [paramKey, paramValue] of Object.entries(value)) {
-        if (typeof paramValue === 'string') {
-          dict[paramKey] = paramValue;
-        }
-      }
-      return dict;
-    });
+    const command =
+      this.commandFactory.makeCommand<Record<string, string>>(
+        'getLiveryParams',
+      );
+    return this.sendCommandObject(command);
   }
 
+  /**
+   * Returns current playback:
+   *  - buffer in seconds ahead of current position
+   *  - duration in seconds from start to end of VOD or live stream (e.g: continuously increasing)
+   *  - position in seconds since start of stream
+   */
   getPlayback() {
-    return this.video.getPlayback();
+    const command = this.commandFactory.makeCommand('getPlayback');
+    return this.sendCommandObject(command);
   }
 
   /**
    * Returns promise of LiveryPlayer version.
    */
   getPlayerVersion() {
-    return this.sendCommand('getPlayerVersion').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getPlayerVersion value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    const command = this.commandFactory.makeCommand('getPlayerVersion');
+    return this.sendCommandObject(command);
   }
 
   /**
    * Returns promise of LiveryPlayer stream id.
    */
   getStreamId() {
-    return this.sendCommand('getStreamId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getStreamId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    const command = this.commandFactory.makeCommand('getStreamId');
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   *
+   */
+  pause() {
+    const command = this.commandFactory.makeCommand<void>('pause');
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Can require direct user interaction
+   * If starting unmuted playback fails this will fall back to muted playback
+   * and notify subscribeUnmuteRequiresInteraction listeners.
+   */
+  play() {
+    const command = this.commandFactory.makeCommand<void>('play');
+    return this.sendCommandObject(command);
   }
 
   /**
@@ -217,11 +165,11 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `registerPlayerCommand()` instead.
    */
-  override registerCustomCommand(
+  registerCustomCommand(
     name: string,
     handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
   ) {
-    return super.registerCustomCommand(name, handler);
+    return this.bridge.registerCustomCommand(name, handler);
   }
 
   /**
@@ -232,7 +180,43 @@ export class InteractiveBridge extends LiveryBridge {
     name: string,
     handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
   ) {
-    super.registerCustomCommand(name, handler);
+    return this.bridge.registerCustomCommand(name, handler);
+  }
+
+  /**
+   * Reloads player, e.g: to try to recover from an error
+   */
+  reload() {
+    const command = this.commandFactory.makeCommand<void>('reload');
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   *
+   * Seek to specified position in seconds since start of stream/vod
+   * If position is not within a LIVE stream phase period this will return an error
+   */
+  seek(position: number) {
+    const command = this.commandFactory.makeCommand<void>('seek', {
+      arg: position,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Select index of quality to play, or -1 to use ABR
+   */
+  selectQuality(index: number) {
+    const command = this.commandFactory.makeCommand<void>('selectQuality', {
+      arg: index,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  sendCommandObject<T>(command: Command<T>) {
+    return this.bridge
+      .sendCommand(command.name, command.arg, command.listener, command.custom)
+      .then((value) => command.parser.parse(value));
   }
 
   /**
@@ -241,12 +225,12 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `sendPlayerCommand()` instead.
    */
-  override sendCustomCommand<T>(
+  sendCustomCommand<T>(
     name: string,
     arg?: unknown,
     listener?: (value: T) => void,
   ) {
-    return super.sendCustomCommand(name, arg, listener);
+    return this.bridge.sendPlayerCommand(name, arg, listener);
   }
 
   /**
@@ -258,25 +242,135 @@ export class InteractiveBridge extends LiveryBridge {
     arg?: unknown,
     listener?: (value: T) => void,
   ) {
-    return super.sendCustomCommand(name, arg, listener);
+    return this.bridge.sendPlayerCommand(name, arg, listener);
   }
 
   /**
    *
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  submitUserFeedback(_feedback: {
+  setAirplay(active: boolean) {
+    const command = this.commandFactory.makeCommand<void>('setAirplay', {
+      arg: active,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   *
+   */
+  setChromecast(active: boolean) {
+    const command = this.commandFactory.makeCommand<void>('setChromecast', {
+      arg: active,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Can require direct user interaction
+   */
+  setFullscreen(active: boolean) {
+    const command = this.commandFactory.makeCommand<void>('setFullscreen', {
+      arg: active,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Can require direct user interaction
+   */
+  setMuted(muted: boolean) {
+    const command = this.commandFactory.makeCommand<void>('setMuted', {
+      arg: muted,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Can require direct user interaction
+   */
+  setPictureInPicture(active: boolean) {
+    const command = this.commandFactory.makeCommand<void>(
+      'setPictureInPicture',
+      { arg: active },
+    );
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   *
+   */
+  submitUserFeedback(feedback: {
     comments: string;
     email: string;
     name: string;
-  }) {}
+  }) {
+    const command = this.commandFactory.makeCommand('submitUserFeedback', {
+      arg: feedback,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Returns true when Airplay is being used, false otherwise
+   */
+  subscribeAirplay(listener: (value: boolean) => void) {
+    const command = this.commandFactory.makeCommand<boolean>(
+      'subscribeAirplay',
+      { listener },
+    );
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Returns name of device that is being cast to or undefined
+   */
+  subscribeChromecast(listener: (value: string | undefined) => void) {
+    const command = this.commandFactory.makeCommand<string | undefined>(
+      'subscribeChromecast',
+      { listener },
+    );
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Where Controls is an object with boolean properties:
+   * cast, contact, error, fullscreen, mute, pip, play, quality, scrubber
+   */
+  subscribeControls(listener: (value: Controls) => void) {
+    const command = this.commandFactory.makeCommand<Controls>(
+      'subscribeControls',
+      { listener },
+    );
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Current player error message or undefined if none
+   */
+  subscribeError(listener: (value: string | undefined) => void) {
+    const command = this.commandFactory.makeCommand<string | undefined>(
+      'subscribeError',
+      { listener },
+    );
+    return this.sendCommandObject(command);
+  }
 
   /**
    * Returns promise of current LiveryPlayer fullscreen state
    * and calls back `listener` with any subsequent state changes.
    */
   subscribeFullscreen(listener: (value: boolean) => void) {
-    return this.fullscreenSubscriber.subscribe(listener);
+    const command = this.commandFactory.makeCommand('subscribeFullscreen', {
+      listener,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  subscribeMuted(listener: (value: boolean) => void) {
+    const command = this.commandFactory.makeCommand<boolean>('subscribeMuted', {
+      listener,
+    });
+    return this.sendCommandObject(command);
   }
 
   /**
@@ -284,11 +378,58 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent orientations.
    */
   subscribeOrientation(listener: (orientation: Orientation) => void) {
-    return this.orientationSubscriber.subscribe(listener);
+    const command = this.commandFactory.makeCommand('subscribeOrientation', {
+      listener,
+    });
+    return this.sendCommandObject(command);
   }
 
+  subscribePictureInPicture(listener: (value: boolean) => void) {
+    const command = this.commandFactory.makeCommand<boolean>(
+      'subscribePictureInPicture',
+      { listener },
+    );
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Returns current mode of playback, e.g: buffering, syncing, ABR, stall management, etc.
+   */
+  subscribePlaybackMode(listener: (value: PlaybackMode) => void) {
+    const command = this.commandFactory.makeCommand<PlaybackMode>(
+      'subscribePlaybackMode',
+      { listener },
+    );
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Stalled (loading) states are: 'BUFFERING', 'SEEKING'
+   * Paused states are: 'ENDED', 'PAUSED'
+   * Playing states are: 'FAST_FORWARD', 'PLAYING', 'REWIND', 'SLOW_MO'
+   * Though practically we only use 'PLAYING' for now
+   */
+  subscribePlaybackState(listener: (value: PlaybackState) => void) {
+    const command = this.commandFactory.makeCommand<PlaybackState>(
+      'subscribePlaybackState',
+      { listener },
+    );
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * Note that the existing subscribeQuality method only returns the label
+   * of the current playback quality. Assuming that that should be unique
+   * I think it will already suffice to create a qualities list that shows
+   * the currently active quality. Otherwise we’ll have to also add a
+   * subscribeQualityIndex method or so that returns the index of the quality
+   * in the list of qualities returned by subscribeQualities.
+   */
   subscribeQualities(listener: (value: Quality[]) => void) {
-    return this.video.subscribeQualities(listener);
+    const command = this.commandFactory.makeCommand('subscribeQualities', {
+      listener,
+    });
+    return this.sendCommandObject(command);
   }
 
   /**
@@ -296,7 +437,10 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent quality changes.
    */
   subscribeQuality(listener: (value: string) => void) {
-    return this.qualitySubscriber.subscribe(listener);
+    const command = this.commandFactory.makeCommand('subscribeQuality', {
+      listener,
+    });
+    return this.sendCommandObject(command);
   }
 
   /**
@@ -304,7 +448,37 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent phases.
    */
   subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
-    return this.streamPhaseSubscriber.subscribe(listener);
+    const command = this.commandFactory.makeCommand('subscribeStreamPhase', {
+      listener,
+    });
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   * This indicates the LIVE periods of the stream that can be seeked to
+   * I.e: from the start of LIVE timestamp to the first non-LIVE timestamp
+   */
+  subscribeStreamPhaseTimeline(listener: (value: StreamPhaseTimeline) => void) {
+    const command = this.commandFactory.makeCommand<StreamPhaseTimeline>(
+      'subscribeStreamPhaseTimeline',
+      { listener },
+    );
+    return this.sendCommandObject(command);
+  }
+
+  /**
+   *
+   * If true then unmuting playback requires user interaction,
+   * e.g: setMuted() should be called directly from a 'click' event listener.
+   * In this case the web player currently shows a special unmute button
+   * to highlight this fact to users and facilitate unmuting.
+   */
+  subscribeUnmuteRequiresInteraction(listener: (value: boolean) => void) {
+    const command = this.commandFactory.makeCommand<boolean>(
+      'subscribeUnmuteRequiresInteraction',
+      { listener },
+    );
+    return this.sendCommandObject(command);
   }
 
   /**
@@ -312,14 +486,14 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version. Use `unregisterInteractiveCommand()` instead.
    */
-  override unregisterCustomCommand(name: string) {
-    super.unregisterCustomCommand(name);
+  unregisterCustomCommand(name: string) {
+    this.bridge.unregisterInteractiveCommand(name);
   }
 
   /**
    * Unregister custom interactive command by name.
    */
   unregisterInteractiveCommand(name: string) {
-    return super.unregisterCustomCommand(name);
+    return this.bridge.unregisterInteractiveCommand(name);
   }
 }

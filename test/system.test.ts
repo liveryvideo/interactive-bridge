@@ -102,8 +102,9 @@ function executeSystemTests(
       const promises = new Array<Promise<any>>(commands.length);
       for (let i = 0; i < commands.length; i++) {
         const [commandName, response] = commands[i];
-        promises.push(
-          playerBridge.sendInteractiveCommand(commandName, response),
+        promises[i] = playerBridge.sendInteractiveCommand(
+          commandName,
+          response,
         );
       }
       await Promise.all(promises);

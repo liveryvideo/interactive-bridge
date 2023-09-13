@@ -236,6 +236,40 @@ export class LiveryBridge {
   }
 
   /**
+   * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
+   * other side with matching `name`.
+   */
+  registerCustomCommand(
+    name: string,
+    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
+  ) {
+    this.customCommandMap.set(name, handler);
+  }
+
+  sendCommand<T>(
+    name: string,
+    arg?: unknown,
+    listener?: (value: T) => void,
+    custom = false,
+  ) {
+    return this.handshakePromise.then(() => {
+      const id = uuid();
+
+      const promise = new Promise<T>((resolve, reject) => {
+        this.deferredMap.set(id, { resolve, reject });
+      });
+
+      if (listener) {
+        this.listenerMap.set(id, listener);
+      }
+
+      this.sendMessage(custom ? 'customCommand' : 'command', id, { name, arg });
+
+      return promise;
+    });
+  }
+
+  /**
    * Spy on LiveryMessages handled by this bridge.
    *
    * @param callback Callback to call with message
@@ -258,40 +292,6 @@ export class LiveryBridge {
     throw new Error(`Unsupported command: ${name}`);
   }
   /* eslint-enable @typescript-eslint/no-unused-vars */
-
-  /**
-   * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
-   * other side with matching `name`.
-   */
-  protected registerCustomCommand(
-    name: string,
-    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
-  ) {
-    this.customCommandMap.set(name, handler);
-  }
-
-  protected sendCommand<T>(
-    name: string,
-    arg?: unknown,
-    listener?: (value: T) => void,
-    custom = false,
-  ) {
-    return this.handshakePromise.then(() => {
-      const id = uuid();
-
-      const promise = new Promise<T>((resolve, reject) => {
-        this.deferredMap.set(id, { resolve, reject });
-      });
-
-      if (listener) {
-        this.listenerMap.set(id, listener);
-      }
-
-      this.sendMessage(custom ? 'customCommand' : 'command', id, { name, arg });
-
-      return promise;
-    });
-  }
 
   /**
    * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
