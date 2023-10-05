@@ -8,6 +8,7 @@
 #
 # Note: semantic-release depends on the GitHub liveryvideo "web" context for GH_TOKEN and NPM_TOKEN
 # environment variables for repo write and package publish access.
+# It also depends on the SENTRY_AUTH_TOKEN environment variable for Sentry release creation.
 #
 # Note: We used to use the cimg/node -browsers docker image variant and circleci/browser-tools to install
 # Chrome to be able to run our tests in that browser.
@@ -22,7 +23,7 @@ executors:
   default:
     docker:
       # - image: cimg/node:18.12.1-browsers
-      - image: cimg/node:20.1.0
+      - image: cimg/node:20.7.0
 
 commands:
   npm_install:
