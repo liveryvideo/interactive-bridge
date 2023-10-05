@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.9.0...v1.9.1) (2023-10-05)
+
+
+### Bug Fixes
+
+* update lit v2.8.0 and browsers list ([004451a](https://github.com/liveryvideo/interactive-bridge/commit/004451a52b1ae1427afa10e5e6235ebd5289a6e4))
+
 # [1.9.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.8.3...v1.9.0) (2023-08-03)
 
 
