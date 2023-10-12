@@ -1,3 +1,10 @@
+## [1.9.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.9.1...v1.9.2) (2023-10-12)
+
+
+### Bug Fixes
+
+* support loading interactive-bridge multiple times ([#24](https://github.com/liveryvideo/interactive-bridge/issues/24)) ([30b0bb4](https://github.com/liveryvideo/interactive-bridge/commit/30b0bb476dd54712bbdd5df0cc9f92c9f9db3a33))
+
 ## [1.9.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.9.0...v1.9.1) (2023-10-05)
 
 
