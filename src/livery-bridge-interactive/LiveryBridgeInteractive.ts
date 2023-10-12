@@ -1,8 +1,9 @@
 import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import type { AbstractPlayerBridge } from '../AbstractPlayerBridge';
 import { InteractiveBridge } from '../InteractiveBridge';
 import '../livery-bridge-log/LiveryBridgeLog';
+import { defineVersionedElement } from '../util/defineVersionedElement';
 import { stringify } from '../util/stringify';
 
 declare global {
@@ -54,7 +55,6 @@ function isBridgeSubscribeMethodName(
  * interactive.tenantId = 'abc123';
  * document.body.appendChild(interactive);
  */
-@customElement('livery-bridge-interactive')
 export class LiveryBridgeInteractive extends LitElement {
   static override readonly styles = css`
     :host {
@@ -113,6 +113,8 @@ export class LiveryBridgeInteractive extends LitElement {
       padding: 5px;
     }
   `;
+
+  static readonly version = __VERSION__;
 
   /**
    * InteractiveBridge instance created by this element on first DOM connect.
@@ -422,3 +424,5 @@ export class LiveryBridgeInteractive extends LitElement {
     this.handlePlayerCall('subscribe', event);
   }
 }
+
+defineVersionedElement('livery-bridge-interactive', LiveryBridgeInteractive);

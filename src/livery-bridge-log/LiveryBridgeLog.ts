@@ -1,6 +1,7 @@
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import type { LiveryBridge } from '../LiveryBridge';
+import { defineVersionedElement } from '../util/defineVersionedElement';
 import { stringify } from '../util/stringify';
 
 declare global {
@@ -12,7 +13,6 @@ declare global {
 /**
  * Element defined as `<livery-bridge-log>` which logs LiveryBridge and other window messages posted to this window.
  */
-@customElement('livery-bridge-log')
 export class LiveryBridgeLog extends LitElement {
   static override readonly styles = css`
     :host {
@@ -31,6 +31,8 @@ export class LiveryBridgeLog extends LitElement {
       overflow-wrap: break-word;
     }
   `;
+
+  static readonly version = __VERSION__;
 
   /**
    * Bridge to spy on.
@@ -104,3 +106,5 @@ export class LiveryBridgeLog extends LitElement {
     this.addMessage(`${event.origin}: ${stringify(event.data, null, '  ')}`);
   };
 }
+
+defineVersionedElement('livery-bridge-log', LiveryBridgeLog);

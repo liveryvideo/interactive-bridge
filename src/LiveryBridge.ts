@@ -55,7 +55,24 @@ function hasOwnProperty<X extends {}, Y extends PropertyKey>(
   return Object.hasOwnProperty.call(obj, prop);
 }
 
+/**
+ * Returns true if specified target is a LiveryBridge instance.
+ *
+ * This package can be loaded multiple times so unfortunately we can't simply use `instanceof LiveryBridge`.
+ */
+function isLiveryBridge(
+  target: undefined | LiveryBridge | { origin: string; window: Window },
+): target is LiveryBridge {
+  if (!target) {
+    return false;
+  }
+  const { constructor } = target;
+  return 'isLiveryBridge' in constructor && constructor.isLiveryBridge === true;
+}
+
 export class LiveryBridge {
+  static readonly isLiveryBridge = true;
+
   private customCommandMap = new Map<
     string,
     (arg: unknown, listener: (value: unknown) => void) => unknown
@@ -102,7 +119,7 @@ export class LiveryBridge {
     });
 
     if (target) {
-      if (target instanceof LiveryBridge) {
+      if (isLiveryBridge(target)) {
         target.target = this;
       } else {
         window.addEventListener('message', (event) =>
@@ -377,7 +394,7 @@ export class LiveryBridge {
   }
 
   private handleMessage(event: MessageEvent) {
-    if (!this.target || this.target instanceof LiveryBridge) {
+    if (!this.target || isLiveryBridge(this.target)) {
       throw new Error('Use handleMessage only when target is a window');
     }
 
@@ -431,7 +448,7 @@ export class LiveryBridge {
       ...properties,
     };
 
-    if (this.target instanceof LiveryBridge) {
+    if (isLiveryBridge(this.target)) {
       this.target.handleLiveryMessage(message);
     } else {
       this.target.window.postMessage(message, this.target.origin);
