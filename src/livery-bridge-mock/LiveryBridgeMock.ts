@@ -1,8 +1,9 @@
 import type { PropertyValues } from 'lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import '../livery-bridge-log/LiveryBridgeLog';
 import { MockPlayerBridge } from '../MockPlayerBridge';
+import { defineVersionedElement } from '../util/defineVersionedElement';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -28,7 +29,6 @@ declare global {
  * };
  * document.body.appendChild(mock);
  */
-@customElement('livery-bridge-mock')
 export class LiveryBridgeMock extends LitElement {
   static override readonly styles = css`
     :host {
@@ -91,6 +91,8 @@ export class LiveryBridgeMock extends LitElement {
       left: 0;
     }
   `;
+
+  static readonly version = __VERSION__;
 
   /**
    * Target origin of `MockPlayerBridge` when an `<iframe>` is specified as interactive child element.
@@ -168,3 +170,5 @@ export class LiveryBridgeMock extends LitElement {
     /* eslint-enable @typescript-eslint/unbound-method */
   }
 }
+
+defineVersionedElement('livery-bridge-mock', LiveryBridgeMock);
