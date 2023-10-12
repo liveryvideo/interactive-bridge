@@ -66,7 +66,8 @@ function isLiveryBridge(
   if (!target) {
     return false;
   }
-  return 'isLiveryBridge' in target && target.isLiveryBridge === true;
+  const { constructor } = target;
+  return 'isLiveryBridge' in constructor && constructor.isLiveryBridge === true;
 }
 
 export class LiveryBridge {
