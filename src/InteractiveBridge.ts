@@ -160,7 +160,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of LiveryPlayer features and whether or not they're enabled.
+   * Returns promise of LiveryPlayer playback details.
    */
   getPlayback(): Promise<GetPlaybackReturn> {
     return this.sendCommand('getPlayback').then((value) => {
@@ -209,6 +209,13 @@ export class InteractiveBridge extends LiveryBridge {
       }
       return value;
     });
+  }
+
+  /**
+   * Pauses LiveryPlayer playback.
+   */
+  pause() {
+    return this.sendCommand('pause');
   }
 
   /**
