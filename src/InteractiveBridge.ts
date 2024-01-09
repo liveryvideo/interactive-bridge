@@ -257,6 +257,19 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Seek to a specified LiveryPlayer position in seconds.
+   */
+  seek(position: number) {
+    if (typeof position !== 'number') {
+      throw new Error(
+        `position arg value type: ${typeof position}, should be: number`,
+      );
+    }
+
+    return this.sendCommand('seek', position);
+  }
+
+  /**
    * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    *

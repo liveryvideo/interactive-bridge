@@ -89,6 +89,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'reload') {
       return this.reload();
     }
+    if (name === 'seek') {
+      return this.seek(arg);
+    }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
@@ -157,6 +160,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract play(): void;
 
   protected abstract reload(): void;
+
+  protected abstract seek(position: unknown): void;
 
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
