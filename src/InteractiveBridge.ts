@@ -285,12 +285,11 @@ export class InteractiveBridge extends LiveryBridge {
         `position arg value type: ${typeof position}, should be: number`,
       );
     }
-
     return this.sendCommand('seek', position);
   }
 
   /**
-   * Seek to a specified LiveryPlayer position in seconds.
+   * Select specified LiveryPlayer quality index or -1 for ABR.
    */
   selectQuality(index: number) {
     if (typeof index !== 'number') {
@@ -298,7 +297,6 @@ export class InteractiveBridge extends LiveryBridge {
         `index arg value type: ${typeof index}, should be: number`,
       );
     }
-
     return this.sendCommand('selectQuality', index);
   }
 
@@ -326,6 +324,15 @@ export class InteractiveBridge extends LiveryBridge {
     listener?: (value: T) => void,
   ) {
     return super.sendCustomCommand(name, arg, listener);
+  }
+
+  setControlsDisabled(disabled: boolean) {
+    if (typeof disabled !== 'boolean') {
+      throw new Error(
+        `disabled arg value type: ${typeof disabled}, should be: boolean`,
+      );
+    }
+    return this.sendCommand('setControlsDisabled', disabled);
   }
 
   /**
@@ -368,8 +375,8 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer playback quality
-   * and calls back `listener` with any subsequent quality changes.
+   * Returns promise of current LiveryPlayer qualities
+   * and calls back `listener` with any subsequent changes.
    */
   subscribeQualities(listener: (value: Qualities) => void) {
     function validate(value: unknown) {

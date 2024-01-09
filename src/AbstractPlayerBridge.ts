@@ -96,6 +96,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'selectQuality') {
       return this.selectQuality(arg);
     }
+    if (name === 'setControlsDisabled') {
+      return this.setControlsDisabled(arg);
+    }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
@@ -171,6 +174,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract seek(position: unknown): void;
 
   protected abstract selectQuality(index: unknown): void;
+
+  protected abstract setControlsDisabled(disabled: unknown): void;
 
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
