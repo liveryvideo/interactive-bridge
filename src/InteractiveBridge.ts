@@ -250,6 +250,13 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Reloads LiveryPlayer.
+   */
+  reload() {
+    return this.sendCommand('reload');
+  }
+
+  /**
    * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    *
