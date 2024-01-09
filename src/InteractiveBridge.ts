@@ -219,6 +219,13 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Starts or resumes LiveryPlayer playback.
+   */
+  play() {
+    return this.sendCommand('play');
+  }
+
+  /**
    * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
    * other side with matching `name`.
    *

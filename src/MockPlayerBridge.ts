@@ -63,6 +63,8 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   protected pause() {}
 
+  protected play() {}
+
   protected subscribeFullscreen(listener: (value: boolean) => void) {
     // Note: LiveryPlayer only listens to itself becoming fullscreen; not just anything
     document.addEventListener('fullscreenchange', () => {
