@@ -2,6 +2,7 @@ import type {
   GetFeaturesReturn,
   GetPlaybackReturn,
   Orientation,
+  Qualities,
   StreamPhase,
 } from './InteractiveBridge';
 import { LiveryBridge } from './LiveryBridge';
@@ -92,11 +93,17 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'seek') {
       return this.seek(arg);
     }
+    if (name === 'selectQuality') {
+      return this.selectQuality(arg);
+    }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
+    }
+    if (name === 'subscribeQualities') {
+      return this.subscribeQualities(listener);
     }
     if (name === 'subscribeQuality') {
       return this.subscribeQuality(listener);
@@ -163,9 +170,15 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
 
   protected abstract seek(position: unknown): void;
 
+  protected abstract selectQuality(index: unknown): void;
+
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
   ): boolean;
+
+  protected abstract subscribeQualities(
+    listener: (value: Qualities) => void,
+  ): Qualities;
 
   protected abstract subscribeQuality(
     listener: (value: string) => void,

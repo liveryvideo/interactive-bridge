@@ -30,6 +30,26 @@ export type PlaybackDetails = (typeof playbackDetails)[number];
 
 export type GetPlaybackReturn = Record<PlaybackDetails, number | undefined>;
 
+export interface Quality {
+  audio?: {
+    bandwidth: number;
+  };
+  label: string;
+  video?: {
+    bandwidth: number;
+    height: number;
+    width: number;
+  };
+}
+
+export type Qualities =
+  | {
+      active: number;
+      list: Quality[];
+      selected: number;
+    }
+  | undefined;
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
@@ -270,6 +290,19 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Seek to a specified LiveryPlayer position in seconds.
+   */
+  selectQuality(index: number) {
+    if (typeof index !== 'number') {
+      throw new Error(
+        `index arg value type: ${typeof index}, should be: number`,
+      );
+    }
+
+    return this.sendCommand('selectQuality', index);
+  }
+
+  /**
    * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    *
@@ -330,6 +363,20 @@ export class InteractiveBridge extends LiveryBridge {
     }
 
     return this.sendCommand('subscribeOrientation', undefined, (value) =>
+      listener(validate(value)),
+    ).then(validate);
+  }
+
+  /**
+   * Returns promise of current LiveryPlayer playback quality
+   * and calls back `listener` with any subsequent quality changes.
+   */
+  subscribeQualities(listener: (value: Qualities) => void) {
+    function validate(value: unknown) {
+      return value as Qualities;
+    }
+
+    return this.sendCommand('subscribeQualities', undefined, (value) =>
       listener(validate(value)),
     ).then(validate);
   }

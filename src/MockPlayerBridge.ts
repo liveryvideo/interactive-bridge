@@ -1,5 +1,5 @@
 import { AbstractPlayerBridge } from './AbstractPlayerBridge';
-import type { StreamPhase } from './InteractiveBridge';
+import type { Qualities, Quality, StreamPhase } from './InteractiveBridge';
 
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
@@ -71,12 +71,54 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return position;
   }
 
+  protected selectQuality(index: number) {
+    return index;
+  }
+
   protected subscribeFullscreen(listener: (value: boolean) => void) {
     // Note: LiveryPlayer only listens to itself becoming fullscreen; not just anything
     document.addEventListener('fullscreenchange', () => {
       listener(!!document.fullscreenElement);
     });
     return !!document.fullscreenElement;
+  }
+
+  protected subscribeQualities(listener: (value: Qualities) => void) {
+    const quality1: Quality = {
+      audio: {
+        bandwidth: 1,
+      },
+      label: '1',
+      video: {
+        bandwidth: 1,
+        height: 1,
+        width: 1,
+      },
+    };
+    const quality2: Quality = {
+      audio: {
+        bandwidth: 2,
+      },
+      label: '2',
+      video: {
+        bandwidth: 2,
+        height: 2,
+        width: 2,
+      },
+    };
+    const qualities1: Qualities = {
+      active: 1,
+      list: [quality1, quality2],
+      selected: 1,
+    };
+    const qualities2: Qualities = {
+      active: 2,
+      list: [quality1, quality2],
+      selected: 2,
+    };
+    setTimeout(() => listener(qualities2), 1500);
+    setTimeout(() => listener(qualities1), 3000);
+    return qualities1;
   }
 
   protected subscribeQuality(listener: (value: string) => void) {
