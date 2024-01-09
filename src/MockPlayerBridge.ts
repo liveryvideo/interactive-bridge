@@ -29,6 +29,17 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return 'dummy-endpoint-id';
   }
 
+  protected getFeatures() {
+    return {
+      airplay: true,
+      chromecast: true,
+      contact: true,
+      fullscreen: true,
+      pip: true,
+      scrubber: true,
+    };
+  }
+
   protected getLatency() {
     return Math.random() * 6;
   }

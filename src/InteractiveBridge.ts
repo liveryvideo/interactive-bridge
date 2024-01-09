@@ -6,6 +6,19 @@ export type Orientation = 'landscape' | 'portrait';
 
 export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
 
+export const features = [
+  'airplay',
+  'chromecast',
+  'contact',
+  'fullscreen',
+  'pip',
+  'scrubber',
+] as const;
+
+export type Feature = (typeof features)[number];
+
+export type GetFeaturesReturn = Record<Feature, boolean>;
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
@@ -61,6 +74,29 @@ export class InteractiveBridge extends LiveryBridge {
         );
       }
       return value;
+    });
+  }
+
+  /**
+   * Returns promise of LiveryPlayer features and whether or not they're enabled.
+   */
+  getFeatures(): Promise<GetFeaturesReturn> {
+    return this.sendCommand('getFeatures').then((value) => {
+      if (typeof value !== 'object') {
+        throw new Error(
+          `getFeatures value type: ${typeof value}, should be: object`,
+        );
+      }
+      if (value === null) {
+        throw new Error(`getFeatures value type: null, should be: object`);
+      }
+      return features.reduce((previous, feature) => {
+        const typedValue = value as Record<string, unknown>;
+        const typedFeatureValue = typedValue[feature as string];
+        previous[feature] =
+          typeof typedFeatureValue === 'boolean' ? typedFeatureValue : false;
+        return previous;
+      }, {} as GetFeaturesReturn);
     });
   }
 

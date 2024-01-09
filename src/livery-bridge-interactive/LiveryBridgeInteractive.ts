@@ -17,6 +17,7 @@ const BRIDGE_GET_NAMES = [
   'getAppName',
   'getCustomerId',
   'getEndpointId',
+  'getFeatures',
   'getLatency',
   'getLiveryParams',
   'getPlayerVersion',
@@ -238,6 +239,12 @@ export class LiveryBridgeInteractive extends LitElement {
                 <button @click=${this.handlePlayerGet}>getEndpointId</button>
               </td>
               <td id="getEndpointIdOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerGet}>getFeatures</button>
+              </td>
+              <td id="getFeaturesOutput"></td>
             </tr>
             <tr>
               <td>

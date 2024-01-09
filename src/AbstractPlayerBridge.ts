@@ -1,4 +1,8 @@
-import type { Orientation, StreamPhase } from './InteractiveBridge';
+import type {
+  GetFeaturesReturn,
+  Orientation,
+  StreamPhase,
+} from './InteractiveBridge';
 import { LiveryBridge } from './LiveryBridge';
 
 /**
@@ -56,6 +60,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     }
     if (name === 'getEndpointId') {
       return this.getEndpointId();
+    }
+    if (name === 'getFeatures') {
+      return this.getFeatures();
     }
     if (name === 'getLatency') {
       return this.getLatency();
@@ -121,6 +128,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract getCustomerId(): string;
 
   protected abstract getEndpointId(): string;
+
+  protected abstract getFeatures(): GetFeaturesReturn;
 
   protected abstract getLatency(): number;
 
