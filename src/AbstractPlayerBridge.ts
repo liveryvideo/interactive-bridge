@@ -1,5 +1,6 @@
 import type {
   GetFeaturesReturn,
+  GetPlaybackReturn,
   Orientation,
   StreamPhase,
 } from './InteractiveBridge';
@@ -70,6 +71,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'getLiveryParams') {
       return this.getLiveryParams();
     }
+    if (name === 'getPlayback') {
+      return this.getPlayback();
+    }
     if (name === 'getPlayerVersion') {
       return this.getPlayerVersion();
     }
@@ -132,6 +136,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract getFeatures(): GetFeaturesReturn;
 
   protected abstract getLatency(): number;
+
+  protected abstract getPlayback(): GetPlaybackReturn;
 
   protected abstract getPlayerVersion(): string;
 

@@ -44,6 +44,15 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return Math.random() * 6;
   }
 
+  protected getPlayback() {
+    return {
+      buffer: Math.random() * 6,
+      duration: Math.random() * 6,
+      latency: Math.random() * 6,
+      position: Math.random() * 6,
+    };
+  }
+
   protected getPlayerVersion() {
     return '1.0.0-dummy-version';
   }

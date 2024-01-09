@@ -19,6 +19,17 @@ export type Feature = (typeof features)[number];
 
 export type GetFeaturesReturn = Record<Feature, boolean>;
 
+export const playbackDetails = [
+  'buffer',
+  'duration',
+  'latency',
+  'position',
+] as const;
+
+export type PlaybackDetails = (typeof playbackDetails)[number];
+
+export type GetPlaybackReturn = Record<PlaybackDetails, number | undefined>;
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
@@ -145,6 +156,30 @@ export class InteractiveBridge extends LiveryBridge {
         }
       }
       return dict;
+    });
+  }
+
+  /**
+   * Returns promise of LiveryPlayer features and whether or not they're enabled.
+   */
+  getPlayback(): Promise<GetPlaybackReturn> {
+    return this.sendCommand('getPlayback').then((value) => {
+      if (typeof value !== 'object') {
+        throw new Error(
+          `getPlayback value type: ${typeof value}, should be: object`,
+        );
+      }
+      if (value === null) {
+        throw new Error(`getPlayback value type: null, should be: object`);
+      }
+      return playbackDetails.reduce((previous, detail) => {
+        const typedValue = value as Record<string, unknown>;
+        const typedFeatureValue = typedValue[detail as string];
+
+        previous[detail] =
+          typeof typedFeatureValue === 'number' ? typedFeatureValue : undefined;
+        return previous;
+      }, {} as GetPlaybackReturn);
     });
   }
 

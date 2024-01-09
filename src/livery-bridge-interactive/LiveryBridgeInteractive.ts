@@ -20,6 +20,7 @@ const BRIDGE_GET_NAMES = [
   'getFeatures',
   'getLatency',
   'getLiveryParams',
+  'getPlayback',
   'getPlayerVersion',
   'getStreamId',
 ] as const;
@@ -257,6 +258,12 @@ export class LiveryBridgeInteractive extends LitElement {
                 <button @click=${this.handlePlayerGet}>getLiveryParams</button>
               </td>
               <td id="getLiveryParamsOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerGet}>getPlayback</button>
+              </td>
+              <td id="getPlaybackOutput"></td>
             </tr>
             <tr>
               <td>
