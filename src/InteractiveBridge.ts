@@ -66,6 +66,30 @@ export interface UserFeedbackPayload {
   name: string;
 }
 
+export const controls = [
+  'cast',
+  'contact',
+  'error',
+  'fullscreen',
+  'mute',
+  'pip',
+  'play',
+  'quality',
+  'scrubber',
+] as const;
+
+export type Control = (typeof controls)[number];
+
+export type Config =
+  | {
+      controls: Record<Control, boolean>;
+      customerId: string;
+      streamPhase: StreamPhase;
+      streamPhases: Record<number, StreamPhase>;
+      tenantId: string;
+    }
+  | undefined;
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
@@ -376,6 +400,9 @@ export class InteractiveBridge extends LiveryBridge {
     return this.sendCommand('setMuted', muted);
   }
 
+  /**
+   * Uses LiveryPlayer's Sentry API to submit user feedback.
+   */
   submitUserFeedback(payload: UserFeedbackPayload) {
     if (typeof payload !== 'object') {
       throw new Error(
@@ -383,6 +410,25 @@ export class InteractiveBridge extends LiveryBridge {
       );
     }
     return this.sendCommand('submitUserFeedback', payload);
+  }
+
+  /**
+   * Returns promise of current LiveryPlayer fullscreen state
+   * and calls back `listener` with any subsequent state changes.
+   */
+  subscribeConfig(listener: (value: Config) => void) {
+    function validate(value: unknown) {
+      if (typeof value !== 'object') {
+        throw new Error(
+          `subscribeConfig value type: ${typeof value}, should be: object`,
+        );
+      }
+      return value as Config;
+    }
+
+    return this.sendCommand('subscribeConfig', undefined, (value) =>
+      listener(validate(value)),
+    ).then(validate);
   }
 
   /**
@@ -430,6 +476,11 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeQualities(listener: (value: Qualities) => void) {
     function validate(value: unknown) {
+      if (typeof value !== 'object') {
+        throw new Error(
+          `subscribeQualities value type: ${typeof value}, should be: object`,
+        );
+      }
       return value as Qualities;
     }
 

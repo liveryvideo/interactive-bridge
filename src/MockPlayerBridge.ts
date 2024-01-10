@@ -1,5 +1,6 @@
 import { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import type {
+  Config,
   DisplayMode,
   Qualities,
   Quality,
@@ -95,6 +96,28 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   protected submitUserFeedback(payload: UserFeedbackPayload) {
     return payload;
+  }
+
+  protected subscribeConfig(listener: (value: Config) => void) {
+    const config: Config = {
+      controls: {
+        cast: false,
+        contact: false,
+        error: false,
+        fullscreen: false,
+        mute: false,
+        pip: false,
+        play: false,
+        quality: false,
+        scrubber: false,
+      },
+      customerId: 'id',
+      streamPhase: 'LIVE',
+      streamPhases: ['LIVE', 'POST', 'PRE'],
+      tenantId: 'id',
+    };
+    listener(config);
+    return config;
   }
 
   protected subscribeFullscreen(listener: (value: boolean) => void) {

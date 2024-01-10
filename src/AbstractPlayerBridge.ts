@@ -1,4 +1,5 @@
 import type {
+  Config,
   DisplayMode,
   GetFeaturesReturn,
   GetPlaybackReturn,
@@ -110,6 +111,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'submitUserFeedback') {
       return this.submitUserFeedback(arg as UserFeedbackPayload);
     }
+    if (name === 'subscribeConfig') {
+      return this.subscribeConfig(listener);
+    }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
@@ -193,6 +197,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract setMuted(muted: boolean): void;
 
   protected abstract submitUserFeedback(payload: UserFeedbackPayload): void;
+
+  protected abstract subscribeConfig(listener: (value: Config) => void): Config;
 
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
