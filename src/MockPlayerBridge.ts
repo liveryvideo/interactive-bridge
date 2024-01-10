@@ -1,5 +1,10 @@
 import { AbstractPlayerBridge } from './AbstractPlayerBridge';
-import type { Qualities, Quality, StreamPhase } from './InteractiveBridge';
+import type {
+  DisplayMode,
+  Qualities,
+  Quality,
+  StreamPhase,
+} from './InteractiveBridge';
 
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
@@ -77,6 +82,10 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   protected setControlsDisabled(disabled: boolean) {
     return disabled;
+  }
+
+  protected setDisplay(display: DisplayMode) {
+    return display;
   }
 
   protected subscribeFullscreen(listener: (value: boolean) => void) {

@@ -1,4 +1,5 @@
 import type {
+  DisplayMode,
   GetFeaturesReturn,
   GetPlaybackReturn,
   Orientation,
@@ -91,13 +92,16 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       return this.reload();
     }
     if (name === 'seek') {
-      return this.seek(arg);
+      return this.seek(arg as number);
     }
     if (name === 'selectQuality') {
-      return this.selectQuality(arg);
+      return this.selectQuality(arg as number);
     }
     if (name === 'setControlsDisabled') {
-      return this.setControlsDisabled(arg);
+      return this.setControlsDisabled(arg as boolean);
+    }
+    if (name === 'setDisplay') {
+      return this.setDisplay(arg as DisplayMode);
     }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
@@ -171,11 +175,13 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
 
   protected abstract reload(): void;
 
-  protected abstract seek(position: unknown): void;
+  protected abstract seek(position: number): void;
 
-  protected abstract selectQuality(index: unknown): void;
+  protected abstract selectQuality(index: number): void;
 
-  protected abstract setControlsDisabled(disabled: unknown): void;
+  protected abstract setControlsDisabled(disabled: boolean): void;
+
+  protected abstract setDisplay(display: DisplayMode): void;
 
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,

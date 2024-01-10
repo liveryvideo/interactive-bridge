@@ -50,6 +50,16 @@ export type Qualities =
     }
   | undefined;
 
+export const displayModes = [
+  'AIRPLAY',
+  'CHROMECAST',
+  'FULLSCREEN',
+  'DEFAULT',
+  'PIP',
+] as const;
+
+export type DisplayMode = (typeof displayModes)[number];
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
@@ -326,6 +336,9 @@ export class InteractiveBridge extends LiveryBridge {
     return super.sendCustomCommand(name, arg, listener);
   }
 
+  /**
+   * Sets whether or not LiveryPlayer controls are disabled.
+   */
   setControlsDisabled(disabled: boolean) {
     if (typeof disabled !== 'boolean') {
       throw new Error(
@@ -333,6 +346,16 @@ export class InteractiveBridge extends LiveryBridge {
       );
     }
     return this.sendCommand('setControlsDisabled', disabled);
+  }
+
+  /**
+   * Change the LiveryPlayer display to the specified value.
+   */
+  setDisplay(display: DisplayMode) {
+    if (!displayModes.includes(display)) {
+      throw new Error(`display arg value: ${typeof display} is not supported`);
+    }
+    return this.sendCommand('setDisplay', display);
   }
 
   /**
