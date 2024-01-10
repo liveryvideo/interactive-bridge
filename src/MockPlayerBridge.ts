@@ -4,6 +4,7 @@ import type {
   Qualities,
   Quality,
   StreamPhase,
+  UserFeedbackPayload,
 } from './InteractiveBridge';
 
 /**
@@ -90,6 +91,10 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   protected setMuted(muted: boolean) {
     return muted;
+  }
+
+  protected submitUserFeedback(payload: UserFeedbackPayload) {
+    return payload;
   }
 
   protected subscribeFullscreen(listener: (value: boolean) => void) {

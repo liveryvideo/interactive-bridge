@@ -60,6 +60,12 @@ export const displayModes = [
 
 export type DisplayMode = (typeof displayModes)[number];
 
+export interface UserFeedbackPayload {
+  comments: string;
+  email: string;
+  name: string;
+}
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
@@ -368,6 +374,15 @@ export class InteractiveBridge extends LiveryBridge {
       );
     }
     return this.sendCommand('setMuted', muted);
+  }
+
+  submitUserFeedback(payload: UserFeedbackPayload) {
+    if (typeof payload !== 'object') {
+      throw new Error(
+        `payload arg value type: ${typeof payload}, should be: object`,
+      );
+    }
+    return this.sendCommand('submitUserFeedback', payload);
   }
 
   /**

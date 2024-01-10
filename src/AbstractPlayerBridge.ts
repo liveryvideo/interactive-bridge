@@ -5,6 +5,7 @@ import type {
   Orientation,
   Qualities,
   StreamPhase,
+  UserFeedbackPayload,
 } from './InteractiveBridge';
 import { LiveryBridge } from './LiveryBridge';
 
@@ -106,6 +107,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'setMuted') {
       return this.setMuted(arg as boolean);
     }
+    if (name === 'submitUserFeedback') {
+      return this.submitUserFeedback(arg as UserFeedbackPayload);
+    }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
@@ -187,6 +191,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract setDisplay(display: DisplayMode): void;
 
   protected abstract setMuted(muted: boolean): void;
+
+  protected abstract submitUserFeedback(payload: UserFeedbackPayload): void;
 
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
