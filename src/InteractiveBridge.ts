@@ -432,6 +432,24 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Returns promise of current LiveryPlayer display mode
+   * and calls back `listener` with any subsequent display mode changes.
+   */
+  subscribeDisplay(listener: (value: DisplayMode) => void) {
+    function validate(value: unknown) {
+      const typedValue = value as DisplayMode;
+      if (!displayModes.includes(typedValue)) {
+        throw new Error(`display arg value: ${typeof value} is not supported`);
+      }
+      return typedValue;
+    }
+
+    return this.sendCommand('subscribeDisplay', undefined, (value) =>
+      listener(validate(value)),
+    ).then(validate);
+  }
+
+  /**
    * Returns promise of current LiveryPlayer fullscreen state
    * and calls back `listener` with any subsequent state changes.
    */

@@ -114,6 +114,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'subscribeConfig') {
       return this.subscribeConfig(listener);
     }
+    if (name === 'subscribeDisplay') {
+      return this.subscribeDisplay(listener);
+    }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
@@ -199,6 +202,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract submitUserFeedback(payload: UserFeedbackPayload): void;
 
   protected abstract subscribeConfig(listener: (value: Config) => void): Config;
+
+  protected abstract subscribeDisplay(
+    listener: (value: DisplayMode) => void,
+  ): DisplayMode;
 
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
