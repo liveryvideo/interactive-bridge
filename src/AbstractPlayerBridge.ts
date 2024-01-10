@@ -103,6 +103,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'setDisplay') {
       return this.setDisplay(arg as DisplayMode);
     }
+    if (name === 'setMuted') {
+      return this.setMuted(arg as boolean);
+    }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
@@ -182,6 +185,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract setControlsDisabled(disabled: boolean): void;
 
   protected abstract setDisplay(display: DisplayMode): void;
+
+  protected abstract setMuted(muted: boolean): void;
 
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,

@@ -359,6 +359,18 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Sets whether or not LiveryPlayer is muted.
+   */
+  setMuted(muted: boolean) {
+    if (typeof muted !== 'boolean') {
+      throw new Error(
+        `muted arg value type: ${typeof muted}, should be: boolean`,
+      );
+    }
+    return this.sendCommand('setMuted', muted);
+  }
+
+  /**
    * Returns promise of current LiveryPlayer fullscreen state
    * and calls back `listener` with any subsequent state changes.
    */
