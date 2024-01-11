@@ -450,6 +450,23 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Returns promise of current LiveryPlayer error
+   * and calls back `listener` with any subsequent errors.
+   */
+  subscribeError(listener: (error: string | undefined) => void) {
+    function validate(error: unknown) {
+      if (typeof error !== 'string' && typeof error !== 'undefined') {
+        throw new Error(`error arg value: ${typeof error} is not supported`);
+      }
+      return error;
+    }
+
+    return this.sendCommand('subscribeError', undefined, (error) =>
+      listener(validate(error)),
+    ).then(validate);
+  }
+
+  /**
    * Returns promise of current LiveryPlayer fullscreen state
    * and calls back `listener` with any subsequent state changes.
    */
