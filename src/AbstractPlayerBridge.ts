@@ -175,6 +175,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return result;
   }
 
+  /**
+   * @deprecated Will be removed in the next major version.
+   */
   private subscribeOrientation(listener: (value: Orientation) => void) {
     // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use addListener()
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
@@ -192,12 +195,18 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return this.portraitQuery.matches ? 'portrait' : 'landscape';
   }
 
+  /**
+   * @deprecated Instead use {@link subscribeConfig}.customerId
+   */
   protected abstract getCustomerId(): string;
 
   protected abstract getEndpointId(): string;
 
   protected abstract getFeatures(): GetFeaturesReturn;
 
+  /**
+   * @deprecated Instead use {@link getPlayback}.latency
+   */
   protected abstract getLatency(): number;
 
   protected abstract getPlayback(): GetPlaybackReturn;
@@ -234,6 +243,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (error: string | undefined) => void,
   ): string | undefined;
 
+  /**
+   * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
+   */
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
   ): boolean;
@@ -262,6 +274,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (qualities: Qualities) => void,
   ): Qualities;
 
+  /**
+   * @deprecated Instead use {@link subscribeQualities}.active
+   */
   protected abstract subscribeQuality(
     listener: (quality: string) => void,
   ): string;
@@ -270,6 +285,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (value: boolean) => void,
   ): boolean;
 
+  /**
+   * @deprecated Instead use {@link subscribeConfig}.streamPhase
+   */
   protected abstract subscribeStreamPhase(
     listener: (streamPhase: StreamPhase) => void,
   ): string;

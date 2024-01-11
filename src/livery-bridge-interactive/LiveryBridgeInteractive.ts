@@ -25,9 +25,19 @@ const BRIDGE_GET_NAMES = [
   'getStreamId',
 ] as const;
 const BRIDGE_SUBSCRIBE_NAMES = [
+  'subscribeConfig',
+  'subscribeDisplay',
+  'subscribeError',
   'subscribeFullscreen',
+  'subscribeMode',
+  'subscribeMuted',
   'subscribeOrientation',
+  'subscribePaused',
+  'subscribePlaybackState',
+  'subscribePlaying',
+  'subscribeQualities',
   'subscribeQuality',
+  'subscribeStalled',
   'subscribeStreamPhase',
 ] as const;
 
@@ -280,10 +290,50 @@ export class LiveryBridgeInteractive extends LitElement {
             <tr>
               <td>
                 <button @click=${this.handlePlayerSubscribe}>
+                  subscribeConfig
+                </button>
+              </td>
+              <td id="subscribeConfigOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
+                  subscribeDisplay
+                </button>
+              </td>
+              <td id="subscribeDisplayOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
+                  subscribeError
+                </button>
+              </td>
+              <td id="subscribeErrorOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
                   subscribeFullscreen
                 </button>
               </td>
               <td id="subscribeFullscreenOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
+                  subscribeMode
+                </button>
+              </td>
+              <td id="subscribeModeOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
+                  subscribeMuted
+                </button>
+              </td>
+              <td id="subscribeMutedOutput"></td>
             </tr>
             <tr>
               <td>
@@ -296,10 +346,50 @@ export class LiveryBridgeInteractive extends LitElement {
             <tr>
               <td>
                 <button @click=${this.handlePlayerSubscribe}>
+                  subscribePaused
+                </button>
+              </td>
+              <td id="subscribePausedOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
+                  subscribePlaybackState
+                </button>
+              </td>
+              <td id="subscribePlaybackStateOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
+                  subscribePlaying
+                </button>
+              </td>
+              <td id="subscribePlayingOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
+                  subscribeQualities
+                </button>
+              </td>
+              <td id="subscribeQualitiesOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
                   subscribeQuality
                 </button>
               </td>
               <td id="subscribeQualityOutput"></td>
+            </tr>
+            <tr>
+              <td>
+                <button @click=${this.handlePlayerSubscribe}>
+                  subscribeStalled
+                </button>
+              </td>
+              <td id="subscribeStalledOutput"></td>
             </tr>
             <tr>
               <td>

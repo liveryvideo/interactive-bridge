@@ -139,6 +139,8 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Returns promise of LiveryPlayer customer id.
+   *
+   * @deprecated Instead use {@link subscribeConfig}.customerId
    */
   getCustomerId() {
     return this.sendCommand('getCustomerId').then((value) => {
@@ -190,6 +192,8 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Returns promise of current LiveryPlayer latency in seconds.
+   *
+   * @deprecated Instead use {@link getPlayback}.latency
    */
   getLatency() {
     return this.sendCommand('getLatency').then((value) => {
@@ -490,6 +494,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current LiveryPlayer fullscreen state
    * and calls back `listener` with any subsequent state changes.
+   *
+   * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
    */
   subscribeFullscreen(listener: (value: boolean) => void) {
     function validate(value: unknown) {
@@ -548,6 +554,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current LiveryPlayer window orientation (`'landscape' \| 'portrait'`)
    * and calls back `listener` with any subsequent orientations.
+   *
+   * @deprecated Will be removed in the next major version.
    */
   subscribeOrientation(listener: (orientation: Orientation) => void) {
     function validate(value: unknown) {
@@ -647,6 +655,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current LiveryPlayer playback quality
    * and calls back `listener` with any subsequent quality changes.
+   *
+   * @deprecated Instead use {@link subscribeQualities}.active
    */
   subscribeQuality(listener: (value: string) => void) {
     function validate(value: unknown) {
@@ -685,6 +695,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current LiveryPlayer stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
    * and calls back `listener` with any subsequent phases.
+   *
+   * @deprecated Instead use {@link subscribeConfig}.streamPhase
    */
   subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
     function validate(value: unknown) {
