@@ -90,9 +90,22 @@ export type Config =
     }
   | undefined;
 
-export const playbackModes = ['CATCHUP', 'LIVE', 'UNKNOWN', 'VOD'];
+export const playbackModes = ['CATCHUP', 'LIVE', 'UNKNOWN', 'VOD'] as const;
 
 export type PlaybackMode = (typeof playbackModes)[number];
+
+export const playbackStates = [
+  'BUFFERING',
+  'ENDED',
+  'FAST_FORWARD',
+  'PAUSED',
+  'PLAYING',
+  'REWIND',
+  'SEEKING',
+  'SLOW_MO',
+] as const;
+
+export type PlaybackState = (typeof playbackStates)[number];
 
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
@@ -443,7 +456,9 @@ export class InteractiveBridge extends LiveryBridge {
     function validate(value: unknown) {
       const typedValue = value as DisplayMode;
       if (!displayModes.includes(typedValue)) {
-        throw new Error(`display arg value: ${typeof value} is not supported`);
+        throw new Error(
+          `subscribeDisplay arg value: ${typeof value} is not supported`,
+        );
       }
       return typedValue;
     }
@@ -460,7 +475,9 @@ export class InteractiveBridge extends LiveryBridge {
   subscribeError(listener: (error: string | undefined) => void) {
     function validate(error: unknown) {
       if (typeof error !== 'string' && typeof error !== 'undefined') {
-        throw new Error(`error arg value: ${typeof error} is not supported`);
+        throw new Error(
+          `subscribeError value type: ${typeof error}, should be: "string" | "undefined"`,
+        );
       }
       return error;
     }
@@ -497,7 +514,9 @@ export class InteractiveBridge extends LiveryBridge {
     function validate(mode: unknown) {
       const typedMode = mode as PlaybackMode;
       if (!playbackModes.includes(typedMode)) {
-        throw new Error(`display arg value: ${typeof mode} is not supported`);
+        throw new Error(
+          `subscribeMode arg mode: ${typeof mode} is not supported`,
+        );
       }
       return typedMode;
     }
@@ -543,6 +562,28 @@ export class InteractiveBridge extends LiveryBridge {
 
     return this.sendCommand('subscribeOrientation', undefined, (value) =>
       listener(validate(value)),
+    ).then(validate);
+  }
+
+  /**
+   * Returns promise of current LiveryPlayer playback state
+   * and calls back `listener` with any subsequent state updates.
+   */
+  subscribePlaybackState(listener: (playbackState: PlaybackState) => void) {
+    function validate(playbackState: unknown) {
+      const typedPlaybackState = playbackState as PlaybackState;
+      if (!playbackStates.includes(typedPlaybackState)) {
+        throw new Error(
+          `subscribePlaybackState arg playbackState: ${typeof playbackState} is not supported`,
+        );
+      }
+      return typedPlaybackState;
+    }
+
+    return this.sendCommand(
+      'subscribePlaybackState',
+      undefined,
+      (playbackState) => listener(validate(playbackState)),
     ).then(validate);
   }
 

@@ -5,6 +5,7 @@ import type {
   GetPlaybackReturn,
   Orientation,
   PlaybackMode,
+  PlaybackState,
   Qualities,
   StreamPhase,
   UserFeedbackPayload,
@@ -133,6 +134,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
     }
+    if (name === 'subscribePlaybackState') {
+      return this.subscribePlaybackState(listener);
+    }
     if (name === 'subscribeQualities') {
       return this.subscribeQualities(listener);
     }
@@ -232,6 +236,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeMuted(
     listener: (value: boolean) => void,
   ): boolean;
+
+  protected abstract subscribePlaybackState(
+    listener: (playbackState: PlaybackState) => void,
+  ): PlaybackState;
 
   protected abstract subscribeQualities(
     listener: (qualities: Qualities) => void,

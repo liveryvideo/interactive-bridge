@@ -3,6 +3,7 @@ import type {
   Config,
   DisplayMode,
   PlaybackMode,
+  PlaybackState,
   Qualities,
   Quality,
   StreamPhase,
@@ -159,6 +160,13 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       listener(this.muted);
     });
     return this.muted;
+  }
+
+  protected subscribePlaybackState(
+    listener: (playbackState: PlaybackState) => void,
+  ) {
+    listener('PLAYING');
+    return 'PLAYING' as PlaybackState;
   }
 
   protected subscribeQualities(listener: (value: Qualities) => void) {
