@@ -14,6 +14,10 @@ import type {
  * And with dummy support for custom command: `subscribeAuthToken` as used on the test page.
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
+  private display: DisplayMode = 'DEFAULT';
+
+  private muted = true;
+
   constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
     super(target);
 
@@ -88,10 +92,14 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected setDisplay(display: DisplayMode) {
+    this.display = display;
+    document.dispatchEvent(new Event('livery-display-change'));
     return display;
   }
 
   protected setMuted(muted: boolean) {
+    this.muted = muted;
+    document.dispatchEvent(new Event('livery-muted-change'));
     return muted;
   }
 
@@ -122,8 +130,10 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected subscribeDisplay(listener: (value: DisplayMode) => void) {
-    listener('DEFAULT');
-    return 'DEFAULT' as DisplayMode;
+    document.addEventListener('livery-display-change', () => {
+      listener(this.display);
+    });
+    return this.display;
   }
 
   protected subscribeError(listener: (error: string | undefined) => void) {
@@ -142,6 +152,13 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   protected subscribeMode(listener: (mode: PlaybackMode) => void) {
     listener('LIVE');
     return 'LIVE' as PlaybackMode;
+  }
+
+  protected subscribeMuted(listener: (value: boolean) => void) {
+    document.addEventListener('livery-muted-change', () => {
+      listener(this.muted);
+    });
+    return this.muted;
   }
 
   protected subscribeQualities(listener: (value: Qualities) => void) {

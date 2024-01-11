@@ -508,6 +508,25 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Returns promise of current LiveryPlayer error
+   * and calls back `listener` with any subsequent errors.
+   */
+  subscribeMuted(listener: (muted: boolean) => void) {
+    function validate(value: unknown) {
+      if (typeof value !== 'boolean') {
+        throw new Error(
+          `subscribeMuted value type: ${typeof value}, should be: boolean`,
+        );
+      }
+      return value;
+    }
+
+    return this.sendCommand('subscribeMuted', undefined, (value) =>
+      listener(validate(value)),
+    ).then(validate);
+  }
+
+  /**
    * Returns promise of current LiveryPlayer window orientation (`'landscape' \| 'portrait'`)
    * and calls back `listener` with any subsequent orientations.
    */

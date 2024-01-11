@@ -127,6 +127,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'subscribeMode') {
       return this.subscribeMode(listener);
     }
+    if (name === 'subscribeMuted') {
+      return this.subscribeMuted(listener);
+    }
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
     }
@@ -225,6 +228,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeMode(
     listener: (mode: PlaybackMode) => void,
   ): PlaybackMode;
+
+  protected abstract subscribeMuted(
+    listener: (value: boolean) => void,
+  ): boolean;
 
   protected abstract subscribeQualities(
     listener: (qualities: Qualities) => void,
