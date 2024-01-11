@@ -4,6 +4,7 @@ import type {
   GetFeaturesReturn,
   GetPlaybackReturn,
   Orientation,
+  PlaybackMode,
   Qualities,
   StreamPhase,
   UserFeedbackPayload,
@@ -123,6 +124,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
+    if (name === 'subscribeMode') {
+      return this.subscribeMode(listener);
+    }
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
     }
@@ -217,6 +221,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeFullscreen(
     listener: (value: boolean) => void,
   ): boolean;
+
+  protected abstract subscribeMode(
+    listener: (mode: PlaybackMode) => void,
+  ): PlaybackMode;
 
   protected abstract subscribeQualities(
     listener: (qualities: Qualities) => void,

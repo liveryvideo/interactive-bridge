@@ -90,6 +90,10 @@ export type Config =
     }
   | undefined;
 
+export const playbackModes = ['CATCHUP', 'LIVE', 'UNKNOWN', 'VOD'];
+
+export type PlaybackMode = (typeof playbackModes)[number];
+
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
  */
@@ -482,6 +486,24 @@ export class InteractiveBridge extends LiveryBridge {
 
     return this.sendCommand('subscribeFullscreen', undefined, (value) =>
       listener(validate(value)),
+    ).then(validate);
+  }
+
+  /**
+   * Returns promise of current LiveryPlayer playback mode
+   * and calls back `listener` with any subsequent mode changes.
+   */
+  subscribeMode(listener: (mode: PlaybackMode) => void) {
+    function validate(mode: unknown) {
+      const typedMode = mode as PlaybackMode;
+      if (!playbackModes.includes(typedMode)) {
+        throw new Error(`display arg value: ${typeof mode} is not supported`);
+      }
+      return typedMode;
+    }
+
+    return this.sendCommand('subscribeMode', undefined, (mode) =>
+      listener(validate(mode)),
     ).then(validate);
   }
 

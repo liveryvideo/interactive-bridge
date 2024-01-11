@@ -2,6 +2,7 @@ import { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import type {
   Config,
   DisplayMode,
+  PlaybackMode,
   Qualities,
   Quality,
   StreamPhase,
@@ -136,6 +137,11 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       listener(!!document.fullscreenElement);
     });
     return !!document.fullscreenElement;
+  }
+
+  protected subscribeMode(listener: (mode: PlaybackMode) => void) {
+    listener('LIVE');
+    return 'LIVE' as PlaybackMode;
   }
 
   protected subscribeQualities(listener: (value: Qualities) => void) {
