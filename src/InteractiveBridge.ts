@@ -566,6 +566,25 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Returns promise of current LiveryPlayer paused state
+   * and calls back `listener` with any subsequent state updates.
+   */
+  subscribePaused(listener: (value: boolean) => void) {
+    function validate(value: unknown) {
+      if (typeof value !== 'boolean') {
+        throw new Error(
+          `subscribePaused value type: ${typeof value}, should be: boolean`,
+        );
+      }
+      return value;
+    }
+
+    return this.sendCommand('subscribePaused', undefined, (value) =>
+      listener(validate(value)),
+    ).then(validate);
+  }
+
+  /**
    * Returns promise of current LiveryPlayer playback state
    * and calls back `listener` with any subsequent state updates.
    */
@@ -584,6 +603,25 @@ export class InteractiveBridge extends LiveryBridge {
       'subscribePlaybackState',
       undefined,
       (playbackState) => listener(validate(playbackState)),
+    ).then(validate);
+  }
+
+  /**
+   * Returns promise of current LiveryPlayer playing state
+   * and calls back `listener` with any subsequent state updates.
+   */
+  subscribePlaying(listener: (value: boolean) => void) {
+    function validate(value: unknown) {
+      if (typeof value !== 'boolean') {
+        throw new Error(
+          `subscribePlaying value type: ${typeof value}, should be: boolean`,
+        );
+      }
+      return value;
+    }
+
+    return this.sendCommand('subscribePlaying', undefined, (value) =>
+      listener(validate(value)),
     ).then(validate);
   }
 
@@ -621,6 +659,25 @@ export class InteractiveBridge extends LiveryBridge {
     }
 
     return this.sendCommand('subscribeQuality', undefined, (value) =>
+      listener(validate(value)),
+    ).then(validate);
+  }
+
+  /**
+   * Returns promise of current LiveryPlayer stalled state
+   * and calls back `listener` with any subsequent state updates.
+   */
+  subscribeStalled(listener: (value: boolean) => void) {
+    function validate(value: unknown) {
+      if (typeof value !== 'boolean') {
+        throw new Error(
+          `subscribeStalled value type: ${typeof value}, should be: boolean`,
+        );
+      }
+      return value;
+    }
+
+    return this.sendCommand('subscribeStalled', undefined, (value) =>
       listener(validate(value)),
     ).then(validate);
   }

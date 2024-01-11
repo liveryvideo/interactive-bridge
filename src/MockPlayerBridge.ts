@@ -19,6 +19,8 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private muted = true;
 
+  private playbackState: PlaybackState = 'PLAYING';
+
   constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
     super(target);
 
@@ -74,13 +76,24 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return 'dummy-stream-id';
   }
 
-  protected pause() {}
+  protected pause() {
+    this.playbackState = 'PAUSED';
+    document.dispatchEvent(new Event('livery-playback-change'));
+  }
 
-  protected play() {}
+  protected play() {
+    this.playbackState = 'PLAYING';
+    document.dispatchEvent(new Event('livery-playback-change'));
+  }
 
-  protected reload() {}
+  protected reload() {
+    this.playbackState = 'PLAYING';
+    document.dispatchEvent(new Event('livery-playback-change'));
+  }
 
   protected seek(position: number) {
+    this.playbackState = 'SEEKING';
+    document.dispatchEvent(new Event('livery-playback-change'));
     return position;
   }
 
@@ -162,11 +175,34 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return this.muted;
   }
 
+  protected subscribePaused(listener: (value: boolean) => void) {
+    const pausedStates: PlaybackState[] = ['ENDED', 'PAUSED'];
+    document.addEventListener('livery-playback-change', () => {
+      listener(pausedStates.includes(this.playbackState));
+    });
+    return pausedStates.includes(this.playbackState);
+  }
+
   protected subscribePlaybackState(
     listener: (playbackState: PlaybackState) => void,
   ) {
-    listener('PLAYING');
-    return 'PLAYING' as PlaybackState;
+    document.addEventListener('livery-playback-change', () => {
+      listener(this.playbackState);
+    });
+    return this.playbackState;
+  }
+
+  protected subscribePlaying(listener: (value: boolean) => void) {
+    const playingStates: PlaybackState[] = [
+      'FAST_FORWARD',
+      'PLAYING',
+      'REWIND',
+      'SLOW_MO',
+    ];
+    document.addEventListener('livery-playback-change', () => {
+      listener(playingStates.includes(this.playbackState));
+    });
+    return playingStates.includes(this.playbackState);
   }
 
   protected subscribeQualities(listener: (value: Qualities) => void) {
@@ -211,6 +247,14 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     setTimeout(() => listener('dummy-quality-2'), 1500);
     setTimeout(() => listener('dummy-quality-3'), 3000);
     return 'dummy-quality-1';
+  }
+
+  protected subscribeStalled(listener: (value: boolean) => void) {
+    const stalledStates: PlaybackState[] = ['BUFFERING', 'SEEKING'];
+    document.addEventListener('livery-playback-change', () => {
+      listener(stalledStates.includes(this.playbackState));
+    });
+    return stalledStates.includes(this.playbackState);
   }
 
   protected subscribeStreamPhase(listener: (value: StreamPhase) => void) {

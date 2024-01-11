@@ -134,14 +134,23 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
     }
+    if (name === 'subscribePaused') {
+      return this.subscribePaused(listener);
+    }
     if (name === 'subscribePlaybackState') {
       return this.subscribePlaybackState(listener);
+    }
+    if (name === 'subscribePlaying') {
+      return this.subscribePlaying(listener);
     }
     if (name === 'subscribeQualities') {
       return this.subscribeQualities(listener);
     }
     if (name === 'subscribeQuality') {
       return this.subscribeQuality(listener);
+    }
+    if (name === 'subscribeStalled') {
+      return this.subscribeStalled(listener);
     }
     if (name === 'subscribeStreamPhase') {
       return this.subscribeStreamPhase(listener);
@@ -237,9 +246,17 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (value: boolean) => void,
   ): boolean;
 
+  protected abstract subscribePaused(
+    listener: (value: boolean) => void,
+  ): boolean;
+
   protected abstract subscribePlaybackState(
     listener: (playbackState: PlaybackState) => void,
   ): PlaybackState;
+
+  protected abstract subscribePlaying(
+    listener: (value: boolean) => void,
+  ): boolean;
 
   protected abstract subscribeQualities(
     listener: (qualities: Qualities) => void,
@@ -248,6 +265,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeQuality(
     listener: (quality: string) => void,
   ): string;
+
+  protected abstract subscribeStalled(
+    listener: (value: boolean) => void,
+  ): boolean;
 
   protected abstract subscribeStreamPhase(
     listener: (streamPhase: StreamPhase) => void,
