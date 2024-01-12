@@ -253,15 +253,21 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeQualities}.active
    */
   private subscribeQuality(listener: (quality: Quality | string) => void) {
-    return this.subscribeQualities((qualities) => {
+    const getActiveQuality = (qualities: Qualities) => {
       const activeQualityIndex = qualities?.active;
 
-      listener(
+      return (
         (activeQualityIndex !== undefined &&
-          qualities?.list[activeQualityIndex]) ||
-          '',
+          qualities?.list[activeQualityIndex]?.label) ||
+        ''
       );
-    })?.active;
+    };
+
+    const qualities = this.subscribeQualities((value) => {
+      listener(getActiveQuality(value));
+    });
+
+    return getActiveQuality(qualities);
   }
 
   /**
