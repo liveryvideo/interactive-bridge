@@ -168,7 +168,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of LiveryPlayer features and whether or not they're enabled.
+   * Returns promise of a registry of features supported by the player in general and under given circumstances.
    */
   getFeatures(): Promise<GetFeaturesReturn> {
     return this.sendCommand('getFeatures').then((value) => {
@@ -241,7 +241,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of LiveryPlayer playback details.
+   * Returns promise of current playback details, i.e: values that are continuously changing.
    */
   getPlayback(): Promise<GetPlaybackReturn> {
     return this.sendCommand('getPlayback').then((value) => {
@@ -293,14 +293,14 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Pauses LiveryPlayer playback.
+   * Pauses playback.
    */
   pause() {
     return this.sendCommand('pause');
   }
 
   /**
-   * Starts or resumes LiveryPlayer playback.
+   * Attempt to start or resume playback.
    */
   play() {
     return this.sendCommand('play');
@@ -331,14 +331,14 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Reloads LiveryPlayer.
+   * Reloads LiveryPlayer, e.g: to try to recover from an error.
    */
   reload() {
     return this.sendCommand('reload');
   }
 
   /**
-   * Seek to a specified LiveryPlayer position in seconds.
+   * Seek to specified `position` in seconds since start of stream/VOD.
    */
   seek(position: number) {
     if (typeof position !== 'number') {
@@ -350,7 +350,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Select specified LiveryPlayer quality index or -1 for ABR.
+   * Select quality at specified index of subscribeQualities() list or -1 to use ABR.
    */
   selectQuality(index: number) {
     if (typeof index !== 'number') {
@@ -388,7 +388,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Sets whether or not LiveryPlayer controls are disabled.
+   * Change disabled to true to disable all default player controls and implement your own instead.
    */
   setControlsDisabled(disabled: boolean) {
     if (typeof disabled !== 'boolean') {
@@ -400,7 +400,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Change the LiveryPlayer display to the specified value.
+   * Attempt to change `display` mode to specified value.
    */
   setDisplay(display: DisplayMode) {
     if (!displayModes.includes(display)) {
@@ -410,7 +410,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Sets whether or not LiveryPlayer is muted.
+   * Attempt to change `muted` state to specified value.
    */
   setMuted(muted: boolean) {
     if (typeof muted !== 'boolean') {
@@ -434,8 +434,8 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer fullscreen state
-   * and calls back `listener` with any subsequent state changes.
+   * Returns promise of Livery stream config
+   * and calls back `listener` with server side updates or when streamId is changed.
    */
   subscribeConfig(listener: (value: Config) => void) {
     function validate(value: unknown) {
@@ -453,7 +453,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer display mode
+   * Returns promise of current display mode
    * and calls back `listener` with any subsequent display mode changes.
    */
   subscribeDisplay(listener: (value: DisplayMode) => void) {
@@ -473,7 +473,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer error
+   * Returns promise of current LiveryPlayer error message or undefined
    * and calls back `listener` with any subsequent errors.
    */
   subscribeError(listener: (error: string | undefined) => void) {
@@ -513,7 +513,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer playback mode
+   * Returns promise of current mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
    * and calls back `listener` with any subsequent mode changes.
    */
   subscribeMode(listener: (mode: PlaybackMode) => void) {
@@ -533,8 +533,8 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer error
-   * and calls back `listener` with any subsequent errors.
+   * Returns promise of current LiveryPlayer muted state
+   * and calls back `listener` with any subsequent muted changes.
    */
   subscribeMuted(listener: (muted: boolean) => void) {
     function validate(value: unknown) {
@@ -574,8 +574,8 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer paused state
-   * and calls back `listener` with any subsequent state updates.
+   * Returns promise of current playback paused state
+   * and calls back `listener` with any subsequent paused state updates.
    */
   subscribePaused(listener: (value: boolean) => void) {
     function validate(value: unknown) {
@@ -615,8 +615,8 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer playing state
-   * and calls back `listener` with any subsequent state updates.
+   * Returns promise of current playback playing state
+   * and calls back `listener` with any subsequent playing state updates.
    */
   subscribePlaying(listener: (value: boolean) => void) {
     function validate(value: unknown) {
@@ -634,8 +634,8 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer qualities
-   * and calls back `listener` with any subsequent changes.
+   * Returns promise of current LiveryPlayer playback qualities
+   * and calls back `listener` with any subsequent qualities changes.
    */
   subscribeQualities(listener: (value: Qualities) => void) {
     function validate(value: unknown) {
@@ -674,8 +674,8 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer stalled state
-   * and calls back `listener` with any subsequent state updates.
+   * Returns promise of current playback stalled state
+   * and calls back `listener` with any subsequent stalled state updates.
    */
   subscribeStalled(listener: (value: boolean) => void) {
     function validate(value: unknown) {

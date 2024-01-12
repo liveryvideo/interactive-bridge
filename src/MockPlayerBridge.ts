@@ -5,10 +5,15 @@ import type {
   PlaybackMode,
   PlaybackState,
   Qualities,
-  Quality,
-  StreamPhase,
   UserFeedbackPayload,
 } from './InteractiveBridge';
+
+// eslint-disable-next-line no-shadow
+enum MockListenerEvents {
+  DISPLAY = 'mock-display-change',
+  MUTED = 'mock-muted-change',
+  PLAYBACK = 'mock-playback-change',
+}
 
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
@@ -36,10 +41,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     });
   }
 
-  protected getCustomerId() {
-    return 'dummy-customer-id';
-  }
-
   protected getEndpointId() {
     return 'dummy-endpoint-id';
   }
@@ -53,10 +54,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       pip: true,
       scrubber: true,
     };
-  }
-
-  protected getLatency() {
-    return Math.random() * 6;
   }
 
   protected getPlayback() {
@@ -77,23 +74,19 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected pause() {
-    this.playbackState = 'PAUSED';
-    document.dispatchEvent(new Event('livery-playback-change'));
+    this.setPlaybackState('PAUSED');
   }
 
   protected play() {
-    this.playbackState = 'PLAYING';
-    document.dispatchEvent(new Event('livery-playback-change'));
+    this.setPlaybackState('PLAYING');
   }
 
   protected reload() {
-    this.playbackState = 'PLAYING';
-    document.dispatchEvent(new Event('livery-playback-change'));
+    this.setPlaybackState('PLAYING');
   }
 
   protected seek(position: number) {
-    this.playbackState = 'SEEKING';
-    document.dispatchEvent(new Event('livery-playback-change'));
+    this.setPlaybackState('SEEKING');
     return position;
   }
 
@@ -106,15 +99,11 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected setDisplay(display: DisplayMode) {
-    this.display = display;
-    document.dispatchEvent(new Event('livery-display-change'));
-    return display;
+    return this.setDisplayState(display);
   }
 
   protected setMuted(muted: boolean) {
-    this.muted = muted;
-    document.dispatchEvent(new Event('livery-muted-change'));
-    return muted;
+    return this.setMutedState(muted);
   }
 
   protected submitUserFeedback(payload: UserFeedbackPayload) {
@@ -124,27 +113,49 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   protected subscribeConfig(listener: (value: Config) => void) {
     const config: Config = {
       controls: {
-        cast: false,
-        contact: false,
-        error: false,
-        fullscreen: false,
-        mute: false,
-        pip: false,
-        play: false,
-        quality: false,
-        scrubber: false,
+        cast: true,
+        contact: true,
+        error: true,
+        fullscreen: true,
+        mute: true,
+        pip: true,
+        play: true,
+        quality: true,
+        scrubber: true,
       },
       customerId: 'id',
-      streamPhase: 'LIVE',
+      streamPhase: 'PRE',
       streamPhases: ['LIVE', 'POST', 'PRE'],
       tenantId: 'id',
     };
+
+    setTimeout(() => {
+      const newConfig = { ...config };
+      newConfig.controls = {
+        ...newConfig.controls,
+        cast: false,
+        scrubber: false,
+      };
+      newConfig.streamPhase = 'LIVE';
+      listener(newConfig);
+    }, 1500);
+    setTimeout(() => {
+      const newConfig = { ...config };
+      newConfig.controls = {
+        ...newConfig.controls,
+        cast: true,
+        scrubber: true,
+      };
+      newConfig.streamPhase = 'POST';
+      listener(newConfig);
+    }, 3000);
+
     listener(config);
     return config;
   }
 
   protected subscribeDisplay(listener: (value: DisplayMode) => void) {
-    document.addEventListener('livery-display-change', () => {
+    document.addEventListener(MockListenerEvents.DISPLAY, () => {
       listener(this.display);
     });
     return this.display;
@@ -155,111 +166,64 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return 'error';
   }
 
-  protected subscribeFullscreen(listener: (value: boolean) => void) {
-    // Note: LiveryPlayer only listens to itself becoming fullscreen; not just anything
-    document.addEventListener('fullscreenchange', () => {
-      listener(!!document.fullscreenElement);
-    });
-    return !!document.fullscreenElement;
-  }
-
   protected subscribeMode(listener: (mode: PlaybackMode) => void) {
     listener('LIVE');
     return 'LIVE' as PlaybackMode;
   }
 
   protected subscribeMuted(listener: (value: boolean) => void) {
-    document.addEventListener('livery-muted-change', () => {
+    document.addEventListener(MockListenerEvents.MUTED, () => {
       listener(this.muted);
     });
     return this.muted;
   }
 
-  protected subscribePaused(listener: (value: boolean) => void) {
-    const pausedStates: PlaybackState[] = ['ENDED', 'PAUSED'];
-    document.addEventListener('livery-playback-change', () => {
-      listener(pausedStates.includes(this.playbackState));
-    });
-    return pausedStates.includes(this.playbackState);
-  }
-
   protected subscribePlaybackState(
     listener: (playbackState: PlaybackState) => void,
   ) {
-    document.addEventListener('livery-playback-change', () => {
+    document.addEventListener(MockListenerEvents.PLAYBACK, () => {
       listener(this.playbackState);
     });
     return this.playbackState;
   }
 
-  protected subscribePlaying(listener: (value: boolean) => void) {
-    const playingStates: PlaybackState[] = [
-      'FAST_FORWARD',
-      'PLAYING',
-      'REWIND',
-      'SLOW_MO',
-    ];
-    document.addEventListener('livery-playback-change', () => {
-      listener(playingStates.includes(this.playbackState));
-    });
-    return playingStates.includes(this.playbackState);
-  }
-
   protected subscribeQualities(listener: (value: Qualities) => void) {
-    const quality1: Quality = {
+    const buildQuality = (index: number) => ({
       audio: {
-        bandwidth: 1,
+        bandwidth: index,
       },
-      label: '1',
+      label: `${index}`,
       video: {
-        bandwidth: 1,
-        height: 1,
-        width: 1,
+        bandwidth: index,
+        height: index,
+        width: index,
       },
-    };
-    const quality2: Quality = {
-      audio: {
-        bandwidth: 2,
-      },
-      label: '2',
-      video: {
-        bandwidth: 2,
-        height: 2,
-        width: 2,
-      },
-    };
-    const qualities1: Qualities = {
-      active: 1,
-      list: [quality1, quality2],
-      selected: 1,
-    };
-    const qualities2: Qualities = {
-      active: 2,
-      list: [quality1, quality2],
-      selected: 2,
-    };
-    setTimeout(() => listener(qualities2), 1500);
-    setTimeout(() => listener(qualities1), 3000);
-    return qualities1;
-  }
-
-  protected subscribeQuality(listener: (value: string) => void) {
-    setTimeout(() => listener('dummy-quality-2'), 1500);
-    setTimeout(() => listener('dummy-quality-3'), 3000);
-    return 'dummy-quality-1';
-  }
-
-  protected subscribeStalled(listener: (value: boolean) => void) {
-    const stalledStates: PlaybackState[] = ['BUFFERING', 'SEEKING'];
-    document.addEventListener('livery-playback-change', () => {
-      listener(stalledStates.includes(this.playbackState));
     });
-    return stalledStates.includes(this.playbackState);
+    const buildQualities = (index: number) => ({
+      active: index,
+      list: [buildQuality(1), buildQuality(2), buildQuality(3)],
+      selected: index,
+    });
+    const qualities = [1, 2, 3].map((index) => buildQualities(index));
+
+    setTimeout(() => listener(qualities[1]), 1500);
+    setTimeout(() => listener(qualities[2]), 3000);
+    listener(qualities[0]);
+    return qualities[0];
   }
 
-  protected subscribeStreamPhase(listener: (value: StreamPhase) => void) {
-    setTimeout(() => listener('LIVE'), 1500);
-    setTimeout(() => listener('POST'), 3000);
-    return 'PRE';
+  private setDisplayState(display: DisplayMode) {
+    this.display = display;
+    document.dispatchEvent(new Event(MockListenerEvents.DISPLAY));
+  }
+
+  private setMutedState(muted: boolean) {
+    this.muted = muted;
+    document.dispatchEvent(new Event(MockListenerEvents.MUTED));
+  }
+
+  private setPlaybackState(playbackState: PlaybackState) {
+    this.playbackState = playbackState;
+    document.dispatchEvent(new Event(MockListenerEvents.PLAYBACK));
   }
 }

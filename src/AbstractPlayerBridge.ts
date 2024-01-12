@@ -7,6 +7,7 @@ import type {
   PlaybackMode,
   PlaybackState,
   Qualities,
+  Quality,
   StreamPhase,
   UserFeedbackPayload,
 } from './InteractiveBridge';
@@ -163,6 +164,20 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return window.location.hostname;
   }
 
+  /**
+   * @deprecated Instead use {@link subscribeConfig}.customerId
+   */
+  private getCustomerId() {
+    return this.subscribeConfig(() => null)?.customerId;
+  }
+
+  /**
+   * @deprecated Instead use {@link getPlayback}.latency
+   */
+  private getLatency() {
+    return this.getPlayback().latency;
+  }
+
   private getLiveryParams(queryString = window.location.search) {
     const urlParams = new URLSearchParams(queryString);
     const result: Record<string, string> = {};
@@ -173,6 +188,16 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       }
     }
     return result;
+  }
+
+  /**
+   * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
+   */
+  private subscribeFullscreen(listener: (value: boolean) => void) {
+    return (
+      this.subscribeDisplay((display) => listener(display === 'FULLSCREEN')) ===
+      'FULLSCREEN'
+    );
   }
 
   /**
@@ -196,18 +221,73 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * @deprecated Instead use {@link subscribeConfig}.customerId
+   * Returns promise of current paused playbackState
+   * and calls back `listener` with any subsequent state updates.
    */
-  protected abstract getCustomerId(): string;
+  private subscribePaused(listener: (value: boolean) => void) {
+    const pausedStates: PlaybackState[] = ['ENDED', 'PAUSED'];
+    const playbackState = this.subscribePlaybackState((value) =>
+      listener(pausedStates.includes(value)),
+    );
+    return pausedStates.includes(playbackState);
+  }
+
+  /**
+   * Returns promise of current playing playbackState
+   * and calls back `listener` with any subsequent state updates.
+   */
+  private subscribePlaying(listener: (value: boolean) => void) {
+    const playingStates: PlaybackState[] = [
+      'FAST_FORWARD',
+      'PLAYING',
+      'REWIND',
+      'SLOW_MO',
+    ];
+    const playbackState = this.subscribePlaybackState((value) =>
+      listener(playingStates.includes(value)),
+    );
+    return playingStates.includes(playbackState);
+  }
+
+  /**
+   * @deprecated Instead use {@link subscribeQualities}.active
+   */
+  private subscribeQuality(listener: (quality: Quality | string) => void) {
+    return this.subscribeQualities((qualities) => {
+      const activeQualityIndex = qualities?.active;
+
+      listener(
+        (activeQualityIndex !== undefined &&
+          qualities?.list[activeQualityIndex]) ||
+          '',
+      );
+    })?.active;
+  }
+
+  /**
+   * Returns promise of current stalled playbackState
+   * and calls back `listener` with any subsequent state updates.
+   */
+  private subscribeStalled(listener: (value: boolean) => void) {
+    const stalledStates: PlaybackState[] = ['BUFFERING', 'SEEKING'];
+    const playbackState = this.subscribePlaybackState((value) =>
+      listener(stalledStates.includes(value)),
+    );
+    return stalledStates.includes(playbackState);
+  }
+
+  /**
+   * @deprecated Instead use {@link subscribeConfig}.streamPhase
+   */
+  private subscribeStreamPhase(listener: (streamPhase: StreamPhase) => void) {
+    return this.subscribeConfig((config) =>
+      listener(config?.streamPhase || 'PRE'),
+    )?.streamPhase;
+  }
 
   protected abstract getEndpointId(): string;
 
   protected abstract getFeatures(): GetFeaturesReturn;
-
-  /**
-   * @deprecated Instead use {@link getPlayback}.latency
-   */
-  protected abstract getLatency(): number;
 
   protected abstract getPlayback(): GetPlaybackReturn;
 
@@ -243,13 +323,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (error: string | undefined) => void,
   ): string | undefined;
 
-  /**
-   * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
-   */
-  protected abstract subscribeFullscreen(
-    listener: (value: boolean) => void,
-  ): boolean;
-
   protected abstract subscribeMode(
     listener: (mode: PlaybackMode) => void,
   ): PlaybackMode;
@@ -258,37 +331,11 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (value: boolean) => void,
   ): boolean;
 
-  protected abstract subscribePaused(
-    listener: (value: boolean) => void,
-  ): boolean;
-
   protected abstract subscribePlaybackState(
     listener: (playbackState: PlaybackState) => void,
   ): PlaybackState;
 
-  protected abstract subscribePlaying(
-    listener: (value: boolean) => void,
-  ): boolean;
-
   protected abstract subscribeQualities(
     listener: (qualities: Qualities) => void,
   ): Qualities;
-
-  /**
-   * @deprecated Instead use {@link subscribeQualities}.active
-   */
-  protected abstract subscribeQuality(
-    listener: (quality: string) => void,
-  ): string;
-
-  protected abstract subscribeStalled(
-    listener: (value: boolean) => void,
-  ): boolean;
-
-  /**
-   * @deprecated Instead use {@link subscribeConfig}.streamPhase
-   */
-  protected abstract subscribeStreamPhase(
-    listener: (streamPhase: StreamPhase) => void,
-  ): string;
 }
