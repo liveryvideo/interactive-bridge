@@ -1,111 +1,34 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { LiveryBridge } from './LiveryBridge';
-import { stringify } from './util/stringify';
-
-export type Orientation = 'landscape' | 'portrait';
-
-export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
-
-export const features = [
-  'airplay',
-  'chromecast',
-  'contact',
-  'fullscreen',
-  'pip',
-  'scrubber',
-] as const;
-
-export type Feature = (typeof features)[number];
-
-export type GetFeaturesReturn = Record<Feature, boolean>;
-
-export const playbackDetails = [
-  'buffer',
-  'duration',
-  'latency',
-  'position',
-] as const;
-
-export type PlaybackDetails = (typeof playbackDetails)[number];
-
-export type GetPlaybackReturn = Record<PlaybackDetails, number | undefined>;
-
-export interface Quality {
-  audio?: {
-    bandwidth: number;
-  };
-  label: string;
-  video?: {
-    bandwidth: number;
-    height: number;
-    width: number;
-  };
-}
-
-export type Qualities =
-  | {
-      active: number;
-      list: Quality[];
-      selected: number;
-    }
-  | undefined;
-
-export const displayModes = [
-  'AIRPLAY',
-  'CHROMECAST',
-  'FULLSCREEN',
-  'DEFAULT',
-  'PIP',
-] as const;
-
-export type DisplayMode = (typeof displayModes)[number];
-
-export interface UserFeedbackPayload {
-  comments: string;
-  email: string;
-  name: string;
-}
-
-export const controls = [
-  'cast',
-  'contact',
-  'error',
-  'fullscreen',
-  'mute',
-  'pip',
-  'play',
-  'quality',
-  'scrubber',
-] as const;
-
-export type Control = (typeof controls)[number];
-
-export type Config =
-  | {
-      controls: Record<Control, boolean>;
-      customerId: string;
-      streamPhase: StreamPhase;
-      streamPhases: Record<number, StreamPhase>;
-      tenantId: string;
-    }
-  | undefined;
-
-export const playbackModes = ['CATCHUP', 'LIVE', 'UNKNOWN', 'VOD'] as const;
-
-export type PlaybackMode = (typeof playbackModes)[number];
-
-export const playbackStates = [
-  'BUFFERING',
-  'ENDED',
-  'FAST_FORWARD',
-  'PAUSED',
-  'PLAYING',
-  'REWIND',
-  'SEEKING',
-  'SLOW_MO',
-] as const;
-
-export type PlaybackState = (typeof playbackStates)[number];
+import type {
+  Config,
+  DisplayMode,
+  Orientation,
+  PlaybackMode,
+  PlaybackState,
+  Qualities,
+  StreamPhase,
+  UserFeedback,
+} from './util/schema';
+import {
+  config,
+  displayMode,
+  features,
+  liveryParams,
+  orientation,
+  pausedState,
+  playbackDetails,
+  playbackMode,
+  playbackState,
+  playingState,
+  qualities,
+  stalledState,
+  streamPhase,
+  validateBoolean,
+  validateNumber,
+  validateString,
+  validateStringOrUndefined,
+} from './util/schema';
 
 /**
  * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
@@ -127,14 +50,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of LiveryPlayer application name.
    */
   getAppName() {
-    return this.sendCommand('getAppName').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getAppName value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getAppName').then(validateString);
   }
 
   /**
@@ -143,51 +59,23 @@ export class InteractiveBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeConfig}.customerId
    */
   getCustomerId() {
-    return this.sendCommand('getCustomerId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getCustomerId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getCustomerId').then(validateString);
   }
 
   /**
    * Returns promise of LiveryPlayer Pinpoint analytics endpoint id.
    */
   getEndpointId() {
-    return this.sendCommand('getEndpointId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getEndpointId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getEndpointId').then(validateString);
   }
 
   /**
    * Returns promise of a registry of features supported by the player in general and under given circumstances.
    */
-  getFeatures(): Promise<GetFeaturesReturn> {
-    return this.sendCommand('getFeatures').then((value) => {
-      if (typeof value !== 'object') {
-        throw new Error(
-          `getFeatures value type: ${typeof value}, should be: object`,
-        );
-      }
-      if (value === null) {
-        throw new Error(`getFeatures value type: null, should be: object`);
-      }
-      return features.reduce((previous, feature) => {
-        const typedValue = value as Record<string, unknown>;
-        const typedFeatureValue = typedValue[feature as string];
-        previous[feature] =
-          typeof typedFeatureValue === 'boolean' ? typedFeatureValue : false;
-        return previous;
-      }, {} as GetFeaturesReturn);
-    });
+  getFeatures() {
+    return this.sendCommand('getFeatures').then((value) =>
+      features.parse(value),
+    );
   }
 
   /**
@@ -196,14 +84,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @deprecated Instead use {@link getPlayback}.latency
    */
   getLatency() {
-    return this.sendCommand('getLatency').then((value) => {
-      if (typeof value !== 'number') {
-        throw new Error(
-          `getLatency value type: ${typeof value}, should be: number`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getLatency').then(validateNumber);
   }
 
   /**
@@ -220,76 +101,33 @@ export class InteractiveBridge extends LiveryBridge {
    * So given location.search: `'?foo&livery_foo%3Abar=hey+you&livery_no_val&livery_multi=1&livery_multi=2'`
    * this will return: `{ 'foo:bar': 'hey you', no_val: '', multi: '1' }`.
    */
-  getLiveryParams(): Promise<Record<string, string>> {
-    return this.sendCommand('getLiveryParams').then((value) => {
-      if (typeof value !== 'object') {
-        throw new Error(
-          `getLiveryParams value type: ${typeof value}, should be: object`,
-        );
-      }
-      if (value === null) {
-        throw new Error(`getLiveryParams value type: null, should be: object`);
-      }
-      const dict: Record<string, string> = {};
-      for (const [paramKey, paramValue] of Object.entries(value)) {
-        if (typeof paramValue === 'string') {
-          dict[paramKey] = paramValue;
-        }
-      }
-      return dict;
-    });
+  getLiveryParams() {
+    return this.sendCommand('getLiveryParams').then((value) =>
+      liveryParams.parse(value),
+    );
   }
 
   /**
    * Returns promise of current playback details, i.e: values that are continuously changing.
    */
-  getPlayback(): Promise<GetPlaybackReturn> {
-    return this.sendCommand('getPlayback').then((value) => {
-      if (typeof value !== 'object') {
-        throw new Error(
-          `getPlayback value type: ${typeof value}, should be: object`,
-        );
-      }
-      if (value === null) {
-        throw new Error(`getPlayback value type: null, should be: object`);
-      }
-      return playbackDetails.reduce((previous, detail) => {
-        const typedValue = value as Record<string, unknown>;
-        const typedFeatureValue = typedValue[detail as string];
-
-        previous[detail] =
-          typeof typedFeatureValue === 'number' ? typedFeatureValue : undefined;
-        return previous;
-      }, {} as GetPlaybackReturn);
-    });
+  getPlayback() {
+    return this.sendCommand('getPlayback').then((value) =>
+      playbackDetails.parse(value),
+    );
   }
 
   /**
    * Returns promise of LiveryPlayer version.
    */
   getPlayerVersion() {
-    return this.sendCommand('getPlayerVersion').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getPlayerVersion value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getPlayerVersion').then(validateString);
   }
 
   /**
    * Returns promise of LiveryPlayer stream id.
    */
   getStreamId() {
-    return this.sendCommand('getStreamId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getStreamId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getStreamId').then(validateString);
   }
 
   /**
@@ -341,11 +179,6 @@ export class InteractiveBridge extends LiveryBridge {
    * Seek to specified `position` in seconds since start of stream/VOD.
    */
   seek(position: number) {
-    if (typeof position !== 'number') {
-      throw new Error(
-        `position arg value type: ${typeof position}, should be: number`,
-      );
-    }
     return this.sendCommand('seek', position);
   }
 
@@ -353,11 +186,6 @@ export class InteractiveBridge extends LiveryBridge {
    * Select quality at specified index of subscribeQualities() list or -1 to use ABR.
    */
   selectQuality(index: number) {
-    if (typeof index !== 'number') {
-      throw new Error(
-        `index arg value type: ${typeof index}, should be: number`,
-      );
-    }
     return this.sendCommand('selectQuality', index);
   }
 
@@ -391,11 +219,6 @@ export class InteractiveBridge extends LiveryBridge {
    * Change disabled to true to disable all default player controls and implement your own instead.
    */
   setControlsDisabled(disabled: boolean) {
-    if (typeof disabled !== 'boolean') {
-      throw new Error(
-        `disabled arg value type: ${typeof disabled}, should be: boolean`,
-      );
-    }
     return this.sendCommand('setControlsDisabled', disabled);
   }
 
@@ -403,9 +226,6 @@ export class InteractiveBridge extends LiveryBridge {
    * Attempt to change `display` mode to specified value.
    */
   setDisplay(display: DisplayMode) {
-    if (!displayModes.includes(display)) {
-      throw new Error(`display arg value: ${typeof display} is not supported`);
-    }
     return this.sendCommand('setDisplay', display);
   }
 
@@ -413,43 +233,24 @@ export class InteractiveBridge extends LiveryBridge {
    * Attempt to change `muted` state to specified value.
    */
   setMuted(muted: boolean) {
-    if (typeof muted !== 'boolean') {
-      throw new Error(
-        `muted arg value type: ${typeof muted}, should be: boolean`,
-      );
-    }
     return this.sendCommand('setMuted', muted);
   }
 
   /**
    * Uses LiveryPlayer's Sentry API to submit user feedback.
    */
-  submitUserFeedback(payload: UserFeedbackPayload) {
-    if (typeof payload !== 'object') {
-      throw new Error(
-        `payload arg value type: ${typeof payload}, should be: object`,
-      );
-    }
-    return this.sendCommand('submitUserFeedback', payload);
+  submitUserFeedback(userFeedback: UserFeedback) {
+    return this.sendCommand('submitUserFeedback', userFeedback);
   }
 
   /**
    * Returns promise of Livery stream config
    * and calls back `listener` with server side updates or when streamId is changed.
    */
-  subscribeConfig(listener: (value: Config) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'object') {
-        throw new Error(
-          `subscribeConfig value type: ${typeof value}, should be: object`,
-        );
-      }
-      return value as Config;
-    }
-
+  subscribeConfig(listener: (value?: Config) => void) {
     return this.sendCommand('subscribeConfig', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(config.parse(value)),
+    ).then((value) => config.parse(value));
   }
 
   /**
@@ -457,38 +258,19 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent display mode changes.
    */
   subscribeDisplay(listener: (value: DisplayMode) => void) {
-    function validate(value: unknown) {
-      const typedValue = value as DisplayMode;
-      if (!displayModes.includes(typedValue)) {
-        throw new Error(
-          `subscribeDisplay arg value: ${typeof value} is not supported`,
-        );
-      }
-      return typedValue;
-    }
-
     return this.sendCommand('subscribeDisplay', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(displayMode.parse(value)),
+    ).then((value) => displayMode.parse(value));
   }
 
   /**
    * Returns promise of current LiveryPlayer error message or undefined
    * and calls back `listener` with any subsequent errors.
    */
-  subscribeError(listener: (error: string | undefined) => void) {
-    function validate(error: unknown) {
-      if (typeof error !== 'string' && typeof error !== 'undefined') {
-        throw new Error(
-          `subscribeError value type: ${typeof error}, should be: "string" | "undefined"`,
-        );
-      }
-      return error;
-    }
-
-    return this.sendCommand('subscribeError', undefined, (error) =>
-      listener(validate(error)),
-    ).then(validate);
+  subscribeError(listener: (value: string | undefined) => void) {
+    return this.sendCommand('subscribeError', undefined, (value) =>
+      listener(validateStringOrUndefined(value)),
+    ).then(validateStringOrUndefined);
   }
 
   /**
@@ -498,18 +280,9 @@ export class InteractiveBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
    */
   subscribeFullscreen(listener: (value: boolean) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'boolean') {
-        throw new Error(
-          `subscribeFullscreen value type: ${typeof value}, should be: boolean`,
-        );
-      }
-      return value;
-    }
-
     return this.sendCommand('subscribeFullscreen', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(validateBoolean(value)),
+    ).then(validateBoolean);
   }
 
   /**
@@ -517,19 +290,9 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent mode changes.
    */
   subscribeMode(listener: (mode: PlaybackMode) => void) {
-    function validate(mode: unknown) {
-      const typedMode = mode as PlaybackMode;
-      if (!playbackModes.includes(typedMode)) {
-        throw new Error(
-          `subscribeMode arg mode: ${typeof mode} is not supported`,
-        );
-      }
-      return typedMode;
-    }
-
     return this.sendCommand('subscribeMode', undefined, (mode) =>
-      listener(validate(mode)),
-    ).then(validate);
+      listener(playbackMode.parse(mode)),
+    ).then((mode) => playbackMode.parse(mode));
   }
 
   /**
@@ -537,18 +300,9 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent muted changes.
    */
   subscribeMuted(listener: (muted: boolean) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'boolean') {
-        throw new Error(
-          `subscribeMuted value type: ${typeof value}, should be: boolean`,
-        );
-      }
-      return value;
-    }
-
     return this.sendCommand('subscribeMuted', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(validateBoolean(value)),
+    ).then(validateBoolean);
   }
 
   /**
@@ -557,99 +311,52 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Will be removed in the next major version.
    */
-  subscribeOrientation(listener: (orientation: Orientation) => void) {
-    function validate(value: unknown) {
-      if (value !== 'landscape' && value !== 'portrait') {
-        const strValue = stringify(value);
-        throw new Error(
-          `subscribeOrientation value: ${strValue}, should be: "landscape" | "portrait"`,
-        );
-      }
-      return value;
-    }
-
+  subscribeOrientation(listener: (value: Orientation) => void) {
     return this.sendCommand('subscribeOrientation', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(orientation.parse(value)),
+    ).then((value) => orientation.parse(value));
   }
 
   /**
    * Returns promise of current playback paused state
    * and calls back `listener` with any subsequent paused state updates.
    */
-  subscribePaused(listener: (value: boolean) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'boolean') {
-        throw new Error(
-          `subscribePaused value type: ${typeof value}, should be: boolean`,
-        );
-      }
-      return value;
-    }
-
-    return this.sendCommand('subscribePaused', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+  async subscribePaused(listener: (value: boolean) => void) {
+    const state = await this.subscribePlaybackState((value) =>
+      listener(pausedState.safeParse(value).success),
+    );
+    return pausedState.safeParse(state).success;
   }
 
   /**
    * Returns promise of current LiveryPlayer playback state
    * and calls back `listener` with any subsequent state updates.
    */
-  subscribePlaybackState(listener: (playbackState: PlaybackState) => void) {
-    function validate(playbackState: unknown) {
-      const typedPlaybackState = playbackState as PlaybackState;
-      if (!playbackStates.includes(typedPlaybackState)) {
-        throw new Error(
-          `subscribePlaybackState arg playbackState: ${typeof playbackState} is not supported`,
-        );
-      }
-      return typedPlaybackState;
-    }
-
-    return this.sendCommand(
-      'subscribePlaybackState',
-      undefined,
-      (playbackState) => listener(validate(playbackState)),
-    ).then(validate);
+  subscribePlaybackState(listener: (value: PlaybackState) => void) {
+    return this.sendCommand('subscribePlaybackState', undefined, (value) =>
+      listener(playbackState.parse(value)),
+    ).then((value) => playbackState.parse(value));
   }
 
   /**
    * Returns promise of current playback playing state
    * and calls back `listener` with any subsequent playing state updates.
    */
-  subscribePlaying(listener: (value: boolean) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'boolean') {
-        throw new Error(
-          `subscribePlaying value type: ${typeof value}, should be: boolean`,
-        );
-      }
-      return value;
-    }
-
-    return this.sendCommand('subscribePlaying', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+  async subscribePlaying(listener: (value: boolean) => void) {
+    const state = await this.subscribePlaybackState((value) =>
+      listener(playingState.safeParse(value).success),
+    );
+    return playingState.safeParse(state).success;
   }
 
   /**
    * Returns promise of current LiveryPlayer playback qualities
    * and calls back `listener` with any subsequent qualities changes.
    */
-  subscribeQualities(listener: (value: Qualities) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'object') {
-        throw new Error(
-          `subscribeQualities value type: ${typeof value}, should be: object`,
-        );
-      }
-      return value as Qualities;
-    }
-
+  subscribeQualities(listener: (value?: Qualities) => void) {
     return this.sendCommand('subscribeQualities', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(qualities.parse(value)),
+    ).then((value) => qualities.parse(value));
   }
 
   /**
@@ -659,37 +366,20 @@ export class InteractiveBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeQualities}.active
    */
   subscribeQuality(listener: (value: string) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `subscribeQuality value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    }
-
     return this.sendCommand('subscribeQuality', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(validateString(value)),
+    ).then(validateString);
   }
 
   /**
    * Returns promise of current playback stalled state
    * and calls back `listener` with any subsequent stalled state updates.
    */
-  subscribeStalled(listener: (value: boolean) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'boolean') {
-        throw new Error(
-          `subscribeStalled value type: ${typeof value}, should be: boolean`,
-        );
-      }
-      return value;
-    }
-
-    return this.sendCommand('subscribeStalled', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+  async subscribeStalled(listener: (value: boolean) => void) {
+    const state = await this.subscribePlaybackState((value) =>
+      listener(stalledState.safeParse(value).success),
+    );
+    return stalledState.safeParse(state).success;
   }
 
   /**
@@ -699,19 +389,9 @@ export class InteractiveBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeConfig}.streamPhase
    */
   subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
-    function validate(value: unknown) {
-      if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
-        const strValue = stringify(value);
-        throw new Error(
-          `subscribeStreamPhase value: ${strValue}, should be: "LIVE" | "POST" | "PRE"`,
-        );
-      }
-      return value;
-    }
-
     return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(streamPhase.parse(value)),
+    ).then((value) => streamPhase.parse(value));
   }
 
   /**

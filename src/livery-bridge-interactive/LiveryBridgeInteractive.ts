@@ -4,6 +4,7 @@ import type { AbstractPlayerBridge } from '../AbstractPlayerBridge';
 import { InteractiveBridge } from '../InteractiveBridge';
 import '../livery-bridge-log/LiveryBridgeLog';
 import { defineVersionedElement } from '../util/defineVersionedElement';
+import { displayMode, type UserFeedback } from '../util/schema';
 import { stringify } from '../util/stringify';
 
 declare global {
@@ -23,6 +24,15 @@ const BRIDGE_GET_NAMES = [
   'getPlayback',
   'getPlayerVersion',
   'getStreamId',
+  'pause',
+  'play',
+  'reload',
+  'seek',
+  'selectQuality',
+  'setControlsDisabled',
+  'setDisplay',
+  'setMuted',
+  'submitUserFeedback',
 ] as const;
 const BRIDGE_SUBSCRIBE_NAMES = [
   'subscribeConfig',
@@ -230,174 +240,121 @@ export class LiveryBridgeInteractive extends LitElement {
         <div class="panel">
           <table>
             <tr>
-              <th>Player Command</th>
-              <th>Value</th>
+              <th>Player Command:</th>
             </tr>
             <tr>
               <td>
-                <button @click=${this.handlePlayerGet}>getAppName</button>
+                <form name="GetForm" @submit=${this.handlePlayerGet}>
+                  <select
+                    name="getCommandName"
+                    @change=${this.handleGetSelectChange}
+                  >
+                    <option value="getAppName">getAppName</option>
+                    <option value="getCustomerId">getCustomerId</option>
+                    <option value="getEndpointId">getEndpointId</option>
+                    <option value="getFeatures">getFeatures</option>
+                    <option value="getLatency">getLatency</option>
+                    <option value="getLiveryParams">getLiveryParams</option>
+                    <option value="getPlayback">getPlayback</option>
+                    <option value="getPlayerVersion">getPlayerVersion</option>
+                    <option value="getStreamId">getStreamId</option>
+                    <option value="pause">pause</option>
+                    <option value="play">play</option>
+                    <option value="reload">reload</option>
+                    <option value="seek">seek</option>
+                    <option value="selectQuality">selectQuality</option>
+                    <option value="setControlsDisabled">
+                      setControlsDisabled
+                    </option>
+                    <option value="setDisplay">setDisplay</option>
+                    <option value="setMuted">setMuted</option>
+                    <option value="submitUserFeedback">
+                      submitUserFeedback
+                    </option>
+                  </select>
+                  <input
+                    type="text"
+                    id="getCommandNameInput"
+                    name="getCommandNameInput"
+                    style="display: none"
+                  />
+                  <select
+                    id="getCommandNameBoolean"
+                    name="getCommandNameBoolean"
+                    style="display: none"
+                  >
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                  <select
+                    id="getCommandNameDisplay"
+                    name="getCommandNameDisplay"
+                    style="display: none"
+                  >
+                    <option value="AIRPLAY">AIRPLAY</option>
+                    <option value="CHROMECAST">CHROMECAST</option>
+                    <option value="DEFAULT">DEFAULT</option>
+                    <option value="FULLSCREEN">FULLSCREEN</option>
+                    <option value="PIP">PIP</option>
+                  </select>
+                  <button type="submit">Send</button>
+                </form>
               </td>
-              <td id="getAppNameOutput"></td>
+            </tr>
+            <tr>
+              <th>Last Command Value:</th>
             </tr>
             <tr>
               <td>
-                <button @click=${this.handlePlayerGet}>getCustomerId</button>
+                <pre id="getCommandOutput"></pre>
               </td>
-              <td id="getCustomerIdOutput"></td>
+            </tr>
+            <tr>
+              <th>Player Subscription:</th>
             </tr>
             <tr>
               <td>
-                <button @click=${this.handlePlayerGet}>getEndpointId</button>
+                <form
+                  name="SubscribeForm"
+                  @submit=${this.handlePlayerSubscribe}
+                >
+                  <select name="subscribeCommandName">
+                    <option value="subscribeConfig">subscribeConfig</option>
+                    <option value="subscribeDisplay">subscribeDisplay</option>
+                    <option value="subscribeError">subscribeError</option>
+                    <option value="subscribeFullscreen">
+                      subscribeFullscreen
+                    </option>
+                    <option value="subscribeMode">subscribeMode</option>
+                    <option value="subscribeMuted">subscribeMuted</option>
+                    <option value="subscribeOrientation">
+                      subscribeOrientation
+                    </option>
+                    <option value="subscribePaused">subscribePaused</option>
+                    <option value="subscribePlaybackState">
+                      subscribePlaybackState
+                    </option>
+                    <option value="subscribePlaying">subscribePlaying</option>
+                    <option value="subscribeQualities">
+                      subscribeQualities
+                    </option>
+                    <option value="subscribeQuality">subscribeQuality</option>
+                    <option value="subscribeStalled">subscribeStalled</option>
+                    <option value="subscribeStreamPhase">
+                      subscribeStreamPhase
+                    </option>
+                  </select>
+                  <button type="submit">Send</button>
+                </form>
               </td>
-              <td id="getEndpointIdOutput"></td>
+            </tr>
+            <tr>
+              <th>Last Subscription Value:</th>
             </tr>
             <tr>
               <td>
-                <button @click=${this.handlePlayerGet}>getFeatures</button>
+                <pre id="subscribeCommandOutput"></pre>
               </td>
-              <td id="getFeaturesOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerGet}>getLatency</button>
-              </td>
-              <td id="getLatencyOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerGet}>getLiveryParams</button>
-              </td>
-              <td id="getLiveryParamsOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerGet}>getPlayback</button>
-              </td>
-              <td id="getPlaybackOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerGet}>getPlayerVersion</button>
-              </td>
-              <td id="getPlayerVersionOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerGet}>getStreamId</button>
-              </td>
-              <td id="getStreamIdOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeConfig
-                </button>
-              </td>
-              <td id="subscribeConfigOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeDisplay
-                </button>
-              </td>
-              <td id="subscribeDisplayOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeError
-                </button>
-              </td>
-              <td id="subscribeErrorOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeFullscreen
-                </button>
-              </td>
-              <td id="subscribeFullscreenOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeMode
-                </button>
-              </td>
-              <td id="subscribeModeOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeMuted
-                </button>
-              </td>
-              <td id="subscribeMutedOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeOrientation
-                </button>
-              </td>
-              <td id="subscribeOrientationOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribePaused
-                </button>
-              </td>
-              <td id="subscribePausedOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribePlaybackState
-                </button>
-              </td>
-              <td id="subscribePlaybackStateOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribePlaying
-                </button>
-              </td>
-              <td id="subscribePlayingOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeQualities
-                </button>
-              </td>
-              <td id="subscribeQualitiesOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeQuality
-                </button>
-              </td>
-              <td id="subscribeQualityOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeStalled
-                </button>
-              </td>
-              <td id="subscribeStalledOutput"></td>
-            </tr>
-            <tr>
-              <td>
-                <button @click=${this.handlePlayerSubscribe}>
-                  subscribeStreamPhase
-                </button>
-              </td>
-              <td id="subscribeStreamPhaseOutput"></td>
             </tr>
           </table>
         </div>
@@ -469,26 +426,194 @@ export class LiveryBridgeInteractive extends LitElement {
     }
 
     return (value: unknown) => {
-      element.innerText = stringify(value);
+      element.innerText = stringify(value, null, '  ');
     };
   }
 
+  private handleGetSelectChange(event: Event) {
+    const { target } = event;
+
+    if (!(target instanceof HTMLSelectElement)) {
+      throw new Error('Unsupported select element');
+    }
+
+    const methodName = target.value;
+
+    if (!isBridgeGetMethodName(methodName)) {
+      throw new Error(`Invalid get select method name: ${methodName}`);
+    }
+
+    switch (methodName) {
+      case 'seek':
+      case 'selectQuality': {
+        const inputElement = this.renderRoot.querySelector(
+          '#getCommandNameInput',
+        );
+
+        if (!(inputElement instanceof HTMLInputElement)) {
+          throw new Error('Unsupported input element');
+        }
+
+        inputElement.setAttribute('style', 'display: inline-block');
+        inputElement.setAttribute('type', 'number');
+        inputElement.setAttribute('min', '0');
+        inputElement.value = '';
+
+        if (methodName === 'selectQuality') {
+          this.interactiveBridge
+            ?.subscribeQualities(() => null)
+            .then((qualities) => {
+              inputElement.setAttribute('max', `${qualities.list.length - 1}`);
+            })
+            .catch((e) => {
+              throw e;
+            });
+        } else {
+          inputElement.removeAttribute('max');
+        }
+        break;
+      }
+      default: {
+        const inputElement = this.renderRoot.querySelector(
+          '#getCommandNameInput',
+        );
+
+        if (inputElement) {
+          inputElement.setAttribute('style', 'display: none');
+          inputElement.setAttribute('type', 'text');
+          inputElement.removeAttribute('min');
+          inputElement.removeAttribute('max');
+        }
+      }
+    }
+
+    switch (methodName) {
+      case 'setControlsDisabled':
+      case 'setMuted': {
+        const booleanElement = this.renderRoot.querySelector(
+          '#getCommandNameBoolean',
+        );
+
+        if (!(booleanElement instanceof HTMLSelectElement)) {
+          throw new Error('Unsupported select element');
+        }
+
+        booleanElement.setAttribute('style', 'display: inline-block');
+        break;
+      }
+      default: {
+        const booleanElement = this.renderRoot.querySelector(
+          '#getCommandNameBoolean',
+        );
+
+        if (booleanElement) {
+          booleanElement.setAttribute('style', 'display: none');
+        }
+      }
+    }
+
+    switch (methodName) {
+      case 'setDisplay': {
+        const displayElement = this.renderRoot.querySelector(
+          '#getCommandNameDisplay',
+        );
+
+        if (!(displayElement instanceof HTMLSelectElement)) {
+          throw new Error('Unsupported select element');
+        }
+
+        displayElement.setAttribute('style', 'display: inline-block');
+        break;
+      }
+      default: {
+        const displayElement = this.renderRoot.querySelector(
+          '#getCommandNameBoolean',
+        );
+
+        if (displayElement) {
+          displayElement.setAttribute('style', 'display: none');
+        }
+      }
+    }
+  }
+
   private handlePlayerCall(type: 'get' | 'subscribe', event: Event) {
-    if (!event.target || !(event.target instanceof HTMLElement)) {
+    if (!event.target || !(event.target instanceof HTMLFormElement)) {
       throw new Error('Unsupported event target');
     }
     if (!this.interactiveBridge) {
       throw new Error('interactiveBridge undefined');
     }
 
-    const methodName = event.target.innerText.trim();
-    const setText = this.createSetText(`#${methodName}Output`);
+    const formData = new FormData(event.target);
+
+    const methodName = formData.get(`${type}CommandName`);
+
+    if (typeof methodName !== 'string') {
+      throw new Error('methodName must be a string');
+    }
+
+    const setText = this.createSetText(`#${type}CommandOutput`);
+
+    const getInputValue = (field: 'Input' | 'Boolean' | 'Display') => {
+      const inputValue = formData.get(`${type}CommandName${field}`)?.toString();
+
+      if (typeof inputValue !== 'string') {
+        throw new Error('inputValue must be a string');
+      }
+
+      return inputValue;
+    };
 
     if (type === 'get') {
       if (!isBridgeGetMethodName(methodName)) {
         throw new Error(`Invalid ${type} method name: ${methodName}`);
       }
-      this.interactiveBridge[methodName]().then(setText, setText);
+
+      switch (methodName) {
+        case 'seek':
+        case 'selectQuality': {
+          const inputValue = getInputValue('Input');
+          this.interactiveBridge[methodName](parseInt(inputValue, 10)).then(
+            setText,
+            setText,
+          );
+          break;
+        }
+        case 'setControlsDisabled':
+        case 'setMuted': {
+          const inputValue = getInputValue('Boolean');
+          this.interactiveBridge[methodName](inputValue === 'true').then(
+            setText,
+            setText,
+          );
+          break;
+        }
+        case 'submitUserFeedback': {
+          const inputValue: UserFeedback = {
+            name: 'dummy-name',
+            email: 'dummy-email',
+            comments: 'dummy-comments',
+          };
+          this.interactiveBridge[methodName](inputValue).then(setText, setText);
+          break;
+        }
+        case 'setDisplay': {
+          const inputValue = getInputValue('Display');
+          const parsed = displayMode.safeParse(inputValue);
+          if (!parsed.success) {
+            throw parsed.error;
+          }
+          this.interactiveBridge[methodName](parsed.data).then(
+            setText,
+            setText,
+          );
+          break;
+        }
+        default: {
+          this.interactiveBridge[methodName]().then(setText, setText);
+        }
+      }
     } else {
       if (!isBridgeSubscribeMethodName(methodName)) {
         throw new Error(`Invalid ${type} method name: ${methodName}`);
@@ -521,10 +646,12 @@ export class LiveryBridgeInteractive extends LitElement {
   }
 
   private handlePlayerGet(event: Event) {
+    event.preventDefault();
     this.handlePlayerCall('get', event);
   }
 
   private handlePlayerSubscribe(event: Event) {
+    event.preventDefault();
     this.handlePlayerCall('subscribe', event);
   }
 }

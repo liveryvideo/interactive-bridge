@@ -5,26 +5,53 @@ import type {
   PlaybackMode,
   PlaybackState,
   Qualities,
-  UserFeedbackPayload,
-} from './InteractiveBridge';
+  UserFeedback,
+} from './util/schema';
 
-// eslint-disable-next-line no-shadow
-enum MockListenerEvents {
-  DISPLAY = 'mock-display-change',
-  MUTED = 'mock-muted-change',
-  PLAYBACK = 'mock-playback-change',
-}
+const buildQuality = (index: number) => ({
+  audio: {
+    bandwidth: index,
+  },
+  label: `dummy-quality-${index}`,
+  video: {
+    bandwidth: index,
+    height: index,
+    width: index,
+  },
+});
 
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
  * And with dummy support for custom command: `subscribeAuthToken` as used on the test page.
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
+  controlsDisabled = false;
+
+  userFeedback: UserFeedback | null = null;
+
   private display: DisplayMode = 'DEFAULT';
+
+  private displayListeners: ((value: DisplayMode) => void)[] = [];
 
   private muted = true;
 
+  private mutedListeners: ((value: boolean) => void)[] = [];
+
+  private playbackMode: PlaybackMode = 'LIVE';
+
   private playbackState: PlaybackState = 'PLAYING';
+
+  private playbackStateListeners: ((value: PlaybackState) => void)[] = [];
+
+  private qualities: Qualities = {
+    active: 0,
+    list: [buildQuality(1), buildQuality(2), buildQuality(3)],
+    selected: 0,
+  };
+
+  private qualitiesListeners: ((value?: Qualities) => void)[] = [];
+
+  private seekPosition = 0;
 
   constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
     super(target);
@@ -61,7 +88,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       buffer: Math.random() * 6,
       duration: Math.random() * 6,
       latency: Math.random() * 6,
-      position: Math.random() * 6,
+      position: this.seekPosition,
     };
   }
 
@@ -74,43 +101,58 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected pause() {
-    this.setPlaybackState('PAUSED');
+    this.playbackState = 'PAUSED';
+    this.playbackStateListeners.forEach((listener) =>
+      listener(this.playbackState),
+    );
   }
 
   protected play() {
-    this.setPlaybackState('PLAYING');
+    this.playbackState = 'PLAYING';
+    this.playbackStateListeners.forEach((listener) =>
+      listener(this.playbackState),
+    );
   }
 
   protected reload() {
-    this.setPlaybackState('PLAYING');
+    this.playbackState = 'PLAYING';
+    this.playbackStateListeners.forEach((listener) =>
+      listener(this.playbackState),
+    );
   }
 
   protected seek(position: number) {
-    this.setPlaybackState('SEEKING');
-    return position;
+    this.playbackState = 'SEEKING';
+    this.seekPosition = position;
+    this.playbackStateListeners.forEach((listener) =>
+      listener(this.playbackState),
+    );
   }
 
   protected selectQuality(index: number) {
-    return index;
+    this.qualities.selected = index;
+    this.qualitiesListeners.forEach((listener) => listener(this.qualities));
   }
 
   protected setControlsDisabled(disabled: boolean) {
-    return disabled;
+    this.controlsDisabled = disabled;
   }
 
   protected setDisplay(display: DisplayMode) {
-    return this.setDisplayState(display);
+    this.display = display;
+    this.displayListeners.forEach((listener) => listener(this.display));
   }
 
   protected setMuted(muted: boolean) {
-    return this.setMutedState(muted);
+    this.muted = muted;
+    this.mutedListeners.forEach((listener) => listener(this.muted));
   }
 
-  protected submitUserFeedback(payload: UserFeedbackPayload) {
-    return payload;
+  protected submitUserFeedback(value: UserFeedback) {
+    this.userFeedback = value;
   }
 
-  protected subscribeConfig(listener: (value: Config) => void) {
+  protected subscribeConfig(listener: (value?: Config) => void) {
     const config: Config = {
       controls: {
         cast: true,
@@ -123,10 +165,14 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
         quality: true,
         scrubber: true,
       },
-      customerId: 'id',
+      customerId: 'dummy-customer-id',
       streamPhase: 'PRE',
-      streamPhases: ['LIVE', 'POST', 'PRE'],
-      tenantId: 'id',
+      streamPhases: {
+        [Date.now() - 3600]: 'LIVE',
+        [Date.now()]: 'POST',
+        [Date.now() + 3600]: 'PRE',
+      },
+      tenantId: 'dummy-tenant-id',
     };
 
     setTimeout(() => {
@@ -149,81 +195,54 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       newConfig.streamPhase = 'POST';
       listener(newConfig);
     }, 3000);
-
-    listener(config);
     return config;
   }
 
   protected subscribeDisplay(listener: (value: DisplayMode) => void) {
-    document.addEventListener(MockListenerEvents.DISPLAY, () => {
-      listener(this.display);
-    });
+    this.displayListeners.push(listener);
     return this.display;
   }
 
   protected subscribeError(listener: (error: string | undefined) => void) {
-    listener('error');
-    return 'error';
+    setTimeout(() => listener(''), 1500);
+    return 'dummy-error';
   }
 
   protected subscribeMode(listener: (mode: PlaybackMode) => void) {
-    listener('LIVE');
-    return 'LIVE' as PlaybackMode;
+    setTimeout(() => {
+      this.playbackMode = 'CATCHUP';
+      listener(this.playbackMode);
+    }, 1500);
+    setTimeout(() => {
+      this.playbackMode = 'LIVE';
+      listener(this.playbackMode);
+    }, 3000);
+    setTimeout(() => {
+      this.playbackMode = 'UNKNOWN';
+      listener(this.playbackMode);
+    }, 4500);
+    setTimeout(() => {
+      this.playbackMode = 'VOD';
+      listener(this.playbackMode);
+    }, 6000);
+
+    return this.playbackMode;
   }
 
   protected subscribeMuted(listener: (value: boolean) => void) {
-    document.addEventListener(MockListenerEvents.MUTED, () => {
-      listener(this.muted);
-    });
+    this.mutedListeners.push(listener);
     return this.muted;
   }
 
   protected subscribePlaybackState(
     listener: (playbackState: PlaybackState) => void,
   ) {
-    document.addEventListener(MockListenerEvents.PLAYBACK, () => {
-      listener(this.playbackState);
-    });
+    this.playbackStateListeners.push(listener);
     return this.playbackState;
   }
 
-  protected subscribeQualities(listener: (value: Qualities) => void) {
-    const buildQuality = (index: number) => ({
-      audio: {
-        bandwidth: index,
-      },
-      label: `${index}`,
-      video: {
-        bandwidth: index,
-        height: index,
-        width: index,
-      },
-    });
-    const buildQualities = (index: number) => ({
-      active: index,
-      list: [buildQuality(1), buildQuality(2), buildQuality(3)],
-      selected: index,
-    });
-    const qualities = [1, 2, 3].map((index) => buildQualities(index));
-
-    setTimeout(() => listener(qualities[1]), 1500);
-    setTimeout(() => listener(qualities[2]), 3000);
-    listener(qualities[0]);
-    return qualities[0];
-  }
-
-  private setDisplayState(display: DisplayMode) {
-    this.display = display;
-    document.dispatchEvent(new Event(MockListenerEvents.DISPLAY));
-  }
-
-  private setMutedState(muted: boolean) {
-    this.muted = muted;
-    document.dispatchEvent(new Event(MockListenerEvents.MUTED));
-  }
-
-  private setPlaybackState(playbackState: PlaybackState) {
-    this.playbackState = playbackState;
-    document.dispatchEvent(new Event(MockListenerEvents.PLAYBACK));
+  protected subscribeQualities(listener: (value?: Qualities) => void) {
+    this.qualitiesListeners.push(listener);
+    return this.qualities;
   }
 }

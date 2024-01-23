@@ -1,17 +1,22 @@
+import { LiveryBridge } from './LiveryBridge';
 import type {
   Config,
   DisplayMode,
-  GetFeaturesReturn,
-  GetPlaybackReturn,
+  Features,
   Orientation,
+  PlaybackDetails,
   PlaybackMode,
   PlaybackState,
   Qualities,
-  Quality,
   StreamPhase,
-  UserFeedbackPayload,
-} from './InteractiveBridge';
-import { LiveryBridge } from './LiveryBridge';
+  UserFeedback,
+} from './util/schema';
+import {
+  displayMode,
+  userFeedback,
+  validateBoolean,
+  validateNumber,
+} from './util/schema';
 
 /**
  * Abstract player bridge class which implements part of the player side API based on browser logic
@@ -20,9 +25,15 @@ import { LiveryBridge } from './LiveryBridge';
 export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
 
+  private config?: Config;
+
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(target?: { origin: string; window: Window }) {
     super(target);
+
+    this.config = this.subscribeConfig((config) => {
+      this.config = config;
+    });
   }
 
   /**
@@ -97,22 +108,22 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       return this.reload();
     }
     if (name === 'seek') {
-      return this.seek(arg as number);
+      return this.seek(validateNumber(arg));
     }
     if (name === 'selectQuality') {
-      return this.selectQuality(arg as number);
+      return this.selectQuality(validateNumber(arg));
     }
     if (name === 'setControlsDisabled') {
-      return this.setControlsDisabled(arg as boolean);
+      return this.setControlsDisabled(validateBoolean(arg));
     }
     if (name === 'setDisplay') {
-      return this.setDisplay(arg as DisplayMode);
+      return this.setDisplay(displayMode.parse(arg));
     }
     if (name === 'setMuted') {
-      return this.setMuted(arg as boolean);
+      return this.setMuted(validateBoolean(arg));
     }
     if (name === 'submitUserFeedback') {
-      return this.submitUserFeedback(arg as UserFeedbackPayload);
+      return this.submitUserFeedback(userFeedback.parse(arg));
     }
     if (name === 'subscribeConfig') {
       return this.subscribeConfig(listener);
@@ -135,23 +146,14 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
     }
-    if (name === 'subscribePaused') {
-      return this.subscribePaused(listener);
-    }
     if (name === 'subscribePlaybackState') {
       return this.subscribePlaybackState(listener);
-    }
-    if (name === 'subscribePlaying') {
-      return this.subscribePlaying(listener);
     }
     if (name === 'subscribeQualities') {
       return this.subscribeQualities(listener);
     }
     if (name === 'subscribeQuality') {
       return this.subscribeQuality(listener);
-    }
-    if (name === 'subscribeStalled') {
-      return this.subscribeStalled(listener);
     }
     if (name === 'subscribeStreamPhase') {
       return this.subscribeStreamPhase(listener);
@@ -165,10 +167,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * @deprecated Instead use {@link subscribeConfig}.customerId
+   * @deprecated Instead use {@link config}.customerId
    */
   private getCustomerId() {
-    return this.subscribeConfig(() => null)?.customerId;
+    return this.config?.customerId;
   }
 
   /**
@@ -221,47 +223,11 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current paused playbackState
-   * and calls back `listener` with any subsequent state updates.
-   */
-  private subscribePaused(listener: (value: boolean) => void) {
-    const pausedStates: PlaybackState[] = ['ENDED', 'PAUSED'];
-    const playbackState = this.subscribePlaybackState((value) =>
-      listener(pausedStates.includes(value)),
-    );
-    return pausedStates.includes(playbackState);
-  }
-
-  /**
-   * Returns promise of current playing playbackState
-   * and calls back `listener` with any subsequent state updates.
-   */
-  private subscribePlaying(listener: (value: boolean) => void) {
-    const playingStates: PlaybackState[] = [
-      'FAST_FORWARD',
-      'PLAYING',
-      'REWIND',
-      'SLOW_MO',
-    ];
-    const playbackState = this.subscribePlaybackState((value) =>
-      listener(playingStates.includes(value)),
-    );
-    return playingStates.includes(playbackState);
-  }
-
-  /**
    * @deprecated Instead use {@link subscribeQualities}.active
    */
-  private subscribeQuality(listener: (quality: Quality | string) => void) {
-    const getActiveQuality = (qualities: Qualities) => {
-      const activeQualityIndex = qualities?.active;
-
-      return (
-        (activeQualityIndex !== undefined &&
-          qualities?.list[activeQualityIndex]?.label) ||
-        ''
-      );
-    };
+  private subscribeQuality(listener: (quality: string) => void) {
+    const getActiveQuality = (qualities?: Qualities) =>
+      qualities?.list[qualities.active]?.label ?? '';
 
     const qualities = this.subscribeQualities((value) => {
       listener(getActiveQuality(value));
@@ -271,31 +237,26 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current stalled playbackState
-   * and calls back `listener` with any subsequent state updates.
-   */
-  private subscribeStalled(listener: (value: boolean) => void) {
-    const stalledStates: PlaybackState[] = ['BUFFERING', 'SEEKING'];
-    const playbackState = this.subscribePlaybackState((value) =>
-      listener(stalledStates.includes(value)),
-    );
-    return stalledStates.includes(playbackState);
-  }
-
-  /**
    * @deprecated Instead use {@link subscribeConfig}.streamPhase
    */
   private subscribeStreamPhase(listener: (streamPhase: StreamPhase) => void) {
-    return this.subscribeConfig((config) =>
-      listener(config?.streamPhase || 'PRE'),
-    )?.streamPhase;
+    let streamPhase = this.config?.streamPhase || 'PRE';
+
+    this.subscribeConfig((config) => {
+      if (config?.streamPhase && config.streamPhase !== streamPhase) {
+        streamPhase = config.streamPhase;
+        listener(config.streamPhase);
+      }
+    });
+
+    return streamPhase;
   }
 
   protected abstract getEndpointId(): string;
 
-  protected abstract getFeatures(): GetFeaturesReturn;
+  protected abstract getFeatures(): Features;
 
-  protected abstract getPlayback(): GetPlaybackReturn;
+  protected abstract getPlayback(): PlaybackDetails;
 
   protected abstract getPlayerVersion(): string;
 
@@ -317,9 +278,11 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
 
   protected abstract setMuted(muted: boolean): void;
 
-  protected abstract submitUserFeedback(payload: UserFeedbackPayload): void;
+  protected abstract submitUserFeedback(value: UserFeedback): void;
 
-  protected abstract subscribeConfig(listener: (value: Config) => void): Config;
+  protected abstract subscribeConfig(
+    listener: (value?: Config) => void,
+  ): Config | undefined;
 
   protected abstract subscribeDisplay(
     listener: (display: DisplayMode) => void,
@@ -342,6 +305,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   ): PlaybackState;
 
   protected abstract subscribeQualities(
-    listener: (qualities: Qualities) => void,
-  ): Qualities;
+    listener: (qualities?: Qualities) => void,
+  ): Qualities | undefined;
 }

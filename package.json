@@ -41,7 +41,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "lit": "^2.8.0"
+    "lit": "^2.8.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.7.2",
