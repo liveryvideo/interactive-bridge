@@ -277,7 +277,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (display: DisplayMode) => void,
   ): DisplayMode;
 
-  protected abstract subscribeError(listener: (error: Error) => void): Error;
+  protected abstract subscribeError(
+    listener: (error: string | undefined) => void,
+  ): string | undefined;
 
   protected abstract subscribeMode(
     listener: (mode: PlaybackMode) => void,
