@@ -23,17 +23,13 @@ import {
  * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
  */
 export abstract class AbstractPlayerBridge extends LiveryBridge {
-  protected portraitQuery = window.matchMedia('(orientation: portrait)');
+  protected config?: Config;
 
-  private config?: Config;
+  protected portraitQuery = window.matchMedia('(orientation: portrait)');
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(target?: { origin: string; window: Window }) {
     super(target);
-
-    this.config = this.subscribeConfig((config) => {
-      this.config = config;
-    });
   }
 
   /**
@@ -240,16 +236,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeConfig}.streamPhase
    */
   private subscribeStreamPhase(listener: (streamPhase: StreamPhase) => void) {
-    let streamPhase = this.config?.streamPhase || 'PRE';
-
-    this.subscribeConfig((config) => {
-      if (config?.streamPhase && config.streamPhase !== streamPhase) {
-        streamPhase = config.streamPhase;
-        listener(config.streamPhase);
-      }
-    });
-
-    return streamPhase;
+    return this.subscribeConfig((config) =>
+      listener(config?.streamPhase || 'PRE'),
+    )?.streamPhase;
   }
 
   protected abstract getEndpointId(): string;
@@ -288,9 +277,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (display: DisplayMode) => void,
   ): DisplayMode;
 
-  protected abstract subscribeError(
-    listener: (error: string | undefined) => void,
-  ): string | undefined;
+  protected abstract subscribeError(listener: (error: Error) => void): Error;
 
   protected abstract subscribeMode(
     listener: (mode: PlaybackMode) => void,

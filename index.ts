@@ -10,4 +10,24 @@ export { MockPlayerBridge } from './src/MockPlayerBridge';
 export { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive';
 export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog';
 export { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock';
-export type { Orientation, StreamPhase } from './src/util/schema';
+export type {
+  Config,
+  Control,
+  Controls,
+  DisplayMode,
+  Feature,
+  Features,
+  LiveryParams,
+  Orientation,
+  PausedState,
+  PlaybackDetail,
+  PlaybackDetails,
+  PlaybackMode,
+  PlaybackState,
+  PlayingState,
+  Qualities,
+  Quality,
+  StalledState,
+  StreamPhase,
+  UserFeedback,
+} from './src/util/schema';
