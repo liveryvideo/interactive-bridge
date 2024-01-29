@@ -118,7 +118,7 @@ module.exports = {
         // Disable formatting rules; leave that to prettier
         'prettier',
       ],
-      plugins: ['deprecation'],
+      plugins: ['deprecation', 'eslint-plugin-tsdoc'],
       parserOptions: {
         project: './tsconfig.json',
       },
@@ -177,8 +177,13 @@ module.exports = {
             disallowTypeAnnotations: false,
           },
         ],
-        // Make use of deprecated code obvious
+        // Warn about use of deprecated features
         'deprecation/deprecation': 'warn',
+        // Don't accept invalid tsdoc syntax
+        'tsdoc/syntax': 'error',
+        // This seems to be throwing error when it shouldn't, i.e: for every use of @state() or @property() decorators
+        // even though we never use `static properties = { .. }
+        'lit/no-classfield-shadowing': 'off',
       },
     },
     // Node JS and TS build configs and TypeScript test files can use devDependencies

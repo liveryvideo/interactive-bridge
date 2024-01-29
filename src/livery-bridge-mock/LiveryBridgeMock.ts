@@ -22,6 +22,7 @@ declare global {
  *
  * @group Elements
  * @example
+ * ```js
  * const mock = document.createElement('livery-bridge-mock');
  * mock.onload = () => {
  *   const interactive = document.createElement('livery-bridge-interactive');
@@ -29,6 +30,7 @@ declare global {
  *   mock.appendChild(interactive);
  * };
  * document.body.appendChild(mock);
+ * ```
  */
 export class LiveryBridgeMock extends LitElement {
   static override readonly styles = css`
