@@ -70,6 +70,9 @@ function isLiveryBridge(
   return 'isLiveryBridge' in constructor && constructor.isLiveryBridge === true;
 }
 
+/**
+ * Base Livery bridge class, to be extended by {@link InteractiveBridge} and {@link AbstractPlayerBridge}.
+ */
 export class LiveryBridge {
   static readonly isLiveryBridge = true;
 

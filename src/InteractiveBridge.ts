@@ -2,12 +2,29 @@ import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { LiveryBridge } from './LiveryBridge';
 import { stringify } from './util/stringify';
 
+/**
+ * Livery video player orientation.
+ */
 export type Orientation = 'landscape' | 'portrait';
 
+/**
+ * Livery video stream phase.
+ */
 export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
 
 /**
- * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
+ * Can be used by a Livery interactive layer element or page to communicate with the surrounding Livery Player.
+ *
+ * @example
+ * ```js
+ * import { InteractiveBridge } from '@liveryvideo/interactive-bridge';
+ * // The playerBridge will be provided to you as interactive element as interactive webview or iframe
+ * const bridge = new InteractiveBridge(playerBridge || '*');
+ * // To prevent cross site security issues:
+ * // https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#security_concerns
+ * // replace the `'*'` origin above with the origin of the page that the Livery Player is on
+ * bridge.getAppName().then(appName => window.alert(`appName: ${appName}`));
+ * ```
  */
 export class InteractiveBridge extends LiveryBridge {
   /**

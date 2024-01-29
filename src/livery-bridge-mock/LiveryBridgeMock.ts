@@ -20,6 +20,7 @@ declare global {
  * That interactive page should create an `InteractiveBridge` instance targetting this window,
  * e.g. by using a Livery Interactive element.
  *
+ * @group Elements
  * @example
  * const mock = document.createElement('livery-bridge-mock');
  * mock.onload = () => {
@@ -96,6 +97,8 @@ export class LiveryBridgeMock extends LitElement {
 
   /**
    * Target origin of `MockPlayerBridge` when an `<iframe>` is specified as interactive child element.
+   * @group Attributes
+   * @defaultValue window.origin
    */
   @property({ type: String, reflect: true })
   interactiveOrigin = window.origin;
