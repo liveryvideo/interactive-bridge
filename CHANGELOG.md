@@ -1,3 +1,17 @@
+# [1.10.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.9.3...v1.10.0) (2024-01-29)
+
+
+### Features
+
+* update dependencies (Lit v3, etc) ([#26](https://github.com/liveryvideo/interactive-bridge/issues/26)) ([f5ecd8f](https://github.com/liveryvideo/interactive-bridge/commit/f5ecd8f41f0d12903c43e7bea22a311c47d8e386))
+
+## [1.9.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.9.2...v1.9.3) (2024-01-29)
+
+
+### Bug Fixes
+
+* **docs:** fix and improve documentation for use from tsdocs.dev ([69c608b](https://github.com/liveryvideo/interactive-bridge/commit/69c608b1bd990eb8ef742e86b44fe949813137c7))
+
 ## [1.9.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.9.1...v1.9.2) (2023-10-12)
 
 
