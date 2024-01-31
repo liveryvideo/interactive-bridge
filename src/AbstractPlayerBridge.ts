@@ -236,9 +236,19 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeConfig}.streamPhase
    */
   private subscribeStreamPhase(listener: (streamPhase: StreamPhase) => void) {
-    return this.subscribeConfig((config) =>
-      listener(config?.streamPhase || 'PRE'),
-    )?.streamPhase;
+    let streamPhase: StreamPhase;
+
+    streamPhase =
+      this.subscribeConfig((config) => {
+        const newStreamPhase = config?.streamPhase || 'PRE';
+
+        if (newStreamPhase !== streamPhase) {
+          listener(newStreamPhase);
+          streamPhase = newStreamPhase;
+        }
+      })?.streamPhase || 'PRE';
+
+    return streamPhase;
   }
 
   protected abstract getEndpointId(): string;

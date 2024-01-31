@@ -176,25 +176,26 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     };
 
     setTimeout(() => {
-      const newConfig = { ...config };
-      newConfig.controls = {
-        ...newConfig.controls,
+      config.controls = {
+        ...config.controls,
         cast: false,
         scrubber: false,
       };
-      newConfig.streamPhase = 'LIVE';
-      listener(newConfig);
+      config.streamPhase = 'LIVE';
+      listener(config);
     }, 1500);
     setTimeout(() => {
-      const newConfig = { ...config };
-      newConfig.controls = {
-        ...newConfig.controls,
+      config.controls = {
+        ...config.controls,
         cast: true,
         scrubber: true,
       };
-      newConfig.streamPhase = 'POST';
-      listener(newConfig);
+      listener(config);
     }, 3000);
+    setTimeout(() => {
+      config.streamPhase = 'POST';
+      listener(config);
+    }, 4500);
     return config;
   }
 
