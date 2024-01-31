@@ -1,14 +1,18 @@
 # Livery Video Interactive Bridge
 
-[![GitHub last commit](https://img.shields.io/github/last-commit/liveryvideo/interactive-bridge)](https://github.com/liveryvideo/interactive-bridge)
-[![NPM package](https://img.shields.io/npm/v/@liveryvideo/interactive-bridge)](https://www.npmjs.com/package/@liveryvideo/interactive-bridge)
-[![Changelog](https://img.shields.io/badge/docs-CHANGELOG-blue)](https://docs.liveryvideo.com/interactive-bridge-changelog)
-[![License](https://img.shields.io/npm/l/@liveryvideo/interactive-bridge)](https://unpkg.com/browse/@liveryvideo/interactive-bridge/LICENSE)
-[![Build with Lit](https://img.shields.io/badge/build%20with-Lit-blue.svg)](https://lit.dev/)
+[![npm package](https://img.shields.io/npm/v/@liveryvideo/interactive-bridge.svg?logo=npm)](https://www.npmjs.com/package/@liveryvideo/interactive-bridge)
+[![conventional CHANGELOG](https://img.shields.io/badge/conventional-CHANGELOG-FE5196.svg?logo=conventionalcommits)](https://docs.livery.live/interactive-bridge-changelog)
+[![docsify Documentation](https://img.shields.io/badge/docsify-Documentation-2ECE53.svg?logo=docsify)](https://docs.livery.live/interactive-bridge)
+[![tsdocs API](https://img.shields.io/badge/tsdocs-API-3178C6.svg?logo=typescript)](https://tsdocs.dev/docs/@liveryvideo/interactive-bridge/modules.html)
+[![Lit Elements](https://img.shields.io/badge/Lit-Elements-324FFF.svg?logo=lit)](https://lit.dev/)
+[![license MIT](https://img.shields.io/npm/l/@liveryvideo/interactive-bridge.svg?color=808080&logo=unlicense)](https://cdn.jsdelivr.net/npm/@liveryvideo/interactive-bridge/LICENSE)
 
 Bridge for communicating between a Livery Video Player and the interactive layer page shown within that.
 
-Please refer to [docs.liveryvideo.com/interactive-bridge](https://docs.liveryvideo.com/interactive-bridge) for complete documentation.
+The main part of this package you are likely to use is the `InteractiveBridge` class, see `Usage` below
+and our [API](https://tsdocs.dev/docs/@liveryvideo/interactive-bridge/modules.html) for details.
+
+Please refer to our [Documentation](https://docs.livery.live/interactive-bridge) for further information.
 
 ## Installation
 

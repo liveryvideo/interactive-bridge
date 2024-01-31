@@ -23,7 +23,7 @@ executors:
   default:
     docker:
       # - image: cimg/node:18.12.1-browsers
-      - image: cimg/node:20.7.0
+      - image: cimg/node:20.11.0
 
 commands:
   npm_install:

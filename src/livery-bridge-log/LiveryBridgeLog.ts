@@ -11,7 +11,13 @@ declare global {
 }
 
 /**
- * Element defined as `<livery-bridge-log>` which logs LiveryBridge and other window messages posted to this window.
+ * Element defined as `<livery-bridge-log>` which logs messages posted to specified {@link bridge} or the window.
+ *
+ * @group Elements
+ * @example
+ * ```html
+ * <livery-bridge-log maxmessages="3"></livery-bridge-log>
+ * ```
  */
 export class LiveryBridgeLog extends LitElement {
   static override readonly styles = css`
@@ -45,6 +51,8 @@ export class LiveryBridgeLog extends LitElement {
 
   /**
    * Maximum number of messages to display.
+   * @group Attributes
+   * @defaultValue 10
    */
   @property({ type: Number, reflect: true })
   maxMessages = 10;
