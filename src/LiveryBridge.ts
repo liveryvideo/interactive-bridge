@@ -70,6 +70,9 @@ function isLiveryBridge(
   return 'isLiveryBridge' in constructor && constructor.isLiveryBridge === true;
 }
 
+/**
+ * Base Livery bridge class, to be extended by {@link InteractiveBridge} and {@link AbstractPlayerBridge}.
+ */
 export class LiveryBridge {
   static readonly isLiveryBridge = true;
 
@@ -109,7 +112,7 @@ export class LiveryBridge {
    * If undefined this waits for the other bridge to be passed this instance
    * and for that in turn to pass it's reference here.
    *
-   * @param target LiveryBridge target
+   * @param target - LiveryBridge target
    */
   constructor(target?: LiveryBridge['target']) {
     this.target = target;
@@ -222,7 +225,7 @@ export class LiveryBridge {
   /**
    * Spy on LiveryMessages handled by this bridge.
    *
-   * @param callback Callback to call with message
+   * @param callback - Callback to call with message
    * @returns Method to remove callback from spies
    */
   spy(callback: Spy) {

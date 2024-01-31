@@ -20,11 +20,35 @@ const buildQuality = (index: number) => ({
   },
 });
 
+const config: Config = {
+  controls: {
+    cast: true,
+    contact: true,
+    error: true,
+    fullscreen: true,
+    mute: true,
+    pip: true,
+    play: true,
+    quality: true,
+    scrubber: true,
+  },
+  customerId: 'dummy-customer-id',
+  streamPhase: 'PRE',
+  streamPhases: {
+    [Date.now() - 3600]: 'LIVE',
+    [Date.now()]: 'POST',
+    [Date.now() + 3600]: 'PRE',
+  },
+  tenantId: 'dummy-tenant-id',
+};
+
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
  * And with dummy support for custom command: `subscribeAuthToken` as used on the test page.
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
+  config = config;
+
   controlsDisabled = false;
 
   userFeedback: UserFeedback | null = null;
@@ -153,50 +177,28 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected subscribeConfig(listener: (value?: Config) => void) {
-    const config: Config = {
-      controls: {
-        cast: true,
-        contact: true,
-        error: true,
-        fullscreen: true,
-        mute: true,
-        pip: true,
-        play: true,
-        quality: true,
-        scrubber: true,
-      },
-      customerId: 'dummy-customer-id',
-      streamPhase: 'PRE',
-      streamPhases: {
-        [Date.now() - 3600]: 'LIVE',
-        [Date.now()]: 'POST',
-        [Date.now() + 3600]: 'PRE',
-      },
-      tenantId: 'dummy-tenant-id',
-    };
-
     setTimeout(() => {
-      config.controls = {
-        ...config.controls,
+      this.config.controls = {
+        ...this.config.controls,
         cast: false,
         scrubber: false,
       };
-      config.streamPhase = 'LIVE';
-      listener(config);
+      this.config.streamPhase = 'LIVE';
+      listener(this.config);
     }, 1500);
     setTimeout(() => {
-      config.controls = {
-        ...config.controls,
+      this.config.controls = {
+        ...this.config.controls,
         cast: true,
         scrubber: true,
       };
-      listener(config);
+      listener(this.config);
     }, 3000);
     setTimeout(() => {
-      config.streamPhase = 'POST';
-      listener(config);
+      this.config.streamPhase = 'POST';
+      listener(this.config);
     }, 4500);
-    return config;
+    return this.config;
   }
 
   protected subscribeDisplay(listener: (value: DisplayMode) => void) {

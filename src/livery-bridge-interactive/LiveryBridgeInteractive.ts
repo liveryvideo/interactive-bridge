@@ -4,7 +4,7 @@ import type { AbstractPlayerBridge } from '../AbstractPlayerBridge';
 import { InteractiveBridge } from '../InteractiveBridge';
 import '../livery-bridge-log/LiveryBridgeLog';
 import { defineVersionedElement } from '../util/defineVersionedElement';
-import { displayMode, type UserFeedback } from '../util/schema';
+import { zDisplayMode, type UserFeedback } from '../util/schema';
 import { stringify } from '../util/stringify';
 
 declare global {
@@ -70,12 +70,15 @@ function isBridgeSubscribeMethodName(
  *
  * This dispatches a 'load' event once it's loaded and `interactiveBridge` has been assigned.
  *
+ * @group Elements
  * @example
+ * ```js
  * const interactive = document.createElement('livery-bridge-interactive');
  * interactive.playerBridge = new MockPlayerBridge();
  * interactive.region = 'eu';
  * interactive.tenantId = 'abc123';
  * document.body.appendChild(interactive);
+ * ```
  */
 export class LiveryBridgeInteractive extends LitElement {
   static override readonly styles = css`
@@ -158,12 +161,16 @@ export class LiveryBridgeInteractive extends LitElement {
 
   /**
    * Region of interactive server that interactive element should connect to.
+   * @group Attributes
+   * @defaultValue null
    */
   @property({ type: String, reflect: true })
   region: string | null = null;
 
   /**
    * Id of tenant that interactive element should use on server.
+   * @group Attributes
+   * @defaultValue null
    */
   @property({ type: String, reflect: true })
   tenantId: string | null = null;
@@ -527,7 +534,7 @@ export class LiveryBridgeInteractive extends LitElement {
       }
       default: {
         const displayElement = this.renderRoot.querySelector(
-          '#getCommandNameBoolean',
+          '#getCommandNameDisplay',
         );
 
         if (displayElement) {
@@ -600,7 +607,7 @@ export class LiveryBridgeInteractive extends LitElement {
         }
         case 'setDisplay': {
           const inputValue = getInputValue('Display');
-          const parsed = displayMode.safeParse(inputValue);
+          const parsed = zDisplayMode.safeParse(inputValue);
           if (!parsed.success) {
             throw parsed.error;
           }

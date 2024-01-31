@@ -1,4 +1,5 @@
 import { LiveryBridge } from './LiveryBridge';
+import { reducedSubscribe } from './util/reducedSubscribe';
 import type {
   Config,
   DisplayMode,
@@ -12,10 +13,10 @@ import type {
   UserFeedback,
 } from './util/schema';
 import {
-  displayMode,
-  userFeedback,
   validateBoolean,
   validateNumber,
+  zDisplayMode,
+  zUserFeedback,
 } from './util/schema';
 
 /**
@@ -23,9 +24,9 @@ import {
  * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
  */
 export abstract class AbstractPlayerBridge extends LiveryBridge {
-  protected config?: Config;
-
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
+
+  abstract config?: Config;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(target?: { origin: string; window: Window }) {
@@ -113,13 +114,13 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       return this.setControlsDisabled(validateBoolean(arg));
     }
     if (name === 'setDisplay') {
-      return this.setDisplay(displayMode.parse(arg));
+      return this.setDisplay(zDisplayMode.parse(arg));
     }
     if (name === 'setMuted') {
       return this.setMuted(validateBoolean(arg));
     }
     if (name === 'submitUserFeedback') {
-      return this.submitUserFeedback(userFeedback.parse(arg));
+      return this.submitUserFeedback(zUserFeedback.parse(arg));
     }
     if (name === 'subscribeConfig') {
       return this.subscribeConfig(listener);
@@ -163,7 +164,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * @deprecated Instead use {@link config}.customerId
+   * @deprecated Instead use {@link subscribeConfig}.customerId
    */
   private getCustomerId() {
     return this.config?.customerId;
@@ -189,12 +190,13 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
+   * @deprecated Instead compare {@link subscribeDisplay} value to 'FULLSCREEN'
    */
   private subscribeFullscreen(listener: (value: boolean) => void) {
-    return (
-      this.subscribeDisplay((display) => listener(display === 'FULLSCREEN')) ===
-      'FULLSCREEN'
+    return reducedSubscribe<DisplayMode, boolean>(
+      (unreducedListener) => this.subscribeDisplay(unreducedListener),
+      (display) => display === 'FULLSCREEN',
+      listener,
     );
   }
 
@@ -219,36 +221,26 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * @deprecated Instead use {@link subscribeQualities}.active
+   * @deprecated Instead use {@link subscribeQualities}.active to get the active quality index
+   * and use the index to get the active quality label from {@link subscribQualities}.list
    */
   private subscribeQuality(listener: (quality: string) => void) {
-    const getActiveQuality = (qualities?: Qualities) =>
-      qualities?.list[qualities.active]?.label ?? '';
-
-    const qualities = this.subscribeQualities((value) => {
-      listener(getActiveQuality(value));
-    });
-
-    return getActiveQuality(qualities);
+    return reducedSubscribe<Qualities | undefined, string>(
+      (unreducedListener) => this.subscribeQualities(unreducedListener),
+      (value) => value?.list[value.active]?.label ?? '',
+      listener,
+    );
   }
 
   /**
    * @deprecated Instead use {@link subscribeConfig}.streamPhase
    */
   private subscribeStreamPhase(listener: (streamPhase: StreamPhase) => void) {
-    let streamPhase: StreamPhase;
-
-    streamPhase =
-      this.subscribeConfig((config) => {
-        const newStreamPhase = config?.streamPhase || 'PRE';
-
-        if (newStreamPhase !== streamPhase) {
-          listener(newStreamPhase);
-          streamPhase = newStreamPhase;
-        }
-      })?.streamPhase || 'PRE';
-
-    return streamPhase;
+    return reducedSubscribe<Config | undefined, StreamPhase>(
+      (unreducedListener) => this.subscribeConfig(unreducedListener),
+      (config) => config?.streamPhase ?? 'PRE',
+      listener,
+    );
   }
 
   protected abstract getEndpointId(): string;

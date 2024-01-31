@@ -1,28 +1,25 @@
 import { z } from 'zod';
 
-export const booleanSchema = z.boolean();
+const booleanSchema = z.boolean();
+
+const numberSchema = z.number();
+
+const stringSchema = z.string();
+
+const undefinedSchema = z.undefined();
+
+const stringOrUndefined = z.union([stringSchema, undefinedSchema]);
 
 export const validateBoolean = (value: unknown) => booleanSchema.parse(value);
 
-export const numberSchema = z.number();
-
 export const validateNumber = (value: unknown) => numberSchema.parse(value);
 
-export const stringSchema = z.string();
-
 export const validateString = (value: unknown) => stringSchema.parse(value);
-
-export const undefinedSchema = z.undefined();
-
-export const validateUndefined = (value: unknown) =>
-  undefinedSchema.parse(value);
-
-export const stringOrUndefined = z.union([stringSchema, undefinedSchema]);
 
 export const validateStringOrUndefined = (value: unknown) =>
   stringOrUndefined.parse(value);
 
-export const displayMode = z.union([
+export const zDisplayMode = z.union([
   z.literal('AIRPLAY'),
   z.literal('CHROMECAST'),
   z.literal('DEFAULT'),
@@ -30,9 +27,9 @@ export const displayMode = z.union([
   z.literal('PIP'),
 ]);
 
-export type DisplayMode = z.infer<typeof displayMode>;
+export type DisplayMode = z.infer<typeof zDisplayMode>;
 
-export const features = z.object({
+export const zFeatures = z.object({
   airplay: booleanSchema,
   chromecast: booleanSchema,
   contact: booleanSchema,
@@ -41,70 +38,53 @@ export const features = z.object({
   scrubber: booleanSchema,
 });
 
-export type Features = Required<z.infer<typeof features>>;
+export type Features = z.infer<typeof zFeatures>;
 
-export const feature = features.keyof();
+export const zFeature = zFeatures.keyof();
 
-export type Feature = z.infer<typeof feature>;
+export const zLiveryParams = z.record(stringSchema);
 
-export const liveryParams = z.record(stringSchema);
-
-export type LiveryParams = z.infer<typeof liveryParams>;
-
-export const orientation = z.union([
+export const zOrientation = z.union([
   z.literal('landscape'),
   z.literal('portrait'),
 ]);
 
-export type Orientation = z.infer<typeof orientation>;
+export type Orientation = z.infer<typeof zOrientation>;
 
-export const playbackDetails = z.object({
+export const zPlaybackDetails = z.object({
   buffer: numberSchema,
   duration: numberSchema,
   latency: numberSchema,
   position: numberSchema,
 });
 
-export type PlaybackDetails = z.infer<typeof playbackDetails>;
+export type PlaybackDetails = z.infer<typeof zPlaybackDetails>;
 
-export const playbackDetail = playbackDetails.keyof();
+export const zPlaybackDetail = zPlaybackDetails.keyof();
 
-export type PlaybackDetail = z.infer<typeof playbackDetail>;
-
-export const playbackMode = z.union([
+export const zPlaybackMode = z.union([
   z.literal('CATCHUP'),
   z.literal('LIVE'),
   z.literal('UNKNOWN'),
   z.literal('VOD'),
 ]);
 
-export type PlaybackMode = z.infer<typeof playbackMode>;
+export type PlaybackMode = z.infer<typeof zPlaybackMode>;
 
-export const pausedState = z.union([z.literal('ENDED'), z.literal('PAUSED')]);
-
-export type PausedState = z.infer<typeof pausedState>;
-
-export const playingState = z.union([
+export const zPlaybackState = z.union([
+  z.literal('BUFFERING'),
+  z.literal('ENDED'),
   z.literal('FAST_FORWARD'),
+  z.literal('PAUSED'),
   z.literal('PLAYING'),
   z.literal('REWIND'),
+  z.literal('SEEKING'),
   z.literal('SLOW_MO'),
 ]);
 
-export type PlayingState = z.infer<typeof playingState>;
+export type PlaybackState = z.infer<typeof zPlaybackState>;
 
-export const stalledState = z.union([
-  z.literal('BUFFERING'),
-  z.literal('SEEKING'),
-]);
-
-export type StalledState = z.infer<typeof stalledState>;
-
-export const playbackState = z.union([pausedState, playingState, stalledState]);
-
-export type PlaybackState = z.infer<typeof playbackState>;
-
-export const quality = z
+export const zQuality = z
   .object({
     audio: z.object({
       bandwidth: numberSchema,
@@ -121,29 +101,25 @@ export const quality = z
     video: true,
   });
 
-export type Quality = z.infer<typeof quality>;
-
-export const qualities = z.object({
+export const zQualities = z.object({
   active: numberSchema,
-  list: z.array(quality),
+  list: z.array(zQuality),
   selected: numberSchema,
 });
 
-export type Qualities = z.infer<typeof qualities>;
+export type Qualities = z.infer<typeof zQualities>;
 
-export const streamPhase = z.union([
+export const zStreamPhase = z.union([
   z.literal('LIVE'),
   z.literal('POST'),
   z.literal('PRE'),
 ]);
 
-export type StreamPhase = z.infer<typeof streamPhase>;
+export type StreamPhase = z.infer<typeof zStreamPhase>;
 
-export const streamPhases = z.record(streamPhase);
+export const zStreamPhases = z.record(zStreamPhase);
 
-export type StreamPhases = z.infer<typeof streamPhases>;
-
-export const controls = z.object({
+export const zControls = z.object({
   cast: booleanSchema,
   contact: booleanSchema,
   error: booleanSchema,
@@ -155,26 +131,22 @@ export const controls = z.object({
   scrubber: booleanSchema,
 });
 
-export type Controls = z.infer<typeof controls>;
+export type Controls = z.infer<typeof zControls>;
 
-export const control = controls.keyof();
-
-export type Control = z.infer<typeof control>;
-
-export const config = z.object({
-  controls,
+export const zConfig = z.object({
+  controls: zControls,
   customerId: stringSchema,
-  streamPhase,
-  streamPhases,
+  streamPhase: zStreamPhase,
+  streamPhases: zStreamPhases,
   tenantId: stringSchema,
 });
 
-export type Config = z.infer<typeof config>;
+export type Config = z.infer<typeof zConfig>;
 
-export const userFeedback = z.object({
+export const zUserFeedback = z.object({
   comments: stringSchema,
   email: stringSchema,
   name: stringSchema,
 });
 
-export type UserFeedback = z.infer<typeof userFeedback>;
+export type UserFeedback = z.infer<typeof zUserFeedback>;

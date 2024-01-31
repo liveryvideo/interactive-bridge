@@ -1,5 +1,6 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { LiveryBridge } from './LiveryBridge';
+import { reducedSubscribe } from './util/reducedSubscribe';
 import type {
   Config,
   DisplayMode,
@@ -11,27 +12,35 @@ import type {
   UserFeedback,
 } from './util/schema';
 import {
-  config,
-  displayMode,
-  features,
-  liveryParams,
-  orientation,
-  pausedState,
-  playbackDetails,
-  playbackMode,
-  playbackState,
-  playingState,
-  qualities,
-  stalledState,
-  streamPhase,
   validateBoolean,
   validateNumber,
   validateString,
   validateStringOrUndefined,
+  zConfig,
+  zDisplayMode,
+  zFeatures,
+  zLiveryParams,
+  zOrientation,
+  zPlaybackDetails,
+  zPlaybackMode,
+  zPlaybackState,
+  zQualities,
+  zStreamPhase,
 } from './util/schema';
 
 /**
- * Can be used on Livery interactive layer pages to communicate with the surrounding Livery Player.
+ * Can be used by a Livery interactive layer element or page to communicate with the surrounding Livery Player.
+ *
+ * @example
+ * ```js
+ * import { InteractiveBridge } from '@liveryvideo/interactive-bridge';
+ * // The playerBridge will be provided to you as interactive element as interactive webview or iframe
+ * const bridge = new InteractiveBridge(playerBridge || '*');
+ * // To prevent cross site security issues:
+ * // https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#security_concerns
+ * // replace the `'*'` origin above with the origin of the page that the Livery Player is on
+ * bridge.getAppName().then(appName => window.alert(`appName: ${appName}`));
+ * ```
  */
 export class InteractiveBridge extends LiveryBridge {
   /**
@@ -74,7 +83,7 @@ export class InteractiveBridge extends LiveryBridge {
    */
   getFeatures() {
     return this.sendCommand('getFeatures').then((value) =>
-      features.parse(value),
+      zFeatures.parse(value),
     );
   }
 
@@ -103,7 +112,7 @@ export class InteractiveBridge extends LiveryBridge {
    */
   getLiveryParams() {
     return this.sendCommand('getLiveryParams').then((value) =>
-      liveryParams.parse(value),
+      zLiveryParams.parse(value),
     );
   }
 
@@ -112,7 +121,7 @@ export class InteractiveBridge extends LiveryBridge {
    */
   getPlayback() {
     return this.sendCommand('getPlayback').then((value) =>
-      playbackDetails.parse(value),
+      zPlaybackDetails.parse(value),
     );
   }
 
@@ -249,8 +258,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeConfig(listener: (value?: Config) => void) {
     return this.sendCommand('subscribeConfig', undefined, (value) =>
-      listener(config.parse(value)),
-    ).then((value) => config.parse(value));
+      listener(zConfig.parse(value)),
+    ).then((value) => zConfig.parse(value));
   }
 
   /**
@@ -259,8 +268,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeDisplay(listener: (value: DisplayMode) => void) {
     return this.sendCommand('subscribeDisplay', undefined, (value) =>
-      listener(displayMode.parse(value)),
-    ).then((value) => displayMode.parse(value));
+      listener(zDisplayMode.parse(value)),
+    ).then((value) => zDisplayMode.parse(value));
   }
 
   /**
@@ -291,8 +300,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeMode(listener: (mode: PlaybackMode) => void) {
     return this.sendCommand('subscribeMode', undefined, (mode) =>
-      listener(playbackMode.parse(mode)),
-    ).then((mode) => playbackMode.parse(mode));
+      listener(zPlaybackMode.parse(mode)),
+    ).then((mode) => zPlaybackMode.parse(mode));
   }
 
   /**
@@ -313,8 +322,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeOrientation(listener: (value: Orientation) => void) {
     return this.sendCommand('subscribeOrientation', undefined, (value) =>
-      listener(orientation.parse(value)),
-    ).then((value) => orientation.parse(value));
+      listener(zOrientation.parse(value)),
+    ).then((value) => zOrientation.parse(value));
   }
 
   /**
@@ -322,10 +331,11 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent paused state updates.
    */
   async subscribePaused(listener: (value: boolean) => void) {
-    const state = await this.subscribePlaybackState((value) =>
-      listener(pausedState.safeParse(value).success),
+    return reducedSubscribe<PlaybackState, boolean>(
+      (unreducedListener) => this.subscribePlaybackState(unreducedListener),
+      (value) => ['ENDED', 'PAUSED'].includes(value),
+      listener,
     );
-    return pausedState.safeParse(state).success;
   }
 
   /**
@@ -334,8 +344,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribePlaybackState(listener: (value: PlaybackState) => void) {
     return this.sendCommand('subscribePlaybackState', undefined, (value) =>
-      listener(playbackState.parse(value)),
-    ).then((value) => playbackState.parse(value));
+      listener(zPlaybackState.parse(value)),
+    ).then((value) => zPlaybackState.parse(value));
   }
 
   /**
@@ -343,10 +353,12 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent playing state updates.
    */
   async subscribePlaying(listener: (value: boolean) => void) {
-    const state = await this.subscribePlaybackState((value) =>
-      listener(playingState.safeParse(value).success),
+    return reducedSubscribe<PlaybackState, boolean>(
+      (unreducedListener) => this.subscribePlaybackState(unreducedListener),
+      (value) =>
+        ['FAST_FORWARD', 'PLAYING', 'REWIND', 'SLOW_MO'].includes(value),
+      listener,
     );
-    return playingState.safeParse(state).success;
   }
 
   /**
@@ -355,8 +367,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeQualities(listener: (value?: Qualities) => void) {
     return this.sendCommand('subscribeQualities', undefined, (value) =>
-      listener(qualities.parse(value)),
-    ).then((value) => qualities.parse(value));
+      listener(zQualities.parse(value)),
+    ).then((value) => zQualities.parse(value));
   }
 
   /**
@@ -376,10 +388,11 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent stalled state updates.
    */
   async subscribeStalled(listener: (value: boolean) => void) {
-    const state = await this.subscribePlaybackState((value) =>
-      listener(stalledState.safeParse(value).success),
+    return reducedSubscribe<PlaybackState, boolean>(
+      (unreducedListener) => this.subscribePlaybackState(unreducedListener),
+      (value) => ['BUFFERING, SEEKING'].includes(value),
+      listener,
     );
-    return stalledState.safeParse(state).success;
   }
 
   /**
@@ -390,8 +403,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
     return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
-      listener(streamPhase.parse(value)),
-    ).then((value) => streamPhase.parse(value));
+      listener(zStreamPhase.parse(value)),
+    ).then((value) => zStreamPhase.parse(value));
   }
 
   /**
