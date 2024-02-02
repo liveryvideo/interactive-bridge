@@ -13,19 +13,19 @@ import type {
 } from './util/schema';
 import {
   validateBoolean,
+  validateConfig,
+  validateDisplayMode,
+  validateFeatures,
+  validateLiveryParams,
   validateNumber,
+  validateOrientation,
+  validatePlaybackDetails,
+  validatePlaybackMode,
+  validatePlaybackState,
+  validateQualities,
+  validateStreamPhase,
   validateString,
   validateStringOrUndefined,
-  zConfig,
-  zDisplayMode,
-  zFeatures,
-  zLiveryParams,
-  zOrientation,
-  zPlaybackDetails,
-  zPlaybackMode,
-  zPlaybackState,
-  zQualities,
-  zStreamPhase,
 } from './util/schema';
 
 /**
@@ -82,9 +82,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of a registry of features supported by the player in general and under given circumstances.
    */
   getFeatures() {
-    return this.sendCommand('getFeatures').then((value) =>
-      zFeatures.parse(value),
-    );
+    return this.sendCommand('getFeatures').then(validateFeatures);
   }
 
   /**
@@ -111,18 +109,14 @@ export class InteractiveBridge extends LiveryBridge {
    * this will return: `{ 'foo:bar': 'hey you', no_val: '', multi: '1' }`.
    */
   getLiveryParams() {
-    return this.sendCommand('getLiveryParams').then((value) =>
-      zLiveryParams.parse(value),
-    );
+    return this.sendCommand('getLiveryParams').then(validateLiveryParams);
   }
 
   /**
    * Returns promise of current playback details, i.e: values that are continuously changing.
    */
   getPlayback() {
-    return this.sendCommand('getPlayback').then((value) =>
-      zPlaybackDetails.parse(value),
-    );
+    return this.sendCommand('getPlayback').then(validatePlaybackDetails);
   }
 
   /**
@@ -258,8 +252,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeConfig(listener: (value?: Config) => void) {
     return this.sendCommand('subscribeConfig', undefined, (value) =>
-      listener(zConfig.parse(value)),
-    ).then((value) => zConfig.parse(value));
+      listener(validateConfig(value)),
+    ).then(validateConfig);
   }
 
   /**
@@ -268,8 +262,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeDisplay(listener: (value: DisplayMode) => void) {
     return this.sendCommand('subscribeDisplay', undefined, (value) =>
-      listener(zDisplayMode.parse(value)),
-    ).then((value) => zDisplayMode.parse(value));
+      listener(validateDisplayMode(value)),
+    ).then(validateDisplayMode);
   }
 
   /**
@@ -300,8 +294,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeMode(listener: (mode: PlaybackMode) => void) {
     return this.sendCommand('subscribeMode', undefined, (mode) =>
-      listener(zPlaybackMode.parse(mode)),
-    ).then((mode) => zPlaybackMode.parse(mode));
+      listener(validatePlaybackMode(mode)),
+    ).then((mode) => validatePlaybackMode(mode));
   }
 
   /**
@@ -322,8 +316,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeOrientation(listener: (value: Orientation) => void) {
     return this.sendCommand('subscribeOrientation', undefined, (value) =>
-      listener(zOrientation.parse(value)),
-    ).then((value) => zOrientation.parse(value));
+      listener(validateOrientation(value)),
+    ).then(validateOrientation);
   }
 
   /**
@@ -344,8 +338,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribePlaybackState(listener: (value: PlaybackState) => void) {
     return this.sendCommand('subscribePlaybackState', undefined, (value) =>
-      listener(zPlaybackState.parse(value)),
-    ).then((value) => zPlaybackState.parse(value));
+      listener(validatePlaybackState(value)),
+    ).then(validatePlaybackState);
   }
 
   /**
@@ -367,8 +361,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeQualities(listener: (value?: Qualities) => void) {
     return this.sendCommand('subscribeQualities', undefined, (value) =>
-      listener(zQualities.parse(value)),
-    ).then((value) => zQualities.parse(value));
+      listener(validateQualities(value)),
+    ).then(validateQualities);
   }
 
   /**
@@ -403,8 +397,8 @@ export class InteractiveBridge extends LiveryBridge {
    */
   subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
     return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
-      listener(zStreamPhase.parse(value)),
-    ).then((value) => zStreamPhase.parse(value));
+      listener(validateStreamPhase(value)),
+    ).then(validateStreamPhase);
   }
 
   /**

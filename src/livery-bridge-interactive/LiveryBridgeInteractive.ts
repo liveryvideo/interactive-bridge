@@ -4,7 +4,7 @@ import type { AbstractPlayerBridge } from '../AbstractPlayerBridge';
 import { InteractiveBridge } from '../InteractiveBridge';
 import '../livery-bridge-log/LiveryBridgeLog';
 import { defineVersionedElement } from '../util/defineVersionedElement';
-import { zDisplayMode, type UserFeedback } from '../util/schema';
+import { validateDisplayMode, type UserFeedback } from '../util/schema';
 import { stringify } from '../util/stringify';
 
 declare global {
@@ -607,14 +607,9 @@ export class LiveryBridgeInteractive extends LitElement {
         }
         case 'setDisplay': {
           const inputValue = getInputValue('Display');
-          const parsed = zDisplayMode.safeParse(inputValue);
-          if (!parsed.success) {
-            throw parsed.error;
-          }
-          this.interactiveBridge[methodName](parsed.data).then(
-            setText,
-            setText,
-          );
+          this.interactiveBridge[methodName](
+            validateDisplayMode(inputValue),
+          ).then(setText, setText);
           break;
         }
         default: {

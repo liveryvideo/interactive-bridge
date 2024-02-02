@@ -1,25 +1,22 @@
 import { z } from 'zod';
 
-const booleanSchema = z.boolean();
+const createValidate =
+  <T>(schema: Zod.ZodSchema<T>) =>
+  (value: unknown) =>
+    schema.parse(value);
 
-const numberSchema = z.number();
+const zBoolean = z.boolean();
+const zNumber = z.number();
+const zString = z.string();
+const zUndefined = z.undefined();
+const zStringOrUndefined = z.union([zString, zUndefined]);
 
-const stringSchema = z.string();
+export const validateBoolean = createValidate(zBoolean);
+export const validateNumber = createValidate(zNumber);
+export const validateString = createValidate(zString);
+export const validateStringOrUndefined = createValidate(zStringOrUndefined);
 
-const undefinedSchema = z.undefined();
-
-const stringOrUndefined = z.union([stringSchema, undefinedSchema]);
-
-export const validateBoolean = (value: unknown) => booleanSchema.parse(value);
-
-export const validateNumber = (value: unknown) => numberSchema.parse(value);
-
-export const validateString = (value: unknown) => stringSchema.parse(value);
-
-export const validateStringOrUndefined = (value: unknown) =>
-  stringOrUndefined.parse(value);
-
-export const zDisplayMode = z.union([
+const zDisplayMode = z.union([
   z.literal('AIRPLAY'),
   z.literal('CHROMECAST'),
   z.literal('DEFAULT'),
@@ -29,40 +26,44 @@ export const zDisplayMode = z.union([
 
 export type DisplayMode = z.infer<typeof zDisplayMode>;
 
-export const zFeatures = z.object({
-  airplay: booleanSchema,
-  chromecast: booleanSchema,
-  contact: booleanSchema,
-  fullscreen: booleanSchema,
-  pip: booleanSchema,
-  scrubber: booleanSchema,
+export const validateDisplayMode = createValidate(zDisplayMode);
+
+const zFeatures = z.object({
+  airplay: zBoolean,
+  chromecast: zBoolean,
+  contact: zBoolean,
+  fullscreen: zBoolean,
+  pip: zBoolean,
+  scrubber: zBoolean,
 });
 
 export type Features = z.infer<typeof zFeatures>;
 
-export const zFeature = zFeatures.keyof();
+export const validateFeatures = createValidate(zFeatures);
 
-export const zLiveryParams = z.record(stringSchema);
+const zLiveryParams = z.record(zString, zString);
 
-export const zOrientation = z.union([
-  z.literal('landscape'),
-  z.literal('portrait'),
-]);
+export const validateLiveryParams = createValidate(zLiveryParams);
 
+const zOrientation = z.union([z.literal('landscape'), z.literal('portrait')]);
+
+/** @deprecated Will be removed in the next major version */
 export type Orientation = z.infer<typeof zOrientation>;
 
-export const zPlaybackDetails = z.object({
-  buffer: numberSchema,
-  duration: numberSchema,
-  latency: numberSchema,
-  position: numberSchema,
+export const validateOrientation = createValidate(zOrientation);
+
+const zPlaybackDetails = z.object({
+  buffer: zNumber,
+  duration: zNumber,
+  latency: zNumber,
+  position: zNumber,
 });
 
 export type PlaybackDetails = z.infer<typeof zPlaybackDetails>;
 
-export const zPlaybackDetail = zPlaybackDetails.keyof();
+export const validatePlaybackDetails = createValidate(zPlaybackDetails);
 
-export const zPlaybackMode = z.union([
+const zPlaybackMode = z.union([
   z.literal('CATCHUP'),
   z.literal('LIVE'),
   z.literal('UNKNOWN'),
@@ -71,7 +72,9 @@ export const zPlaybackMode = z.union([
 
 export type PlaybackMode = z.infer<typeof zPlaybackMode>;
 
-export const zPlaybackState = z.union([
+export const validatePlaybackMode = createValidate(zPlaybackMode);
+
+const zPlaybackState = z.union([
   z.literal('BUFFERING'),
   z.literal('ENDED'),
   z.literal('FAST_FORWARD'),
@@ -84,69 +87,74 @@ export const zPlaybackState = z.union([
 
 export type PlaybackState = z.infer<typeof zPlaybackState>;
 
-export const zQuality = z
-  .object({
-    audio: z.object({
-      bandwidth: numberSchema,
-    }),
-    label: stringSchema,
-    video: z.object({
-      bandwidth: numberSchema,
-      height: numberSchema,
-      width: numberSchema,
-    }),
-  })
-  .partial({
-    audio: true,
-    video: true,
-  });
+export const validatePlaybackState = createValidate(zPlaybackState);
 
-export const zQualities = z.object({
-  active: numberSchema,
-  list: z.array(zQuality),
-  selected: numberSchema,
+const zQualities = z.object({
+  active: zNumber,
+  list: z.array(
+    z
+      .object({
+        audio: z.object({
+          bandwidth: zNumber,
+        }),
+        label: zString,
+        video: z.object({
+          bandwidth: zNumber,
+          height: zNumber,
+          width: zNumber,
+        }),
+      })
+      .partial({
+        audio: true,
+        video: true,
+      }),
+  ),
+  selected: zNumber,
 });
 
 export type Qualities = z.infer<typeof zQualities>;
 
-export const zStreamPhase = z.union([
+export const validateQualities = createValidate(zQualities);
+
+const zStreamPhase = z.union([
   z.literal('LIVE'),
   z.literal('POST'),
   z.literal('PRE'),
 ]);
 
+/** @deprecated Instead use {@link Config}.streamPhase */
 export type StreamPhase = z.infer<typeof zStreamPhase>;
 
-export const zStreamPhases = z.record(zStreamPhase);
+export const validateStreamPhase = createValidate(zStreamPhase);
 
-export const zControls = z.object({
-  cast: booleanSchema,
-  contact: booleanSchema,
-  error: booleanSchema,
-  fullscreen: booleanSchema,
-  mute: booleanSchema,
-  pip: booleanSchema,
-  play: booleanSchema,
-  quality: booleanSchema,
-  scrubber: booleanSchema,
-});
-
-export type Controls = z.infer<typeof zControls>;
-
-export const zConfig = z.object({
-  controls: zControls,
-  customerId: stringSchema,
+const zConfig = z.object({
+  controls: z.object({
+    cast: zBoolean,
+    contact: zBoolean,
+    error: zBoolean,
+    fullscreen: zBoolean,
+    mute: zBoolean,
+    pip: zBoolean,
+    play: zBoolean,
+    quality: zBoolean,
+    scrubber: zBoolean,
+  }),
+  customerId: zString,
   streamPhase: zStreamPhase,
-  streamPhases: zStreamPhases,
-  tenantId: stringSchema,
+  streamPhases: z.record(zNumber, zStreamPhase),
+  tenantId: zString,
 });
 
 export type Config = z.infer<typeof zConfig>;
 
-export const zUserFeedback = z.object({
-  comments: stringSchema,
-  email: stringSchema,
-  name: stringSchema,
+export const validateConfig = createValidate(zConfig);
+
+const zUserFeedback = z.object({
+  comments: zString,
+  email: zString,
+  name: zString,
 });
 
 export type UserFeedback = z.infer<typeof zUserFeedback>;
+
+export const validateUserFeedback = createValidate(zUserFeedback);

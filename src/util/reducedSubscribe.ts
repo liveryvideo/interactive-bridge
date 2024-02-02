@@ -1,7 +1,7 @@
 /**
  * Subscribe to a value reduced from another value.
  *
- * Note: values are compared using basic strict equality (no deep object equality)
+ * Note: values are compared using basic strict equality (no deep object equality).
  *
  * @param subscribe - Unreduced subscribe method
  * @param reducer - Value reducer

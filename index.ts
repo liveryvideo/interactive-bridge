@@ -33,7 +33,6 @@ export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog';
 export { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock';
 export type {
   Config,
-  Controls,
   DisplayMode,
   Features,
   Orientation,

@@ -14,9 +14,9 @@ import type {
 } from './util/schema';
 import {
   validateBoolean,
+  validateDisplayMode,
   validateNumber,
-  zDisplayMode,
-  zUserFeedback,
+  validateUserFeedback,
 } from './util/schema';
 
 /**
@@ -26,7 +26,7 @@ import {
 export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
 
-  abstract config?: Config;
+  protected abstract config?: Config;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(target?: { origin: string; window: Window }) {
@@ -114,13 +114,13 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       return this.setControlsDisabled(validateBoolean(arg));
     }
     if (name === 'setDisplay') {
-      return this.setDisplay(zDisplayMode.parse(arg));
+      return this.setDisplay(validateDisplayMode(arg));
     }
     if (name === 'setMuted') {
       return this.setMuted(validateBoolean(arg));
     }
     if (name === 'submitUserFeedback') {
-      return this.submitUserFeedback(zUserFeedback.parse(arg));
+      return this.submitUserFeedback(validateUserFeedback(arg));
     }
     if (name === 'subscribeConfig') {
       return this.subscribeConfig(listener);
