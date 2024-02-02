@@ -28,6 +28,8 @@ import {
   validateStringOrUndefined,
 } from './util/schema';
 
+// TODO: Improve TSDoc
+
 /**
  * Can be used by a Livery interactive layer element or page to communicate with the surrounding Livery Player.
  *
@@ -321,8 +323,10 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current playback paused state
-   * and calls back `listener` with any subsequent paused state updates.
+   * Returns promise of current `paused` state and calls back `listener` with any subsequent `paused` state updates.
+   *
+   * Where `paused` is true if `playbackState` is `'PAUSED'` or `'ENDED'`.
+   * I.e: Not playing as intended.
    */
   async subscribePaused(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
@@ -343,8 +347,10 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current playback playing state
-   * and calls back `listener` with any subsequent playing state updates.
+   * Returns promise of current `playing` state and calls back `listener` with any subsequent `playing` state updates.
+   *
+   * Where `playing` is true if `playbackState` is `'PLAYING'`, `'FAST_FORWARD'`, `'SLOW_MO'` or `'REWIND'`.
+   * I.e: Playing as intended.
    */
   async subscribePlaying(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
@@ -378,8 +384,10 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current playback stalled state
-   * and calls back `listener` with any subsequent stalled state updates.
+   * Returns promise of current `stalled` state and calls back `listener` with any subsequent `stalled` state updates.
+   *
+   * Where `stalled` is true if `playbackState` is `'BUFFERING'` or `'SEEKING'`.
+   * I.e: Not playing, but trying to.
    */
   async subscribeStalled(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(

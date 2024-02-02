@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+// TODO: TSDoc exported types (and their properties) since they are re-exported by this package from index.ts
+
 const createValidate =
   <T>(schema: Zod.ZodSchema<T>) =>
   (value: unknown) =>
