@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.0...v1.11.1) (2024-02-05)
+
+
+### Bug Fixes
+
+* keys of Config.streamPhases are string not number ([d4262a9](https://github.com/liveryvideo/interactive-bridge/commit/d4262a93740cd501cfa21b4d3c808aaf62cb71f4))
+
 # [1.11.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.10.0...v1.11.0) (2024-02-05)
 
 
