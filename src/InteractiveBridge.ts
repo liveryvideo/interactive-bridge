@@ -4,7 +4,9 @@ import { reducedSubscribe } from './util/reducedSubscribe';
 import type {
   Config,
   DisplayMode,
+  Features,
   Orientation,
+  PlaybackDetails,
   PlaybackMode,
   PlaybackState,
   Qualities,
@@ -28,8 +30,6 @@ import {
   validateStringOrUndefined,
 } from './util/schema';
 
-// TODO: Improve TSDoc
-
 /**
  * Can be used by a Livery interactive layer element or page to communicate with the surrounding Livery Player.
  *
@@ -46,8 +46,8 @@ import {
  */
 export class InteractiveBridge extends LiveryBridge {
   /**
-   * Constructs `InteractiveBridge` with specified `target: AbstractPlayerBridge` (i.e: `PlayerBridge`)
-   * or with `window.parent` as target window and with specified `target: string` as origin.
+   * Constructs `InteractiveBridge` with specified `target` player bridge
+   * or with `window.parent` as target window and with specified string as origin.
    */
   constructor(target: AbstractPlayerBridge | string) {
     if (typeof target === 'string') {
@@ -58,14 +58,14 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of LiveryPlayer application name.
+   * Returns promise of player application name.
    */
   getAppName() {
     return this.sendCommand('getAppName').then(validateString);
   }
 
   /**
-   * Returns promise of LiveryPlayer customer id.
+   * Returns promise of player customer id.
    *
    * @deprecated Instead use {@link subscribeConfig}.customerId
    */
@@ -74,7 +74,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of LiveryPlayer Pinpoint analytics endpoint id.
+   * Returns promise of player Pinpoint analytics endpoint id.
    */
   getEndpointId() {
     return this.sendCommand('getEndpointId').then(validateString);
@@ -83,12 +83,12 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of a registry of features supported by the player in general and under given circumstances.
    */
-  getFeatures() {
+  getFeatures(): Promise<Features> {
     return this.sendCommand('getFeatures').then(validateFeatures);
   }
 
   /**
-   * Returns promise of current LiveryPlayer latency in seconds.
+   * Returns promise of current player latency in seconds.
    *
    * @deprecated Instead use {@link getPlayback}.latency
    */
@@ -97,7 +97,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of an object of key-value string parameters from LiveryPlayer.
+   * Returns promise of an object of key-value string parameters from player.
    *
    * Android and iOS players will call a callback and pass on the returned values.
    *
@@ -116,27 +116,29 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Returns promise of current playback details, i.e: values that are continuously changing.
+   *
+   * Requires: {@link getFeatures}.scrubber.
    */
-  getPlayback() {
+  getPlayback(): Promise<PlaybackDetails> {
     return this.sendCommand('getPlayback').then(validatePlaybackDetails);
   }
 
   /**
-   * Returns promise of LiveryPlayer version.
+   * Returns promise of player version.
    */
   getPlayerVersion() {
     return this.sendCommand('getPlayerVersion').then(validateString);
   }
 
   /**
-   * Returns promise of LiveryPlayer stream id.
+   * Returns promise of player stream id.
    */
   getStreamId() {
     return this.sendCommand('getStreamId').then(validateString);
   }
 
   /**
-   * Pauses playback.
+   * Pause playback.
    */
   pause() {
     return this.sendCommand('pause');
@@ -144,6 +146,10 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Attempt to start or resume playback.
+   *
+   * Can fail if not allowed by the browser, e.g: when not called directly from a click event listener.
+   * In that case it can fall back to muted playback, changing {@link subscribeMuted} to true.
+   * Or if that also fails then {@link subscribePaused} will remain true.
    */
   play() {
     return this.sendCommand('play');
@@ -164,7 +170,7 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Register `handler` function to be called with `arg` and `listener` when `sendInteractiveCommand()` is called
-   * from the livery-player side with matching `name`.
+   * from the player side with matching `name`.
    */
   registerInteractiveCommand(
     name: string,
@@ -174,7 +180,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Reloads LiveryPlayer, e.g: to try to recover from an error.
+   * Reload player, e.g: to try to recover from an error.
    */
   reload() {
     return this.sendCommand('reload');
@@ -182,13 +188,18 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Seek to specified `position` in seconds since start of stream/VOD.
+   *
+   * Where `position` needs to be within a `'LIVE'` interval of {@link subscribeConfig}.streamPhases
+   * and the {@link getPlayback}.duration.
+   *
+   * Requires: {@link getFeatures}.scrubber.
    */
   seek(position: number) {
     return this.sendCommand('seek', position);
   }
 
   /**
-   * Select quality at specified index of subscribeQualities() list or -1 to use ABR.
+   * Select quality at specified index of {@link subscribeQualities}.list or -1 to use ABR.
    */
   selectQuality(index: number) {
     return this.sendCommand('selectQuality', index);
@@ -209,7 +220,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of value returned by the livery-player's custom command handler with matching `name` that is passed `arg`.
+   * Returns promise of value returned by the player's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
   sendPlayerCommand<T>(
@@ -221,7 +232,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Change disabled to true to disable all default player controls and implement your own instead.
+   * Change `disabled` to `true` to disable all default player controls and implement your own instead.
    */
   setControlsDisabled(disabled: boolean) {
     return this.sendCommand('setControlsDisabled', disabled);
@@ -229,6 +240,10 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Attempt to change `display` mode to specified value.
+   *
+   * Can reject if not allowed by the browser, e.g: when not called directly from a click event listener.
+   *
+   * Requires related feature, i.e: {@link getFeatures}.airplay, chromecast or fullscreen.
    */
   setDisplay(display: DisplayMode) {
     return this.sendCommand('setDisplay', display);
@@ -236,13 +251,19 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Attempt to change `muted` state to specified value.
+   *
+   * Unmuting can fail if not allowed by the browser, e.g: when not called directly from a click event listener.
+   * The specified state is kept track of by the player though and respected on reload when possible.
+   * Look at {@link subscribeMuted} state to track actual unmuting.
    */
   setMuted(muted: boolean) {
     return this.sendCommand('setMuted', muted);
   }
 
   /**
-   * Uses LiveryPlayer's Sentry API to submit user feedback.
+   * Submit user feedback.
+   *
+   * Requires: {@link getFeatures}.contact.
    */
   submitUserFeedback(userFeedback: UserFeedback) {
     return this.sendCommand('submitUserFeedback', userFeedback);
@@ -252,7 +273,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of Livery stream config
    * and calls back `listener` with server side updates or when streamId is changed.
    */
-  subscribeConfig(listener: (value?: Config) => void) {
+  subscribeConfig(listener: (value?: Config) => void): Promise<Config> {
     return this.sendCommand('subscribeConfig', undefined, (value) =>
       listener(validateConfig(value)),
     ).then(validateConfig);
@@ -262,14 +283,16 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of current display mode
    * and calls back `listener` with any subsequent display mode changes.
    */
-  subscribeDisplay(listener: (value: DisplayMode) => void) {
+  subscribeDisplay(
+    listener: (value: DisplayMode) => void,
+  ): Promise<DisplayMode> {
     return this.sendCommand('subscribeDisplay', undefined, (value) =>
       listener(validateDisplayMode(value)),
     ).then(validateDisplayMode);
   }
 
   /**
-   * Returns promise of current LiveryPlayer error message or undefined
+   * Returns promise of current player error message or undefined
    * and calls back `listener` with any subsequent errors.
    */
   subscribeError(listener: (value: string | undefined) => void) {
@@ -279,7 +302,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer fullscreen state
+   * Returns promise of current player fullscreen state
    * and calls back `listener` with any subsequent state changes.
    *
    * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
@@ -293,15 +316,17 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
    * and calls back `listener` with any subsequent mode changes.
+   *
+   * Requires: {@link getFeatures}.scrubber.
    */
-  subscribeMode(listener: (mode: PlaybackMode) => void) {
+  subscribeMode(listener: (mode: PlaybackMode) => void): Promise<PlaybackMode> {
     return this.sendCommand('subscribeMode', undefined, (mode) =>
       listener(validatePlaybackMode(mode)),
     ).then((mode) => validatePlaybackMode(mode));
   }
 
   /**
-   * Returns promise of current LiveryPlayer muted state
+   * Returns promise of current player muted state
    * and calls back `listener` with any subsequent muted changes.
    */
   subscribeMuted(listener: (muted: boolean) => void) {
@@ -311,12 +336,14 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer window orientation (`'landscape' \| 'portrait'`)
+   * Returns promise of current player window orientation (`'landscape' \| 'portrait'`)
    * and calls back `listener` with any subsequent orientations.
    *
    * @deprecated Will be removed in the next major version.
    */
-  subscribeOrientation(listener: (value: Orientation) => void) {
+  subscribeOrientation(
+    listener: (value: Orientation) => void,
+  ): Promise<Orientation> {
     return this.sendCommand('subscribeOrientation', undefined, (value) =>
       listener(validateOrientation(value)),
     ).then(validateOrientation);
@@ -337,10 +364,12 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer playback state
+   * Returns promise of current player playback state
    * and calls back `listener` with any subsequent state updates.
    */
-  subscribePlaybackState(listener: (value: PlaybackState) => void) {
+  subscribePlaybackState(
+    listener: (value: PlaybackState) => void,
+  ): Promise<PlaybackState> {
     return this.sendCommand('subscribePlaybackState', undefined, (value) =>
       listener(validatePlaybackState(value)),
     ).then(validatePlaybackState);
@@ -362,17 +391,19 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer playback qualities
+   * Returns promise of current player stream qualities
    * and calls back `listener` with any subsequent qualities changes.
    */
-  subscribeQualities(listener: (value?: Qualities) => void) {
+  subscribeQualities(
+    listener: (value?: Qualities) => void,
+  ): Promise<Qualities> {
     return this.sendCommand('subscribeQualities', undefined, (value) =>
       listener(validateQualities(value)),
     ).then(validateQualities);
   }
 
   /**
-   * Returns promise of current LiveryPlayer playback quality
+   * Returns promise of current player stream quality
    * and calls back `listener` with any subsequent quality changes.
    *
    * @deprecated Instead use {@link subscribeQualities}.active
@@ -398,12 +429,14 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
+   * Returns promise of current player stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
    * and calls back `listener` with any subsequent phases.
    *
    * @deprecated Instead use {@link subscribeConfig}.streamPhase
    */
-  subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
+  subscribeStreamPhase(
+    listener: (phase: StreamPhase) => void,
+  ): Promise<StreamPhase> {
     return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
       listener(validateStreamPhase(value)),
     ).then(validateStreamPhase);
