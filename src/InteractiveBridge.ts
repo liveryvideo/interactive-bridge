@@ -1,16 +1,34 @@
 import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { LiveryBridge } from './LiveryBridge';
-import { stringify } from './util/stringify';
-
-/**
- * Livery video player orientation.
- */
-export type Orientation = 'landscape' | 'portrait';
-
-/**
- * Livery video stream phase.
- */
-export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
+import { reducedSubscribe } from './util/reducedSubscribe';
+import type {
+  Config,
+  DisplayMode,
+  Features,
+  Orientation,
+  PlaybackDetails,
+  PlaybackMode,
+  PlaybackState,
+  Qualities,
+  StreamPhase,
+  UserFeedback,
+} from './util/schema';
+import {
+  validateBoolean,
+  validateConfig,
+  validateDisplayMode,
+  validateFeatures,
+  validateLiveryParams,
+  validateNumber,
+  validateOrientation,
+  validatePlaybackDetails,
+  validatePlaybackMode,
+  validatePlaybackState,
+  validateQualities,
+  validateStreamPhase,
+  validateString,
+  validateStringOrUndefined,
+} from './util/schema';
 
 /**
  * Can be used by a Livery interactive layer element or page to communicate with the surrounding Livery Player.
@@ -28,8 +46,8 @@ export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
  */
 export class InteractiveBridge extends LiveryBridge {
   /**
-   * Constructs `InteractiveBridge` with specified `target: AbstractPlayerBridge` (i.e: `PlayerBridge`)
-   * or with `window.parent` as target window and with specified `target: string` as origin.
+   * Constructs `InteractiveBridge` with specified `target` player bridge
+   * or with `window.parent` as target window and with specified string as origin.
    */
   constructor(target: AbstractPlayerBridge | string) {
     if (typeof target === 'string') {
@@ -40,63 +58,46 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of LiveryPlayer application name.
+   * Returns promise of player application name.
    */
   getAppName() {
-    return this.sendCommand('getAppName').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getAppName value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getAppName').then(validateString);
   }
 
   /**
-   * Returns promise of LiveryPlayer customer id.
+   * Returns promise of player customer id.
+   *
+   * @deprecated Instead use {@link subscribeConfig}.customerId
    */
   getCustomerId() {
-    return this.sendCommand('getCustomerId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getCustomerId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getCustomerId').then(validateString);
   }
 
   /**
-   * Returns promise of LiveryPlayer Pinpoint analytics endpoint id.
+   * Returns promise of player Pinpoint analytics endpoint id.
    */
   getEndpointId() {
-    return this.sendCommand('getEndpointId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getEndpointId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getEndpointId').then(validateString);
   }
 
   /**
-   * Returns promise of current LiveryPlayer latency in seconds.
+   * Returns promise of a registry of features supported by the player in general and under given circumstances.
+   */
+  getFeatures(): Promise<Features> {
+    return this.sendCommand('getFeatures').then(validateFeatures);
+  }
+
+  /**
+   * Returns promise of current player latency in seconds.
+   *
+   * @deprecated Instead use {@link getPlayback}.latency
    */
   getLatency() {
-    return this.sendCommand('getLatency').then((value) => {
-      if (typeof value !== 'number') {
-        throw new Error(
-          `getLatency value type: ${typeof value}, should be: number`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getLatency').then(validateNumber);
   }
 
   /**
-   * Returns promise of an object of key-value string parameters from LiveryPlayer.
+   * Returns promise of an object of key-value string parameters from player.
    *
    * Android and iOS players will call a callback and pass on the returned values.
    *
@@ -109,52 +110,49 @@ export class InteractiveBridge extends LiveryBridge {
    * So given location.search: `'?foo&livery_foo%3Abar=hey+you&livery_no_val&livery_multi=1&livery_multi=2'`
    * this will return: `{ 'foo:bar': 'hey you', no_val: '', multi: '1' }`.
    */
-  getLiveryParams(): Promise<Record<string, string>> {
-    return this.sendCommand('getLiveryParams').then((value) => {
-      if (typeof value !== 'object') {
-        throw new Error(
-          `getLiveryParams value type: ${typeof value}, should be: object`,
-        );
-      }
-      if (value === null) {
-        throw new Error(`getLiveryParams value type: null, should be: object`);
-      }
-      const dict: Record<string, string> = {};
-      for (const [paramKey, paramValue] of Object.entries(value)) {
-        if (typeof paramValue === 'string') {
-          dict[paramKey] = paramValue;
-        }
-      }
-      return dict;
-    });
+  getLiveryParams() {
+    return this.sendCommand('getLiveryParams').then(validateLiveryParams);
   }
 
   /**
-   * Returns promise of LiveryPlayer version.
+   * Returns promise of current playback details, i.e: values that are continuously changing.
+   *
+   * Requires: {@link getFeatures}.scrubber.
+   */
+  getPlayback(): Promise<PlaybackDetails> {
+    return this.sendCommand('getPlayback').then(validatePlaybackDetails);
+  }
+
+  /**
+   * Returns promise of player version.
    */
   getPlayerVersion() {
-    return this.sendCommand('getPlayerVersion').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getPlayerVersion value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getPlayerVersion').then(validateString);
   }
 
   /**
-   * Returns promise of LiveryPlayer stream id.
+   * Returns promise of player stream id.
    */
   getStreamId() {
-    return this.sendCommand('getStreamId').then((value) => {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `getStreamId value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    });
+    return this.sendCommand('getStreamId').then(validateString);
+  }
+
+  /**
+   * Pause playback.
+   */
+  pause() {
+    return this.sendCommand('pause');
+  }
+
+  /**
+   * Attempt to start or resume playback.
+   *
+   * Can fail if not allowed by the browser, e.g: when not called directly from a click event listener.
+   * In that case it can fall back to muted playback, changing {@link subscribeMuted} to true.
+   * Or if that also fails then {@link subscribePaused} will remain true.
+   */
+  play() {
+    return this.sendCommand('play');
   }
 
   /**
@@ -172,13 +170,39 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Register `handler` function to be called with `arg` and `listener` when `sendInteractiveCommand()` is called
-   * from the livery-player side with matching `name`.
+   * from the player side with matching `name`.
    */
   registerInteractiveCommand(
     name: string,
     handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
   ) {
     super.registerCustomCommand(name, handler);
+  }
+
+  /**
+   * Reload player, e.g: to try to recover from an error.
+   */
+  reload() {
+    return this.sendCommand('reload');
+  }
+
+  /**
+   * Seek to specified `position` in seconds since start of stream/VOD.
+   *
+   * Where `position` needs to be within a `'LIVE'` interval of {@link subscribeConfig}.streamPhases
+   * and the {@link getPlayback}.duration.
+   *
+   * Requires: {@link getFeatures}.scrubber.
+   */
+  seek(position: number) {
+    return this.sendCommand('seek', position);
+  }
+
+  /**
+   * Select quality at specified index of {@link subscribeQualities}.list or -1 to use ABR.
+   */
+  selectQuality(index: number) {
+    return this.sendCommand('selectQuality', index);
   }
 
   /**
@@ -196,7 +220,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of value returned by the livery-player's custom command handler with matching `name` that is passed `arg`.
+   * Returns promise of value returned by the player's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
   sendPlayerCommand<T>(
@@ -208,81 +232,214 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current LiveryPlayer fullscreen state
+   * Change `disabled` to `true` to disable all default player controls and implement your own instead.
+   */
+  setControlsDisabled(disabled: boolean) {
+    return this.sendCommand('setControlsDisabled', disabled);
+  }
+
+  /**
+   * Attempt to change `display` mode to specified value.
+   *
+   * Can reject if not allowed by the browser, e.g: when not called directly from a click event listener.
+   *
+   * Requires related feature, i.e: {@link getFeatures}.airplay, chromecast or fullscreen.
+   */
+  setDisplay(display: DisplayMode) {
+    return this.sendCommand('setDisplay', display);
+  }
+
+  /**
+   * Attempt to change `muted` state to specified value.
+   *
+   * Unmuting can fail if not allowed by the browser, e.g: when not called directly from a click event listener.
+   * The specified state is kept track of by the player though and respected on reload when possible.
+   * Look at {@link subscribeMuted} state to track actual unmuting.
+   */
+  setMuted(muted: boolean) {
+    return this.sendCommand('setMuted', muted);
+  }
+
+  /**
+   * Submit user feedback.
+   *
+   * Requires: {@link getFeatures}.contact.
+   */
+  submitUserFeedback(userFeedback: UserFeedback) {
+    return this.sendCommand('submitUserFeedback', userFeedback);
+  }
+
+  /**
+   * Returns promise of Livery stream config
+   * and calls back `listener` with server side updates or when streamId is changed.
+   */
+  subscribeConfig(listener: (value?: Config) => void): Promise<Config> {
+    return this.sendCommand('subscribeConfig', undefined, (value) =>
+      listener(validateConfig(value)),
+    ).then(validateConfig);
+  }
+
+  /**
+   * Returns promise of current display mode
+   * and calls back `listener` with any subsequent display mode changes.
+   */
+  subscribeDisplay(
+    listener: (value: DisplayMode) => void,
+  ): Promise<DisplayMode> {
+    return this.sendCommand('subscribeDisplay', undefined, (value) =>
+      listener(validateDisplayMode(value)),
+    ).then(validateDisplayMode);
+  }
+
+  /**
+   * Returns promise of current player error message or undefined
+   * and calls back `listener` with any subsequent errors.
+   */
+  subscribeError(listener: (value: string | undefined) => void) {
+    return this.sendCommand('subscribeError', undefined, (value) =>
+      listener(validateStringOrUndefined(value)),
+    ).then(validateStringOrUndefined);
+  }
+
+  /**
+   * Returns promise of current player fullscreen state
    * and calls back `listener` with any subsequent state changes.
+   *
+   * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
    */
   subscribeFullscreen(listener: (value: boolean) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'boolean') {
-        throw new Error(
-          `subscribeFullscreen value type: ${typeof value}, should be: boolean`,
-        );
-      }
-      return value;
-    }
-
     return this.sendCommand('subscribeFullscreen', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(validateBoolean(value)),
+    ).then(validateBoolean);
   }
 
   /**
-   * Returns promise of current LiveryPlayer window orientation (`'landscape' \| 'portrait'`)
-   * and calls back `listener` with any subsequent orientations.
+   * Returns promise of current mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
+   * and calls back `listener` with any subsequent mode changes.
+   *
+   * Requires: {@link getFeatures}.scrubber.
    */
-  subscribeOrientation(listener: (orientation: Orientation) => void) {
-    function validate(value: unknown) {
-      if (value !== 'landscape' && value !== 'portrait') {
-        const strValue = stringify(value);
-        throw new Error(
-          `subscribeOrientation value: ${strValue}, should be: "landscape" | "portrait"`,
-        );
-      }
-      return value;
-    }
-
-    return this.sendCommand('subscribeOrientation', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+  subscribeMode(listener: (mode: PlaybackMode) => void): Promise<PlaybackMode> {
+    return this.sendCommand('subscribeMode', undefined, (mode) =>
+      listener(validatePlaybackMode(mode)),
+    ).then((mode) => validatePlaybackMode(mode));
   }
 
   /**
-   * Returns promise of current LiveryPlayer playback quality
+   * Returns promise of current player muted state
+   * and calls back `listener` with any subsequent muted changes.
+   */
+  subscribeMuted(listener: (muted: boolean) => void) {
+    return this.sendCommand('subscribeMuted', undefined, (value) =>
+      listener(validateBoolean(value)),
+    ).then(validateBoolean);
+  }
+
+  /**
+   * Returns promise of current player window orientation (`'landscape' \| 'portrait'`)
+   * and calls back `listener` with any subsequent orientations.
+   *
+   * @deprecated Will be removed in the next major version.
+   */
+  subscribeOrientation(
+    listener: (value: Orientation) => void,
+  ): Promise<Orientation> {
+    return this.sendCommand('subscribeOrientation', undefined, (value) =>
+      listener(validateOrientation(value)),
+    ).then(validateOrientation);
+  }
+
+  /**
+   * Returns promise of current `paused` state and calls back `listener` with any subsequent `paused` state updates.
+   *
+   * Where `paused` is true if `playbackState` is `'PAUSED'` or `'ENDED'`.
+   * I.e: Not playing as intended.
+   */
+  async subscribePaused(listener: (value: boolean) => void) {
+    return reducedSubscribe<PlaybackState, boolean>(
+      (unreducedListener) => this.subscribePlaybackState(unreducedListener),
+      (value) => ['ENDED', 'PAUSED'].includes(value),
+      listener,
+    );
+  }
+
+  /**
+   * Returns promise of current player playback state
+   * and calls back `listener` with any subsequent state updates.
+   */
+  subscribePlaybackState(
+    listener: (value: PlaybackState) => void,
+  ): Promise<PlaybackState> {
+    return this.sendCommand('subscribePlaybackState', undefined, (value) =>
+      listener(validatePlaybackState(value)),
+    ).then(validatePlaybackState);
+  }
+
+  /**
+   * Returns promise of current `playing` state and calls back `listener` with any subsequent `playing` state updates.
+   *
+   * Where `playing` is true if `playbackState` is `'PLAYING'`, `'FAST_FORWARD'`, `'SLOW_MO'` or `'REWIND'`.
+   * I.e: Playing as intended.
+   */
+  async subscribePlaying(listener: (value: boolean) => void) {
+    return reducedSubscribe<PlaybackState, boolean>(
+      (unreducedListener) => this.subscribePlaybackState(unreducedListener),
+      (value) =>
+        ['FAST_FORWARD', 'PLAYING', 'REWIND', 'SLOW_MO'].includes(value),
+      listener,
+    );
+  }
+
+  /**
+   * Returns promise of current player stream qualities
+   * and calls back `listener` with any subsequent qualities changes.
+   */
+  subscribeQualities(
+    listener: (value?: Qualities) => void,
+  ): Promise<Qualities> {
+    return this.sendCommand('subscribeQualities', undefined, (value) =>
+      listener(validateQualities(value)),
+    ).then(validateQualities);
+  }
+
+  /**
+   * Returns promise of current player stream quality
    * and calls back `listener` with any subsequent quality changes.
+   *
+   * @deprecated Instead use {@link subscribeQualities}.active
    */
   subscribeQuality(listener: (value: string) => void) {
-    function validate(value: unknown) {
-      if (typeof value !== 'string') {
-        throw new Error(
-          `subscribeQuality value type: ${typeof value}, should be: string`,
-        );
-      }
-      return value;
-    }
-
     return this.sendCommand('subscribeQuality', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(validateString(value)),
+    ).then(validateString);
   }
 
   /**
-   * Returns promise of current LiveryPlayer stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
-   * and calls back `listener` with any subsequent phases.
+   * Returns promise of current `stalled` state and calls back `listener` with any subsequent `stalled` state updates.
+   *
+   * Where `stalled` is true if `playbackState` is `'BUFFERING'` or `'SEEKING'`.
+   * I.e: Not playing, but trying to.
    */
-  subscribeStreamPhase(listener: (phase: StreamPhase) => void) {
-    function validate(value: unknown) {
-      if (value !== 'LIVE' && value !== 'POST' && value !== 'PRE') {
-        const strValue = stringify(value);
-        throw new Error(
-          `subscribeStreamPhase value: ${strValue}, should be: "LIVE" | "POST" | "PRE"`,
-        );
-      }
-      return value;
-    }
+  async subscribeStalled(listener: (value: boolean) => void) {
+    return reducedSubscribe<PlaybackState, boolean>(
+      (unreducedListener) => this.subscribePlaybackState(unreducedListener),
+      (value) => ['BUFFERING, SEEKING'].includes(value),
+      listener,
+    );
+  }
 
+  /**
+   * Returns promise of current player stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
+   * and calls back `listener` with any subsequent phases.
+   *
+   * @deprecated Instead use {@link subscribeConfig}.streamPhase
+   */
+  subscribeStreamPhase(
+    listener: (phase: StreamPhase) => void,
+  ): Promise<StreamPhase> {
     return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
-      listener(validate(value)),
-    ).then(validate);
+      listener(validateStreamPhase(value)),
+    ).then(validateStreamPhase);
   }
 
   /**

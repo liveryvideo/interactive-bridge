@@ -1,11 +1,82 @@
 import { AbstractPlayerBridge } from './AbstractPlayerBridge';
-import type { StreamPhase } from './InteractiveBridge';
+import type {
+  Config,
+  DisplayMode,
+  PlaybackMode,
+  PlaybackState,
+  Qualities,
+  UserFeedback,
+} from './util/schema';
+
+const buildQuality = (index: number) => ({
+  audio: {
+    bandwidth: index,
+  },
+  label: `dummy-quality-${index}`,
+  video: {
+    bandwidth: index,
+    height: index,
+    width: index,
+  },
+});
+
+const config: Config = {
+  controls: {
+    cast: true,
+    contact: true,
+    error: true,
+    fullscreen: true,
+    mute: true,
+    pip: true,
+    play: true,
+    quality: true,
+    scrubber: true,
+  },
+  customerId: 'dummy-customer-id',
+  streamPhase: 'PRE',
+  streamPhases: {
+    [Date.now() - 3600]: 'LIVE',
+    [Date.now()]: 'POST',
+    [Date.now() + 3600]: 'PRE',
+  },
+  tenantId: 'dummy-tenant-id',
+};
 
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
  * And with dummy support for custom command: `subscribeAuthToken` as used on the test page.
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
+  config = config;
+
+  controlsDisabled = false;
+
+  userFeedback: UserFeedback | null = null;
+
+  private display: DisplayMode = 'DEFAULT';
+
+  private displayListeners: ((value: DisplayMode) => void)[] = [];
+
+  private muted = true;
+
+  private mutedListeners: ((value: boolean) => void)[] = [];
+
+  private playbackMode: PlaybackMode = 'LIVE';
+
+  private playbackState: PlaybackState = 'PLAYING';
+
+  private playbackStateListeners: ((value: PlaybackState) => void)[] = [];
+
+  private qualities: Qualities = {
+    active: 0,
+    list: [buildQuality(1), buildQuality(2), buildQuality(3)],
+    selected: 0,
+  };
+
+  private qualitiesListeners: ((value?: Qualities) => void)[] = [];
+
+  private seekPosition = 0;
+
   constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
     super(target);
 
@@ -21,16 +92,28 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     });
   }
 
-  protected getCustomerId() {
-    return 'dummy-customer-id';
-  }
-
   protected getEndpointId() {
     return 'dummy-endpoint-id';
   }
 
-  protected getLatency() {
-    return Math.random() * 6;
+  protected getFeatures() {
+    return {
+      airplay: true,
+      chromecast: true,
+      contact: true,
+      fullscreen: true,
+      pip: true,
+      scrubber: true,
+    };
+  }
+
+  protected getPlayback() {
+    return {
+      buffer: Math.random() * 6,
+      duration: Math.random() * 6,
+      latency: Math.random() * 6,
+      position: this.seekPosition,
+    };
   }
 
   protected getPlayerVersion() {
@@ -41,23 +124,128 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return 'dummy-stream-id';
   }
 
-  protected subscribeFullscreen(listener: (value: boolean) => void) {
-    // Note: LiveryPlayer only listens to itself becoming fullscreen; not just anything
-    document.addEventListener('fullscreenchange', () => {
-      listener(!!document.fullscreenElement);
-    });
-    return !!document.fullscreenElement;
+  protected pause() {
+    this.playbackState = 'PAUSED';
+    this.playbackStateListeners.forEach((listener) =>
+      listener(this.playbackState),
+    );
   }
 
-  protected subscribeQuality(listener: (value: string) => void) {
-    setTimeout(() => listener('dummy-quality-2'), 1500);
-    setTimeout(() => listener('dummy-quality-3'), 3000);
-    return 'dummy-quality-1';
+  protected play() {
+    this.playbackState = 'PLAYING';
+    this.playbackStateListeners.forEach((listener) =>
+      listener(this.playbackState),
+    );
   }
 
-  protected subscribeStreamPhase(listener: (value: StreamPhase) => void) {
-    setTimeout(() => listener('LIVE'), 1500);
-    setTimeout(() => listener('POST'), 3000);
-    return 'PRE';
+  protected reload() {
+    this.playbackState = 'PLAYING';
+    this.playbackStateListeners.forEach((listener) =>
+      listener(this.playbackState),
+    );
+  }
+
+  protected seek(position: number) {
+    this.playbackState = 'SEEKING';
+    this.seekPosition = position;
+    this.playbackStateListeners.forEach((listener) =>
+      listener(this.playbackState),
+    );
+  }
+
+  protected selectQuality(index: number) {
+    this.qualities.selected = index;
+    this.qualitiesListeners.forEach((listener) => listener(this.qualities));
+  }
+
+  protected setControlsDisabled(disabled: boolean) {
+    this.controlsDisabled = disabled;
+  }
+
+  protected setDisplay(display: DisplayMode) {
+    this.display = display;
+    this.displayListeners.forEach((listener) => listener(this.display));
+  }
+
+  protected setMuted(muted: boolean) {
+    this.muted = muted;
+    this.mutedListeners.forEach((listener) => listener(this.muted));
+  }
+
+  protected submitUserFeedback(value: UserFeedback) {
+    this.userFeedback = value;
+  }
+
+  protected subscribeConfig(listener: (value?: Config) => void) {
+    setTimeout(() => {
+      this.config.controls = {
+        ...this.config.controls,
+        cast: false,
+        scrubber: false,
+      };
+      this.config.streamPhase = 'LIVE';
+      listener(this.config);
+    }, 1500);
+    setTimeout(() => {
+      this.config.controls = {
+        ...this.config.controls,
+        cast: true,
+        scrubber: true,
+      };
+      listener(this.config);
+    }, 3000);
+    setTimeout(() => {
+      this.config.streamPhase = 'POST';
+      listener(this.config);
+    }, 4500);
+    return this.config;
+  }
+
+  protected subscribeDisplay(listener: (value: DisplayMode) => void) {
+    this.displayListeners.push(listener);
+    return this.display;
+  }
+
+  protected subscribeError(listener: (error: string | undefined) => void) {
+    setTimeout(() => listener(''), 1500);
+    return 'dummy-error';
+  }
+
+  protected subscribeMode(listener: (mode: PlaybackMode) => void) {
+    setTimeout(() => {
+      this.playbackMode = 'CATCHUP';
+      listener(this.playbackMode);
+    }, 1500);
+    setTimeout(() => {
+      this.playbackMode = 'LIVE';
+      listener(this.playbackMode);
+    }, 3000);
+    setTimeout(() => {
+      this.playbackMode = 'UNKNOWN';
+      listener(this.playbackMode);
+    }, 4500);
+    setTimeout(() => {
+      this.playbackMode = 'VOD';
+      listener(this.playbackMode);
+    }, 6000);
+
+    return this.playbackMode;
+  }
+
+  protected subscribeMuted(listener: (value: boolean) => void) {
+    this.mutedListeners.push(listener);
+    return this.muted;
+  }
+
+  protected subscribePlaybackState(
+    listener: (playbackState: PlaybackState) => void,
+  ) {
+    this.playbackStateListeners.push(listener);
+    return this.playbackState;
+  }
+
+  protected subscribeQualities(listener: (value?: Qualities) => void) {
+    this.qualitiesListeners.push(listener);
+    return this.qualities;
   }
 }

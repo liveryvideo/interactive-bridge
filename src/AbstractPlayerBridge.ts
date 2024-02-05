@@ -1,5 +1,23 @@
-import type { Orientation, StreamPhase } from './InteractiveBridge';
 import { LiveryBridge } from './LiveryBridge';
+import { reducedSubscribe } from './util/reducedSubscribe';
+import type {
+  Config,
+  DisplayMode,
+  Features,
+  Orientation,
+  PlaybackDetails,
+  PlaybackMode,
+  PlaybackState,
+  Qualities,
+  StreamPhase,
+  UserFeedback,
+} from './util/schema';
+import {
+  validateBoolean,
+  validateDisplayMode,
+  validateNumber,
+  validateUserFeedback,
+} from './util/schema';
 
 /**
  * Abstract player bridge class which implements part of the player side API based on browser logic
@@ -7,6 +25,8 @@ import { LiveryBridge } from './LiveryBridge';
  */
 export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
+
+  protected abstract config?: Config;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(target?: { origin: string; window: Window }) {
@@ -57,11 +77,17 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'getEndpointId') {
       return this.getEndpointId();
     }
+    if (name === 'getFeatures') {
+      return this.getFeatures();
+    }
     if (name === 'getLatency') {
       return this.getLatency();
     }
     if (name === 'getLiveryParams') {
       return this.getLiveryParams();
+    }
+    if (name === 'getPlayback') {
+      return this.getPlayback();
     }
     if (name === 'getPlayerVersion') {
       return this.getPlayerVersion();
@@ -69,11 +95,59 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'getStreamId') {
       return this.getStreamId();
     }
+    if (name === 'pause') {
+      return this.pause();
+    }
+    if (name === 'play') {
+      return this.play();
+    }
+    if (name === 'reload') {
+      return this.reload();
+    }
+    if (name === 'seek') {
+      return this.seek(validateNumber(arg));
+    }
+    if (name === 'selectQuality') {
+      return this.selectQuality(validateNumber(arg));
+    }
+    if (name === 'setControlsDisabled') {
+      return this.setControlsDisabled(validateBoolean(arg));
+    }
+    if (name === 'setDisplay') {
+      return this.setDisplay(validateDisplayMode(arg));
+    }
+    if (name === 'setMuted') {
+      return this.setMuted(validateBoolean(arg));
+    }
+    if (name === 'submitUserFeedback') {
+      return this.submitUserFeedback(validateUserFeedback(arg));
+    }
+    if (name === 'subscribeConfig') {
+      return this.subscribeConfig(listener);
+    }
+    if (name === 'subscribeDisplay') {
+      return this.subscribeDisplay(listener);
+    }
+    if (name === 'subscribeError') {
+      return this.subscribeError(listener);
+    }
     if (name === 'subscribeFullscreen') {
       return this.subscribeFullscreen(listener);
     }
+    if (name === 'subscribeMode') {
+      return this.subscribeMode(listener);
+    }
+    if (name === 'subscribeMuted') {
+      return this.subscribeMuted(listener);
+    }
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
+    }
+    if (name === 'subscribePlaybackState') {
+      return this.subscribePlaybackState(listener);
+    }
+    if (name === 'subscribeQualities') {
+      return this.subscribeQualities(listener);
     }
     if (name === 'subscribeQuality') {
       return this.subscribeQuality(listener);
@@ -89,6 +163,20 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return window.location.hostname;
   }
 
+  /**
+   * @deprecated Instead use {@link subscribeConfig}.customerId
+   */
+  private getCustomerId() {
+    return this.config?.customerId;
+  }
+
+  /**
+   * @deprecated Instead use {@link getPlayback}.latency
+   */
+  private getLatency() {
+    return this.getPlayback().latency;
+  }
+
   private getLiveryParams(queryString = window.location.search) {
     const urlParams = new URLSearchParams(queryString);
     const result: Record<string, string> = {};
@@ -101,6 +189,20 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return result;
   }
 
+  /**
+   * @deprecated Instead compare {@link subscribeDisplay} value to 'FULLSCREEN'
+   */
+  private subscribeFullscreen(listener: (value: boolean) => void) {
+    return reducedSubscribe<DisplayMode, boolean>(
+      (unreducedListener) => this.subscribeDisplay(unreducedListener),
+      (display) => display === 'FULLSCREEN',
+      listener,
+    );
+  }
+
+  /**
+   * @deprecated Will be removed in the next major version.
+   */
   private subscribeOrientation(listener: (value: Orientation) => void) {
     // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use addListener()
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
@@ -118,25 +220,82 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return this.portraitQuery.matches ? 'portrait' : 'landscape';
   }
 
-  protected abstract getCustomerId(): string;
+  /**
+   * @deprecated Instead use {@link subscribeQualities}.active to get the active quality index
+   * and use the index to get the active quality label from {@link subscribQualities}.list
+   */
+  private subscribeQuality(listener: (quality: string) => void) {
+    return reducedSubscribe<Qualities | undefined, string>(
+      (unreducedListener) => this.subscribeQualities(unreducedListener),
+      (value) => value?.list[value.active]?.label ?? '',
+      listener,
+    );
+  }
+
+  /**
+   * @deprecated Instead use {@link subscribeConfig}.streamPhase
+   */
+  private subscribeStreamPhase(listener: (streamPhase: StreamPhase) => void) {
+    return reducedSubscribe<Config | undefined, StreamPhase>(
+      (unreducedListener) => this.subscribeConfig(unreducedListener),
+      (config) => config?.streamPhase ?? 'PRE',
+      listener,
+    );
+  }
 
   protected abstract getEndpointId(): string;
 
-  protected abstract getLatency(): number;
+  protected abstract getFeatures(): Features;
+
+  protected abstract getPlayback(): PlaybackDetails;
 
   protected abstract getPlayerVersion(): string;
 
   protected abstract getStreamId(): string;
 
-  protected abstract subscribeFullscreen(
+  protected abstract pause(): void;
+
+  protected abstract play(): void;
+
+  protected abstract reload(): void;
+
+  protected abstract seek(position: number): void;
+
+  protected abstract selectQuality(index: number): void;
+
+  protected abstract setControlsDisabled(disabled: boolean): void;
+
+  protected abstract setDisplay(display: DisplayMode): void;
+
+  protected abstract setMuted(muted: boolean): void;
+
+  protected abstract submitUserFeedback(value: UserFeedback): void;
+
+  protected abstract subscribeConfig(
+    listener: (value?: Config) => void,
+  ): Config | undefined;
+
+  protected abstract subscribeDisplay(
+    listener: (display: DisplayMode) => void,
+  ): DisplayMode;
+
+  protected abstract subscribeError(
+    listener: (error: string | undefined) => void,
+  ): string | undefined;
+
+  protected abstract subscribeMode(
+    listener: (mode: PlaybackMode) => void,
+  ): PlaybackMode;
+
+  protected abstract subscribeMuted(
     listener: (value: boolean) => void,
   ): boolean;
 
-  protected abstract subscribeQuality(
-    listener: (value: string) => void,
-  ): string;
+  protected abstract subscribePlaybackState(
+    listener: (playbackState: PlaybackState) => void,
+  ): PlaybackState;
 
-  protected abstract subscribeStreamPhase(
-    listener: (value: StreamPhase) => void,
-  ): string;
+  protected abstract subscribeQualities(
+    listener: (qualities?: Qualities) => void,
+  ): Qualities | undefined;
 }
