@@ -213,7 +213,7 @@ const zConfig = z.object({
   /** Livery stream phase, i.e: PRE/LIVE/POST before/while/after streaming to viewers. */
   streamPhase: zStreamPhase,
   /** Map of unix timestamp keys to the Livery stream phase values that started at that time. */
-  streamPhases: z.record(zNumber, zStreamPhase),
+  streamPhases: z.record(zString, zStreamPhase),
   /** Livery tenant ID. */
   tenantId: zString,
 });
