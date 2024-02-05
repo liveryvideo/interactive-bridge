@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.10.0...v1.11.0) (2024-02-05)
+
+
+### Features
+
+* **interactive-bridge:** add interactive player controls support ([#25](https://github.com/liveryvideo/interactive-bridge/issues/25)) ([f07e911](https://github.com/liveryvideo/interactive-bridge/commit/f07e9115e736a6072e9fe693bea63a22414c550a))
+
 # [1.10.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.9.3...v1.10.0) (2024-01-29)
 
 
