@@ -2,7 +2,7 @@ import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import type { LiveryBridge } from '../LiveryBridge';
 import { defineVersionedElement } from '../util/defineVersionedElement';
-import { stringify } from '../util/stringify';
+import { humanStringify } from '../util/humanStringify';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -71,7 +71,7 @@ export class LiveryBridgeLog extends LitElement {
       this.removeSpy = this.bridge.spy((message) => {
         // eslint-disable-next-line no-console
         console.log(message);
-        this.addMessage(stringify(message, null, '  '));
+        this.addMessage(humanStringify(message, true));
       });
     } else {
       window.addEventListener('message', this.handleWindowMessage);
@@ -111,7 +111,7 @@ export class LiveryBridgeLog extends LitElement {
     // eslint-disable-next-line no-console
     console.log(event.origin, event.data);
 
-    this.addMessage(`${event.origin}: ${stringify(event.data, null, '  ')}`);
+    this.addMessage(`${event.origin}: ${humanStringify(event.data, true)}`);
   };
 }
 

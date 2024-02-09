@@ -20,34 +20,28 @@ const buildQuality = (index: number) => ({
   },
 });
 
-const config: Config = {
-  controls: {
-    cast: true,
-    contact: true,
-    error: true,
-    fullscreen: true,
-    mute: true,
-    pip: true,
-    play: true,
-    quality: true,
-    scrubber: true,
-  },
-  customerId: 'dummy-customer-id',
-  streamPhase: 'PRE',
-  streamPhases: {
-    [Date.now() - 3600]: 'LIVE',
-    [Date.now()]: 'POST',
-    [Date.now() + 3600]: 'PRE',
-  },
-  tenantId: 'dummy-tenant-id',
-};
-
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
  * And with dummy support for custom command: `subscribeAuthToken` as used on the test page.
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
-  config = config;
+  config: Config = {
+    controls: {
+      cast: true,
+      contact: true,
+      error: true,
+      fullscreen: true,
+      mute: true,
+      pip: true,
+      play: true,
+      quality: true,
+      scrubber: true,
+    },
+    customerId: 'dummy-customer-id',
+    streamPhase: 'LIVE',
+    streamPhases: [[Date.now(), 'LIVE']],
+    tenantId: 'dummy-tenant-id',
+  };
 
   controlsDisabled = false;
 
@@ -63,6 +57,8 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private playbackMode: PlaybackMode = 'LIVE';
 
+  private playbackPosition = 0;
+
   private playbackState: PlaybackState = 'PLAYING';
 
   private playbackStateListeners: ((value: PlaybackState) => void)[] = [];
@@ -74,8 +70,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   };
 
   private qualitiesListeners: ((value?: Qualities) => void)[] = [];
-
-  private seekPosition = 0;
 
   constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
     super(target);
@@ -109,10 +103,10 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   protected getPlayback() {
     return {
-      buffer: Math.random() * 6,
-      duration: Math.random() * 6,
-      latency: Math.random() * 6,
-      position: this.seekPosition,
+      buffer: Math.random() * 2,
+      duration: Infinity,
+      latency: Math.random() * 3,
+      position: this.playbackPosition,
     };
   }
 
@@ -125,35 +119,35 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected pause() {
-    this.playbackState = 'PAUSED';
-    this.playbackStateListeners.forEach((listener) =>
-      listener(this.playbackState),
-    );
+    this.setPlaybackState('PAUSED');
   }
 
   protected play() {
-    this.playbackState = 'PLAYING';
-    this.playbackStateListeners.forEach((listener) =>
-      listener(this.playbackState),
-    );
+    this.setPlaybackState('BUFFERING');
+    setTimeout(() => {
+      this.setPlaybackState('PLAYING');
+    }, 3000);
   }
 
   protected reload() {
-    this.playbackState = 'PLAYING';
-    this.playbackStateListeners.forEach((listener) =>
-      listener(this.playbackState),
-    );
+    this.play();
   }
 
   protected seek(position: number) {
-    this.playbackState = 'SEEKING';
-    this.seekPosition = position;
-    this.playbackStateListeners.forEach((listener) =>
-      listener(this.playbackState),
-    );
+    this.playbackPosition = position;
+    this.setPlaybackState('SEEKING');
+    setTimeout(() => {
+      this.setPlaybackState('PLAYING');
+    }, 3000);
   }
 
   protected selectQuality(index: number) {
+    if (index === this.qualities.selected) {
+      return;
+    }
+    if (!(index === -1 || !!this.qualities.list[index])) {
+      throw new Error(`Invalid qualities index: ${index}`);
+    }
     this.qualities.selected = index;
     this.qualitiesListeners.forEach((listener) => listener(this.qualities));
   }
@@ -163,11 +157,17 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected setDisplay(display: DisplayMode) {
+    if (display === this.display) {
+      return;
+    }
     this.display = display;
     this.displayListeners.forEach((listener) => listener(this.display));
   }
 
   protected setMuted(muted: boolean) {
+    if (muted === this.muted) {
+      return;
+    }
     this.muted = muted;
     this.mutedListeners.forEach((listener) => listener(this.muted));
   }
@@ -177,27 +177,23 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected subscribeConfig(listener: (value?: Config) => void) {
+    const changeConfig = (streamPhase: Config['streamPhase']) => {
+      if (streamPhase !== this.config.streamPhase) {
+        this.config.streamPhase = streamPhase;
+        this.config.streamPhases.push([Date.now(), streamPhase]);
+      }
+    };
+
+    changeConfig('POST');
     setTimeout(() => {
-      this.config.controls = {
-        ...this.config.controls,
-        cast: false,
-        scrubber: false,
-      };
-      this.config.streamPhase = 'LIVE';
-      listener(this.config);
-    }, 1500);
-    setTimeout(() => {
-      this.config.controls = {
-        ...this.config.controls,
-        cast: true,
-        scrubber: true,
-      };
+      changeConfig('PRE');
       listener(this.config);
     }, 3000);
     setTimeout(() => {
-      this.config.streamPhase = 'POST';
+      changeConfig('LIVE');
       listener(this.config);
-    }, 4500);
+    }, 6000);
+
     return this.config;
   }
 
@@ -247,5 +243,13 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   protected subscribeQualities(listener: (value?: Qualities) => void) {
     this.qualitiesListeners.push(listener);
     return this.qualities;
+  }
+
+  private setPlaybackState(playbackState: PlaybackState) {
+    if (playbackState === this.playbackState) {
+      return;
+    }
+    this.playbackState = playbackState;
+    this.playbackStateListeners.forEach((listener) => listener(playbackState));
   }
 }
