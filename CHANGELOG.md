@@ -1,3 +1,10 @@
+## [1.11.4](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.3...v1.11.4) (2024-02-09)
+
+
+### Bug Fixes
+
+* use zod-validation-error to produce human readable errors ([e54ae9d](https://github.com/liveryvideo/interactive-bridge/commit/e54ae9dec513298529053a565ce007f664b1f853))
+
 ## [1.11.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.2...v1.11.3) (2024-02-09)
 
 
