@@ -423,7 +423,7 @@ export class InteractiveBridge extends LiveryBridge {
   async subscribeStalled(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
       (unreducedListener) => this.subscribePlaybackState(unreducedListener),
-      (value) => ['BUFFERING, SEEKING'].includes(value),
+      (value) => ['BUFFERING', 'SEEKING'].includes(value),
       listener,
     );
   }
