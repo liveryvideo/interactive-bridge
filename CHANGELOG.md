@@ -1,3 +1,10 @@
+## [1.11.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.1...v1.11.2) (2024-02-09)
+
+
+### Bug Fixes
+
+* typo in the subscribeStalled reducer ([#27](https://github.com/liveryvideo/interactive-bridge/issues/27)) ([4b3d61b](https://github.com/liveryvideo/interactive-bridge/commit/4b3d61bf38b652a1b50bd9da9b589da3859131c8))
+
 ## [1.11.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.0...v1.11.1) (2024-02-05)
 
 
