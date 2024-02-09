@@ -4,8 +4,8 @@ import type { AbstractPlayerBridge } from '../AbstractPlayerBridge';
 import { InteractiveBridge } from '../InteractiveBridge';
 import '../livery-bridge-log/LiveryBridgeLog';
 import { defineVersionedElement } from '../util/defineVersionedElement';
+import { humanStringify } from '../util/humanStringify';
 import { validateDisplayMode, type UserFeedback } from '../util/schema';
-import { stringify } from '../util/stringify';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -130,6 +130,10 @@ export class LiveryBridgeInteractive extends LitElement {
       align-items: center;
     }
 
+    pre {
+      white-space: pre-wrap;
+    }
+
     .panel {
       margin: 5px;
       border: 1px solid grey;
@@ -190,7 +194,7 @@ export class LiveryBridgeInteractive extends LitElement {
       this.interactiveBridge.registerInteractiveCommand(
         'test',
         (arg, handler) => {
-          const argStr = stringify(arg);
+          const argStr = humanStringify(arg);
           this.interactiveCommandArg = argStr;
 
           window.setTimeout(() => handler(`${argStr}-result-2`), 2000);
@@ -433,7 +437,7 @@ export class LiveryBridgeInteractive extends LitElement {
     }
 
     return (value: unknown) => {
-      element.innerText = stringify(value, null, '  ');
+      element.innerText = humanStringify(value, true);
     };
   }
 
@@ -463,21 +467,7 @@ export class LiveryBridgeInteractive extends LitElement {
 
         inputElement.setAttribute('style', 'display: inline-block');
         inputElement.setAttribute('type', 'number');
-        inputElement.setAttribute('min', '0');
         inputElement.value = '';
-
-        if (methodName === 'selectQuality') {
-          this.interactiveBridge
-            ?.subscribeQualities(() => null)
-            .then((qualities) => {
-              inputElement.setAttribute('max', `${qualities.list.length - 1}`);
-            })
-            .catch((e) => {
-              throw e;
-            });
-        } else {
-          inputElement.removeAttribute('max');
-        }
         break;
       }
       default: {
@@ -488,8 +478,6 @@ export class LiveryBridgeInteractive extends LitElement {
         if (inputElement) {
           inputElement.setAttribute('style', 'display: none');
           inputElement.setAttribute('type', 'text');
-          inputElement.removeAttribute('min');
-          inputElement.removeAttribute('max');
         }
       }
     }
@@ -640,7 +628,7 @@ export class LiveryBridgeInteractive extends LitElement {
     const arg: unknown = !argStr ? undefined : JSON.parse(argStr);
 
     const setText = (value: unknown) => {
-      this.playerCommandValue = stringify(value);
+      this.playerCommandValue = humanStringify(value);
     };
     this.interactiveBridge
       .sendPlayerCommand(name, arg, setText)
