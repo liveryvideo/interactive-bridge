@@ -1,3 +1,10 @@
+## [1.11.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.2...v1.11.3) (2024-02-09)
+
+
+### Bug Fixes
+
+* change streamPhases type to array of tuples, use humanStringify ([#28](https://github.com/liveryvideo/interactive-bridge/issues/28)) ([58c51fe](https://github.com/liveryvideo/interactive-bridge/commit/58c51fe9f1d581035ff4d82a4c3438e6a4d00cbf))
+
 ## [1.11.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.1...v1.11.2) (2024-02-09)
 
 
