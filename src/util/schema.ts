@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { errorMap } from 'zod-validation-error';
+
+z.setErrorMap(errorMap);
 
 const createValidate =
   <T>(schema: Zod.ZodSchema<T>) =>
