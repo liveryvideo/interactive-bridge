@@ -19,7 +19,7 @@ import {
   validateDisplayMode,
   validateFeatures,
   validateLiveryParams,
-  validateNumber,
+  validateNumberOrNan,
   validateOrientation,
   validatePlaybackDetails,
   validatePlaybackMode,
@@ -93,7 +93,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @deprecated Instead use {@link getPlayback}.latency
    */
   getLatency() {
-    return this.sendCommand('getLatency').then(validateNumber);
+    return this.sendCommand('getLatency').then(validateNumberOrNan);
   }
 
   /**

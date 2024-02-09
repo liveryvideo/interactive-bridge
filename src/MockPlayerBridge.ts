@@ -57,8 +57,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private playbackMode: PlaybackMode = 'LIVE';
 
-  private playbackPosition = 0;
-
   private playbackState: PlaybackState = 'PLAYING';
 
   private playbackStateListeners: ((value: PlaybackState) => void)[] = [];
@@ -70,6 +68,8 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   };
 
   private qualitiesListeners: ((value?: Qualities) => void)[] = [];
+
+  private zeroTimestamp = Date.now();
 
   constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
     super(target);
@@ -102,12 +102,19 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected getPlayback() {
-    return {
-      buffer: Math.random() * 2,
-      duration: Infinity,
-      latency: Math.random() * 3,
-      position: this.playbackPosition,
-    };
+    return this.playbackState === 'PLAYING'
+      ? {
+          buffer: 2.8,
+          duration: Infinity,
+          latency: 2.98,
+          position: (Date.now() - this.zeroTimestamp - 2980) / 1000,
+        }
+      : {
+          buffer: NaN,
+          duration: Infinity,
+          latency: NaN,
+          position: 0,
+        };
   }
 
   protected getPlayerVersion() {
@@ -134,7 +141,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected seek(position: number) {
-    this.playbackPosition = position;
+    this.zeroTimestamp = Date.now() - 1000 * position;
     this.setPlaybackState('SEEKING');
     setTimeout(() => {
       this.setPlaybackState('PLAYING');

@@ -1,21 +1,37 @@
-import { z } from 'zod';
-import { errorMap } from 'zod-validation-error';
-
-z.setErrorMap(errorMap);
+import { ZodError, z } from 'zod';
 
 const createValidate =
   <T>(schema: Zod.ZodSchema<T>) =>
-  (value: unknown) =>
-    schema.parse(value);
+  (value: unknown) => {
+    try {
+      return schema.parse(value);
+    } catch (error: unknown) {
+      if (!(error instanceof ZodError)) {
+        throw new Error('Schema parse error not a ZodError');
+      }
+      // Note: I tried zod-validation-error but it didn't work
+      // This is my own attempt at something like it
+      throw new Error(
+        error.issues
+          .map((issue) => {
+            const path = issue.path.join('.');
+            return `${path ? `${path}: ` : ''}${issue.message}`;
+          })
+          .join('; '),
+      );
+    }
+  };
 
 const zBoolean = z.boolean();
 const zNumber = z.number();
+const zNumberOrNan = z.union([z.number(), z.nan()]);
 const zString = z.string();
 const zUndefined = z.undefined();
 const zStringOrUndefined = z.union([zString, zUndefined]);
 
 export const validateBoolean = createValidate(zBoolean);
 export const validateNumber = createValidate(zNumber);
+export const validateNumberOrNan = createValidate(zNumberOrNan);
 export const validateString = createValidate(zString);
 export const validateStringOrUndefined = createValidate(zStringOrUndefined);
 
@@ -72,13 +88,13 @@ export const validateOrientation = createValidate(zOrientation);
 
 const zPlaybackDetails = z.object({
   /** Current playback buffer in seconds ahead of current position. */
-  buffer: zNumber,
+  buffer: zNumberOrNan,
   /** Current playback duration in seconds from start to end of live stream or VOD. */
-  duration: zNumber,
+  duration: zNumberOrNan,
   /** Current end-to-end latency in seconds. */
-  latency: zNumber,
+  latency: zNumberOrNan,
   /** Current playback position in seconds since start of live stream or VOD. */
-  position: zNumber,
+  position: zNumberOrNan,
 });
 
 /**
