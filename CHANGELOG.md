@@ -1,3 +1,10 @@
+## [1.11.5](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.4...v1.11.5) (2024-02-09)
+
+
+### Bug Fixes
+
+* allow NaN values in PlaybackDetails, replace zod-validation-error by own ([5f2dda9](https://github.com/liveryvideo/interactive-bridge/commit/5f2dda99f76bc739f268c00993ba51dbe629c0cb))
+
 ## [1.11.4](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.3...v1.11.4) (2024-02-09)
 
 
