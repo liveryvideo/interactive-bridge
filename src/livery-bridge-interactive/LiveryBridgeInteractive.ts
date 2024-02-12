@@ -32,6 +32,7 @@ const BRIDGE_GET_NAMES = [
   'setControlsDisabled',
   'setDisplay',
   'setMuted',
+  'setVolume',
   'submitUserFeedback',
 ] as const;
 const BRIDGE_SUBSCRIBE_NAMES = [
@@ -40,7 +41,6 @@ const BRIDGE_SUBSCRIBE_NAMES = [
   'subscribeError',
   'subscribeFullscreen',
   'subscribeMode',
-  'subscribeMuted',
   'subscribeOrientation',
   'subscribePaused',
   'subscribePlaybackState',
@@ -49,6 +49,7 @@ const BRIDGE_SUBSCRIBE_NAMES = [
   'subscribeQuality',
   'subscribeStalled',
   'subscribeStreamPhase',
+  'subscribeVolume',
 ] as const;
 
 type BridgeGetName = (typeof BRIDGE_GET_NAMES)[number];
@@ -279,6 +280,7 @@ export class LiveryBridgeInteractive extends LitElement {
                     </option>
                     <option value="setDisplay">setDisplay</option>
                     <option value="setMuted">setMuted</option>
+                    <option value="setVolume">setVolume</option>
                     <option value="submitUserFeedback">
                       submitUserFeedback
                     </option>
@@ -337,7 +339,6 @@ export class LiveryBridgeInteractive extends LitElement {
                       subscribeFullscreen
                     </option>
                     <option value="subscribeMode">subscribeMode</option>
-                    <option value="subscribeMuted">subscribeMuted</option>
                     <option value="subscribeOrientation">
                       subscribeOrientation
                     </option>
@@ -354,6 +355,7 @@ export class LiveryBridgeInteractive extends LitElement {
                     <option value="subscribeStreamPhase">
                       subscribeStreamPhase
                     </option>
+                    <option value="subscribeVolume">subscribeVolume</option>
                   </select>
                   <button type="submit">Send</button>
                 </form>
@@ -456,6 +458,7 @@ export class LiveryBridgeInteractive extends LitElement {
 
     switch (methodName) {
       case 'seek':
+      case 'setVolume':
       case 'selectQuality': {
         const inputElement = this.renderRoot.querySelector(
           '#getCommandNameInput',

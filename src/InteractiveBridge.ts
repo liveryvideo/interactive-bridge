@@ -12,6 +12,7 @@ import type {
   Qualities,
   StreamPhase,
   UserFeedback,
+  Volume,
 } from './util/schema';
 import {
   validateBoolean,
@@ -28,6 +29,7 @@ import {
   validateStreamPhase,
   validateString,
   validateStringOrUndefined,
+  validateVolume,
 } from './util/schema';
 
 /**
@@ -148,7 +150,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Attempt to start or resume playback.
    *
    * Can fail if not allowed by the browser, e.g: when not called directly from a click event listener.
-   * In that case it can fall back to muted playback, changing {@link subscribeMuted} to true.
+   * In that case it can fall back to muted playback, changing {@link subscribeVolume}.muted to true.
    * Or if that also fails then {@link subscribePaused} will remain true.
    */
   play() {
@@ -254,10 +256,17 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * Unmuting can fail if not allowed by the browser, e.g: when not called directly from a click event listener.
    * The specified state is kept track of by the player though and respected on reload when possible.
-   * Look at {@link subscribeMuted} state to track actual unmuting.
+   * Look at {@link subscribeVolume}.muted state to track actual unmuting.
    */
   setMuted(muted: boolean) {
     return this.sendCommand('setMuted', muted);
+  }
+
+  /**
+   * Change `volume` to specified value.
+   */
+  setVolume(volume: number) {
+    return this.sendCommand('setVolume', volume);
   }
 
   /**
@@ -323,16 +332,6 @@ export class InteractiveBridge extends LiveryBridge {
     return this.sendCommand('subscribeMode', undefined, (mode) =>
       listener(validatePlaybackMode(mode)),
     ).then((mode) => validatePlaybackMode(mode));
-  }
-
-  /**
-   * Returns promise of current player muted state
-   * and calls back `listener` with any subsequent muted changes.
-   */
-  subscribeMuted(listener: (muted: boolean) => void) {
-    return this.sendCommand('subscribeMuted', undefined, (value) =>
-      listener(validateBoolean(value)),
-    ).then(validateBoolean);
   }
 
   /**
@@ -440,6 +439,16 @@ export class InteractiveBridge extends LiveryBridge {
     return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
       listener(validateStreamPhase(value)),
     ).then(validateStreamPhase);
+  }
+
+  /**
+   * Returns promise of current player volume state
+   * and calls back `listener` with any subsequent volume changes.
+   */
+  subscribeVolume(listener: (volume: Volume) => void) {
+    return this.sendCommand('subscribeVolume', undefined, (value) =>
+      listener(validateVolume(value)),
+    ).then(validateVolume);
   }
 
   /**
