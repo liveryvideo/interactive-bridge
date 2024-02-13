@@ -206,10 +206,15 @@ export type StreamPhase = z.infer<typeof zStreamPhase>;
 export const validateStreamPhase = createValidate(zStreamPhase);
 
 const zVolume = z.object({
+  /** If true then audio is muted. */
   muted: zBoolean,
+  /** Audio volume, from `0.0` (silent) to `1.0` (loudest). */
   volume: zNumber,
 });
 
+/**
+ * Player volume state.
+ */
 export type Volume = z.infer<typeof zVolume>;
 
 export const validateVolume = createValidate(zVolume);
