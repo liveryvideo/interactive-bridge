@@ -42,4 +42,5 @@ export type {
   Qualities,
   StreamPhase,
   UserFeedback,
+  Volume,
 } from './src/util/schema';
