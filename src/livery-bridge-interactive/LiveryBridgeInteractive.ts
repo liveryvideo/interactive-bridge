@@ -470,6 +470,10 @@ export class LiveryBridgeInteractive extends LitElement {
 
         inputElement.setAttribute('style', 'display: inline-block');
         inputElement.setAttribute('type', 'number');
+        inputElement.setAttribute(
+          'step',
+          methodName === 'setVolume' ? 'any' : '1',
+        );
         inputElement.value = '';
         break;
       }
@@ -481,6 +485,7 @@ export class LiveryBridgeInteractive extends LitElement {
         if (inputElement) {
           inputElement.setAttribute('style', 'display: none');
           inputElement.setAttribute('type', 'text');
+          inputElement.removeAttribute('step');
         }
       }
     }
@@ -570,9 +575,10 @@ export class LiveryBridgeInteractive extends LitElement {
 
       switch (methodName) {
         case 'seek':
-        case 'selectQuality': {
+        case 'selectQuality':
+        case 'setVolume': {
           const inputValue = getInputValue('Input');
-          this.interactiveBridge[methodName](parseInt(inputValue, 10)).then(
+          this.interactiveBridge[methodName](parseFloat(inputValue)).then(
             setText,
             setText,
           );
