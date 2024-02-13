@@ -6,6 +6,7 @@ import type {
   PlaybackState,
   Qualities,
   UserFeedback,
+  Volume,
 } from './util/schema';
 
 const buildQuality = (index: number) => ({
@@ -53,8 +54,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private muted = true;
 
-  private mutedListeners: ((value: boolean) => void)[] = [];
-
   private playbackMode: PlaybackMode = 'LIVE';
 
   private playbackState: PlaybackState = 'PLAYING';
@@ -68,6 +67,10 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   };
 
   private qualitiesListeners: ((value?: Qualities) => void)[] = [];
+
+  private volume = 1;
+
+  private volumeListeners: ((value: Volume) => void)[] = [];
 
   private zeroTimestamp = Date.now();
 
@@ -176,7 +179,19 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       return;
     }
     this.muted = muted;
-    this.mutedListeners.forEach((listener) => listener(this.muted));
+    this.volumeListeners.forEach((listener) =>
+      listener({ muted: this.muted, volume: this.volume }),
+    );
+  }
+
+  protected setVolume(volume: number) {
+    if (volume === this.volume) {
+      return;
+    }
+    this.volume = volume;
+    this.volumeListeners.forEach((listener) =>
+      listener({ muted: this.muted, volume: this.volume }),
+    );
   }
 
   protected submitUserFeedback(value: UserFeedback) {
@@ -235,11 +250,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return this.playbackMode;
   }
 
-  protected subscribeMuted(listener: (value: boolean) => void) {
-    this.mutedListeners.push(listener);
-    return this.muted;
-  }
-
   protected subscribePlaybackState(
     listener: (playbackState: PlaybackState) => void,
   ) {
@@ -250,6 +260,11 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   protected subscribeQualities(listener: (value?: Qualities) => void) {
     this.qualitiesListeners.push(listener);
     return this.qualities;
+  }
+
+  protected subscribeVolume(listener: (value: Volume) => void) {
+    this.volumeListeners.push(listener);
+    return { muted: this.muted, volume: this.volume };
   }
 
   private setPlaybackState(playbackState: PlaybackState) {

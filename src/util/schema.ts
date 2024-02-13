@@ -205,6 +205,15 @@ export type StreamPhase = z.infer<typeof zStreamPhase>;
 
 export const validateStreamPhase = createValidate(zStreamPhase);
 
+const zVolume = z.object({
+  muted: zBoolean,
+  volume: zNumber,
+});
+
+export type Volume = z.infer<typeof zVolume>;
+
+export const validateVolume = createValidate(zVolume);
+
 const zConfig = z.object({
   /** Registry of controls that should be shown to the user. */
   controls: z.object({

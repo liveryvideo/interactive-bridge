@@ -11,6 +11,7 @@ import type {
   Qualities,
   StreamPhase,
   UserFeedback,
+  Volume,
 } from './util/schema';
 import {
   validateBoolean,
@@ -119,6 +120,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'setMuted') {
       return this.setMuted(validateBoolean(arg));
     }
+    if (name === 'setVolume') {
+      return this.setVolume(validateNumber(arg));
+    }
     if (name === 'submitUserFeedback') {
       return this.submitUserFeedback(validateUserFeedback(arg));
     }
@@ -137,9 +141,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'subscribeMode') {
       return this.subscribeMode(listener);
     }
-    if (name === 'subscribeMuted') {
-      return this.subscribeMuted(listener);
-    }
     if (name === 'subscribeOrientation') {
       return this.subscribeOrientation(listener);
     }
@@ -154,6 +155,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     }
     if (name === 'subscribeStreamPhase') {
       return this.subscribeStreamPhase(listener);
+    }
+    if (name === 'subscribeVolume') {
+      return this.subscribeVolume(listener);
     }
 
     return super.handleCommand(name, arg, listener);
@@ -269,6 +273,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
 
   protected abstract setMuted(muted: boolean): void;
 
+  protected abstract setVolume(volume: number): void;
+
   protected abstract submitUserFeedback(value: UserFeedback): void;
 
   protected abstract subscribeConfig(
@@ -287,10 +293,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (mode: PlaybackMode) => void,
   ): PlaybackMode;
 
-  protected abstract subscribeMuted(
-    listener: (value: boolean) => void,
-  ): boolean;
-
   protected abstract subscribePlaybackState(
     listener: (playbackState: PlaybackState) => void,
   ): PlaybackState;
@@ -298,4 +300,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeQualities(
     listener: (qualities?: Qualities) => void,
   ): Qualities | undefined;
+
+  protected abstract subscribeVolume(
+    listener: (volume: Volume) => void,
+  ): Volume;
 }
