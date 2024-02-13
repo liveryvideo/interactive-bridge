@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.0...v1.12.1) (2024-02-13)
+
+
+### Bug Fixes
+
+* export Volume type ([db6e8f7](https://github.com/liveryvideo/interactive-bridge/commit/db6e8f78b1f7a97ad9ff0304396aa84bd433ff29))
+
 # [1.12.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.5...v1.12.0) (2024-02-13)
 
 
