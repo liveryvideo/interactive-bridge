@@ -264,6 +264,11 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Change `volume` to specified value.
+   *
+   * When a player starts unmuted at volume `0` and this is changed to a higher volume later,
+   * that can be disallowed by the browser, e.g: when not called directly from a click event listener.
+   * In that case the player will fall back to changing {@link subscribeVolume}.muted to `true`
+   * to allow the volume change to persist.
    */
   setVolume(volume: number) {
     return this.sendCommand('setVolume', volume);
