@@ -1,3 +1,10 @@
+## [1.12.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.1...v1.12.2) (2024-02-13)
+
+
+### Bug Fixes
+
+* **InteractiveBridge:** update tsdoc: getPlayback and subscribeMode don't require features scrubber ([f24c00c](https://github.com/liveryvideo/interactive-bridge/commit/f24c00cc2210b1518295b3633371b90516837afa))
+
 ## [1.12.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.0...v1.12.1) (2024-02-13)
 
 
