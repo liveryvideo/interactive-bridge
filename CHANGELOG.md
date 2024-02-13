@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.5...v1.12.0) (2024-02-13)
+
+
+### Features
+
+* add setVolume command and replace subscribeMuted by subscribeVolume ([#29](https://github.com/liveryvideo/interactive-bridge/issues/29)) ([f9747df](https://github.com/liveryvideo/interactive-bridge/commit/f9747df460ccced5bafca043eb287a30e7f77017))
+
 ## [1.11.5](https://github.com/liveryvideo/interactive-bridge/compare/v1.11.4...v1.11.5) (2024-02-09)
 
 
