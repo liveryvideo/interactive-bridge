@@ -118,8 +118,6 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Returns promise of current playback details, i.e: values that are continuously changing.
-   *
-   * Requires: {@link getFeatures}.scrubber.
    */
   getPlayback(): Promise<PlaybackDetails> {
     return this.sendCommand('getPlayback').then(validatePlaybackDetails);
@@ -330,8 +328,6 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
    * and calls back `listener` with any subsequent mode changes.
-   *
-   * Requires: {@link getFeatures}.scrubber.
    */
   subscribeMode(listener: (mode: PlaybackMode) => void): Promise<PlaybackMode> {
     return this.sendCommand('subscribeMode', undefined, (mode) =>
