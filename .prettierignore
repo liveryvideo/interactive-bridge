@@ -22,4 +22,5 @@ CHANGELOG.md
 /.tmp/
 
 ## dist
+/build/
 /dist/

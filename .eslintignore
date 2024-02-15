@@ -20,4 +20,5 @@
 /.tmp/
 
 ## dist
+/build/
 /dist/

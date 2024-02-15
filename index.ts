@@ -13,8 +13,8 @@
  * - Element {@link LiveryBridgeMock} mocks a LiveryPlayer with an interactive child element or iframe for testing
  * - Element {@link LiveryBridgeInteractive} is an interactive element that enables testing all interactive commands
  *
- * **Note:** If you are reading this at tsdocs.dev we recommend you to disable the `Inherited`
- * member visibility from `Settings` to make it easier to find our members.
+ * **Note:** When using the UMD bundle, the exports can be found as properties of `livery` in the global namespace,
+ * e.g: `livery.version`.
  *
  * @packageDocumentation
  */
