@@ -22,7 +22,9 @@
     "dist"
   ],
   "scripts": {
-    "build:lib": "vite build -m lib:bundler && vite build -m lib:browser --emptyOutDir false && typedoc && npm run typedoc:concat",
+    "api:concat": "concat-md --decrease-title-levels --start-title-level-at 2 --file-name-as-title build/typedoc > dist/API.md",
+    "api:strip-title": "sed -i '' '1d' build/typedoc/classes/*",
+    "build:lib": "vite build -m lib:bundler && vite build -m lib:browser --emptyOutDir false && typedoc && npm run api:strip-title && npm run api:concat",
     "build": "vite build",
     "dev": "vite",
     "format:eslint": "eslint --ext .ts,.js,.html . --fix",
@@ -38,8 +40,7 @@
     "prepublishOnly": "npm run build:lib",
     "preview": "vite preview",
     "test:watch": "vitest",
-    "test": "vitest run",
-    "typedoc:concat": "concat-md --decrease-title-levels --start-title-level-at 2 --file-name-as-title build/typedoc > dist/API.md"
+    "test": "vitest run"
   },
   "dependencies": {
     "lit": "^3.1.2",

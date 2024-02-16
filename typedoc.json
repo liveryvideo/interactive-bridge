@@ -4,8 +4,6 @@
   "tsconfig": "./tsconfig-typedoc.json",
   "out": "build/typedoc",
   "plugin": ["typedoc-plugin-markdown", "typedoc-plugin-zod"],
-  /* TODO: see if this is still useful */
-  // "categorizeByGroup": true,
   "disableSources": true,
   "excludeExternals": true,
   "excludePrivate": true,
