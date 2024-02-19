@@ -45,6 +45,7 @@ const zDisplayMode = z.union([
 
 /**
  * Mode of display for player and/or video, i.e:
+ *
  * - `'DEFAULT'` for default display in the web page
  * - `'FULLSCREEN'` for fullscreen display
  * - `'PIP'` for picture-in-picture display of the video (the interactive layer remains in the page)
@@ -113,6 +114,7 @@ const zPlaybackMode = z.union([
 
 /**
  * Mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
+ *
  * - `'CATCHUP'` stream at increased live latency, i.e. after seeking to catch up to missed content
  * - `'LIVE'` stream at default live target latency
  * - `'UNKNOWN'` while state is unknown, e.g: during startup
@@ -135,6 +137,7 @@ const zPlaybackState = z.union([
 
 /**
  * Playback state, i.e:
+ *
  * - `'BUFFERING'` while waiting for buffer to fill before being able to play
  * - `'ENDED'` after video has ended
  * - `'FAST_FORWARD'` while playing at an increased rate

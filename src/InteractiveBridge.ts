@@ -104,6 +104,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Android and iOS players will call a callback and pass on the returned values.
    *
    * The web player will return all 'livery_' prefixed query parameters with:
+   *
    * - The prefix stripped from the names (snake_case will not be converted to camelCase)
    * - Parameter names and values URL decoded
    * - Empty string (not `null`) values for parameters without a value

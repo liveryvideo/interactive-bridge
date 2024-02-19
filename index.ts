@@ -2,6 +2,7 @@
  * Bridge for communicating between a Livery Video Player and the interactive layer page shown within that.
  *
  * Exports:
+ *
  * - Class {@link InteractiveBridge} enables a Livery interactive layer element or page to communicate with
  *   the surrounding Livery Player
  * - Element: {@link LiveryBridgeLog} logs messages posted to specified bridge or the window
