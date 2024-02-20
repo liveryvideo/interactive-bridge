@@ -22,7 +22,7 @@
     "dist"
   ],
   "scripts": {
-    "build:lib": "vite build -m lib:bundler && vite build -m lib:browser --emptyOutDir false && typedoc",
+    "build:lib": "vite build -m lib:bundler && vite build -m lib:browser --emptyOutDir false && typedoc && mv dist/doc/* dist/ && rm -rf dist/doc",
     "build": "vite build",
     "dev": "vite",
     "format:eslint": "eslint --ext .ts,.js,.html . --fix",
