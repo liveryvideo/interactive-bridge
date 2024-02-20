@@ -88,22 +88,28 @@ export type Orientation = z.infer<typeof zOrientation>;
 export const validateOrientation = createValidate(zOrientation);
 
 const zPlaybackDetails = z.object({
-  /** Current playback buffer in seconds ahead of current position. */
   buffer: zNumberOrNan,
-  /** Current playback duration in seconds from start to end of live stream or VOD. */
   duration: zNumberOrNan,
-  /** Current end-to-end latency in seconds. */
   latency: zNumberOrNan,
-  /** Current playback position in seconds since start of live stream or VOD. */
   position: zNumberOrNan,
 });
 
 /**
  * Playback details, i.e: values that are continuously changing.
  */
-export type PlaybackDetails = z.infer<typeof zPlaybackDetails>;
+export type PlaybackDetails = {
+  /** Current playback buffer in seconds ahead of current position. */
+  buffer: number;
+  /** Current playback duration in seconds from start to end of live stream or VOD. */
+  duration: number;
+  /** Current end-to-end latency in seconds. */
+  latency: number;
+  /** Current playback position in seconds since start of live stream or VOD. */
+  position: number;
+};
 
-export const validatePlaybackDetails = createValidate(zPlaybackDetails);
+export const validatePlaybackDetails =
+  createValidate<PlaybackDetails>(zPlaybackDetails);
 
 const zPlaybackMode = z.union([
   z.literal('CATCHUP'),

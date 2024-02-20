@@ -6,7 +6,6 @@ import type {
   DisplayMode,
   Features,
   Orientation,
-  PlaybackDetails,
   PlaybackMode,
   PlaybackState,
   Qualities,
@@ -120,7 +119,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current playback details, i.e: values that are continuously changing.
    */
-  getPlayback(): Promise<PlaybackDetails> {
+  getPlayback() {
     return this.sendCommand('getPlayback').then(validatePlaybackDetails);
   }
 
