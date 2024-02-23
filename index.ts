@@ -41,6 +41,7 @@ export type {
   PlaybackMode,
   PlaybackState,
   Qualities,
+  Quality,
   StreamPhase,
   UserFeedback,
   Volume,

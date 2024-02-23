@@ -225,6 +225,7 @@ export class LiveryBridge {
   /**
    * Spy on LiveryMessages handled by this bridge.
    *
+   * @internal
    * @param callback - Callback to call with message
    * @returns Method to remove callback from spies
    */

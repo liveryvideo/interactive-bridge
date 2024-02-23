@@ -265,30 +265,35 @@ export const validatePlaybackDetails = createValidate<PlaybackDetails>(
 );
 
 /**
+ * Stream audio and video quality.
+ */
+export type Quality = {
+  /** Audio quality. */
+  audio?: {
+    /** Audio bandwidth in bits per second. */
+    bandwidth: number;
+  };
+  /** Quality label. If video height is unique: ‘[height]p’ else ‘[bandwidth/1000]k’. */
+  label: string;
+  /** Video quality. */
+  video?: {
+    /** Video andwidth in bits per second. */
+    bandwidth: number;
+    /** Video height in pixels. */
+    height: number;
+    /** Video width in pixels. */
+    width: number;
+  };
+};
+
+/**
  * Stream qualities.
  */
 export type Qualities = {
   /** Index of quality that is being played, or -1 if no quality is active yet. */
   active: number;
   /** List of qualities that can be played. */
-  list: Array<{
-    /** Audio quality. */
-    audio?: {
-      /** Audio bandwidth in bits per second. */
-      bandwidth: number;
-    };
-    /** Quality label. If video height is unique: ‘[height]p’ else ‘[bandwidth/1000]k’. */
-    label: string;
-    /** Video quality. */
-    video?: {
-      /** Video andwidth in bits per second. */
-      bandwidth: number;
-      /** Video height in pixels. */
-      height: number;
-      /** Video width in pixels. */
-      width: number;
-    };
-  }>;
+  list: Quality[];
   /** Index of quality that is selected to be played, or -1 if ABR is used. */
   selected: number;
 };
