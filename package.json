@@ -67,7 +67,6 @@
     "semantic-release": "^23.0.2",
     "typedoc": "^0.25.8",
     "typedoc-plugin-markdown": "^3.17.1",
-    "typedoc-plugin-zod": "^1.1.2",
     "typescript": "^5.3.3",
     "vite": "^5.1.1",
     "vite-plugin-dts": "^3.7.2",

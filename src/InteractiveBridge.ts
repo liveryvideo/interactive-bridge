@@ -4,7 +4,6 @@ import { reducedSubscribe } from './util/reducedSubscribe';
 import type {
   Config,
   DisplayMode,
-  Features,
   Orientation,
   PlaybackMode,
   PlaybackState,
@@ -18,7 +17,6 @@ import {
   validateConfig,
   validateDisplayMode,
   validateFeatures,
-  validateLiveryParams,
   validateNumberOrNan,
   validateOrientation,
   validatePlaybackDetails,
@@ -28,8 +26,12 @@ import {
   validateStreamPhase,
   validateString,
   validateStringOrUndefined,
+  validateStringParams,
   validateVolume,
 } from './util/schema';
+
+// Note: We have to explicitly define return types for our named union return types to result in nice linked types
+// When one of our named object types is returned this is not necessary however
 
 /**
  * Can be used by a Livery interactive layer element or page to communicate with the surrounding Livery Player.
@@ -84,7 +86,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of a registry of features supported by the player in general and under given circumstances.
    */
-  getFeatures(): Promise<Features> {
+  getFeatures() {
     return this.sendCommand('getFeatures').then(validateFeatures);
   }
 
@@ -113,7 +115,7 @@ export class InteractiveBridge extends LiveryBridge {
    * this will return: `{ 'foo:bar': 'hey you', no_val: '', multi: '1' }`.
    */
   getLiveryParams() {
-    return this.sendCommand('getLiveryParams').then(validateLiveryParams);
+    return this.sendCommand('getLiveryParams').then(validateStringParams);
   }
 
   /**
@@ -141,7 +143,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Pause playback.
    */
   pause() {
-    return this.sendCommand('pause');
+    return this.sendCommand<void>('pause');
   }
 
   /**
@@ -152,7 +154,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Or if that also fails then {@link subscribePaused} will remain true.
    */
   play() {
-    return this.sendCommand('play');
+    return this.sendCommand<void>('play');
   }
 
   /**
@@ -183,7 +185,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Reload player, e.g: to try to recover from an error.
    */
   reload() {
-    return this.sendCommand('reload');
+    return this.sendCommand<void>('reload');
   }
 
   /**
@@ -195,14 +197,14 @@ export class InteractiveBridge extends LiveryBridge {
    * Requires: {@link getFeatures}.scrubber.
    */
   seek(position: number) {
-    return this.sendCommand('seek', position);
+    return this.sendCommand<void>('seek', position);
   }
 
   /**
    * Select quality at specified index of {@link subscribeQualities}.list or -1 to use ABR.
    */
   selectQuality(index: number) {
-    return this.sendCommand('selectQuality', index);
+    return this.sendCommand<void>('selectQuality', index);
   }
 
   /**
@@ -235,7 +237,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Change `disabled` to `true` to disable all default player controls and implement your own instead.
    */
   setControlsDisabled(disabled: boolean) {
-    return this.sendCommand('setControlsDisabled', disabled);
+    return this.sendCommand<void>('setControlsDisabled', disabled);
   }
 
   /**
@@ -246,7 +248,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Requires related feature, i.e: {@link getFeatures}.airplay, chromecast or fullscreen.
    */
   setDisplay(display: DisplayMode) {
-    return this.sendCommand('setDisplay', display);
+    return this.sendCommand<void>('setDisplay', display);
   }
 
   /**
@@ -257,7 +259,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Look at {@link subscribeVolume}.muted state to track actual unmuting.
    */
   setMuted(muted: boolean) {
-    return this.sendCommand('setMuted', muted);
+    return this.sendCommand<void>('setMuted', muted);
   }
 
   /**
@@ -269,7 +271,7 @@ export class InteractiveBridge extends LiveryBridge {
    * to allow the volume change to persist.
    */
   setVolume(volume: number) {
-    return this.sendCommand('setVolume', volume);
+    return this.sendCommand<void>('setVolume', volume);
   }
 
   /**
@@ -278,14 +280,14 @@ export class InteractiveBridge extends LiveryBridge {
    * Requires: {@link getFeatures}.contact.
    */
   submitUserFeedback(userFeedback: UserFeedback) {
-    return this.sendCommand('submitUserFeedback', userFeedback);
+    return this.sendCommand<void>('submitUserFeedback', userFeedback);
   }
 
   /**
    * Returns promise of Livery stream config
    * and calls back `listener` with server side updates or when streamId is changed.
    */
-  subscribeConfig(listener: (value?: Config) => void): Promise<Config> {
+  subscribeConfig(listener: (value?: Config) => void) {
     return this.sendCommand('subscribeConfig', undefined, (value) =>
       listener(validateConfig(value)),
     ).then(validateConfig);
@@ -394,9 +396,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of current player stream qualities
    * and calls back `listener` with any subsequent qualities changes.
    */
-  subscribeQualities(
-    listener: (value?: Qualities) => void,
-  ): Promise<Qualities> {
+  subscribeQualities(listener: (value?: Qualities) => void) {
     return this.sendCommand('subscribeQualities', undefined, (value) =>
       listener(validateQualities(value)),
     ).then(validateQualities);
