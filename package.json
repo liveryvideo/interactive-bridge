@@ -1,6 +1,6 @@
 {
   "name": "@liveryvideo/interactive-bridge",
-  "version": "1.12.3",
+  "version": "1.12.4",
   "publishConfig": {
     "access": "public"
   },

@@ -1,3 +1,10 @@
+## [1.12.4](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.3...v1.12.4) (2024-02-26)
+
+
+### Bug Fixes
+
+* **docs:** update to new InteractiveBridge target and typedoc usage ([a4ac700](https://github.com/liveryvideo/interactive-bridge/commit/a4ac700353fd19a7703a0c4d3e64e27f9394ec87))
+
 ## [1.12.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.2...v1.12.3) (2024-02-26)
 
 
