@@ -1,0 +1,18 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./dist/index.d.ts"],
+  "tsconfig": "./tsconfig-typedoc.json",
+  "out": "dist/doc",
+  "plugin": ["typedoc-plugin-markdown"],
+  "categorizeByGroup": true,
+  "disableSources": true,
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeNotDocumented": true,
+  "includeVersion": true,
+  "readme": "none",
+  /* typedoc-plugin-markdown */
+  "entryDocument": "index.md",
+  "hideInPageTOC": true
+}

@@ -1,2 +1,27 @@
-/node_modules/
+# Copied from .prettierignore
+
 CHANGELOG.md
+
+# Copied from .eslintignore
+
+## External dependencies
+/ext/
+
+# Copied from .gitignore
+
+## editors
+/.idea
+/.vscode
+
+## system files
+.DS_Store
+
+## npm
+/node_modules/
+/npm-debug.log
+
+## temp folders
+/.tmp/
+
+## dist
+/dist/

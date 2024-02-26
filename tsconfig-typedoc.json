@@ -1,0 +1,4 @@
+/* Used by typedoc to generate API docs based on the rolled up package types */
+{
+  "include": ["dist/index.d.ts"]
+}

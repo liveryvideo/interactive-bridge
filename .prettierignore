@@ -1,3 +1,5 @@
+# Copy any changes made here to .markdownlintignore
+
 CHANGELOG.md
 
 # Copied from .eslintignore
