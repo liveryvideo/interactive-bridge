@@ -5,9 +5,9 @@
  *
  * - Class {@link InteractiveBridge} enables a Livery interactive layer element or page to communicate with
  *   the surrounding Livery Player
- * - Element: {@link LiveryBridgeLog} logs messages posted to specified bridge or the window
- * - Types: {@link Orientation}, {@link StreamPhase} are used throughout the package
- * - Variable: {@link version} specifies the version of this package
+ * - Element {@link LiveryBridgeLog} logs messages posted to specified bridge or the window
+ * - Types {@link Orientation} and {@link StreamPhase} are used throughout the package
+ * - Variable {@link version} specifies the version of this package
  * - Class {@link AbstractPlayerBridge} is used by LiveryPlayer for the `PlayerBridge` implementation
  *   (in the past: {@link LiveryBridge})
  * - Class {@link MockPlayerBridge} is a player bridge that returns mock data for testing
