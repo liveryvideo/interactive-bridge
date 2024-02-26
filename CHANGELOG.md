@@ -1,3 +1,10 @@
+## [1.12.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.2...v1.12.3) (2024-02-26)
+
+
+### Bug Fixes
+
+* replace use of tsdocs.dev by typedoc generated markdown ([#30](https://github.com/liveryvideo/interactive-bridge/issues/30)) ([912924f](https://github.com/liveryvideo/interactive-bridge/commit/912924fd6c2e7e74f946b8a19bb4bfec9c0d4a9c))
+
 ## [1.12.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.1...v1.12.2) (2024-02-13)
 
 
