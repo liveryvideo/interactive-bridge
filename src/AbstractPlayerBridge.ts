@@ -29,7 +29,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
 
   protected abstract config: Config;
 
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor -- Restrict target type
   constructor(target?: { origin: string; window: Window }) {
     super(target);
   }
