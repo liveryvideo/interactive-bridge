@@ -1,3 +1,10 @@
+## [1.12.5](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.4...v1.12.5) (2024-02-27)
+
+
+### Bug Fixes
+
+* make config and qualities values consistently required ([#31](https://github.com/liveryvideo/interactive-bridge/issues/31)) ([a6da5ed](https://github.com/liveryvideo/interactive-bridge/commit/a6da5ed39e24db84708c57ddb0f00c47f1de0d90))
+
 ## [1.12.4](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.3...v1.12.4) (2024-02-26)
 
 
