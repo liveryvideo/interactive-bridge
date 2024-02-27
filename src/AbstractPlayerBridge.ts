@@ -27,7 +27,7 @@ import {
 export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected portraitQuery = window.matchMedia('(orientation: portrait)');
 
-  protected abstract config?: Config;
+  protected abstract config: Config;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(target?: { origin: string; window: Window }) {
@@ -171,7 +171,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeConfig}.customerId
    */
   private getCustomerId() {
-    return this.config?.customerId;
+    return this.config.customerId;
   }
 
   /**
@@ -229,9 +229,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * and use the index to get the active quality label from {@link subscribQualities}.list
    */
   private subscribeQuality(listener: (quality: string) => void) {
-    return reducedSubscribe<Qualities | undefined, string>(
+    return reducedSubscribe<Qualities, string>(
       (unreducedListener) => this.subscribeQualities(unreducedListener),
-      (value) => value?.list[value.active]?.label ?? '',
+      (value) => value.list[value.active]?.label ?? '',
       listener,
     );
   }
@@ -240,9 +240,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @deprecated Instead use {@link subscribeConfig}.streamPhase
    */
   private subscribeStreamPhase(listener: (streamPhase: StreamPhase) => void) {
-    return reducedSubscribe<Config | undefined, StreamPhase>(
+    return reducedSubscribe<Config, StreamPhase>(
       (unreducedListener) => this.subscribeConfig(unreducedListener),
-      (config) => config?.streamPhase ?? 'PRE',
+      (config) => config.streamPhase,
       listener,
     );
   }
@@ -277,9 +277,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
 
   protected abstract submitUserFeedback(value: UserFeedback): void;
 
-  protected abstract subscribeConfig(
-    listener: (value?: Config) => void,
-  ): Config | undefined;
+  protected abstract subscribeConfig(listener: (value: Config) => void): Config;
 
   protected abstract subscribeDisplay(
     listener: (display: DisplayMode) => void,
@@ -298,8 +296,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   ): PlaybackState;
 
   protected abstract subscribeQualities(
-    listener: (qualities?: Qualities) => void,
-  ): Qualities | undefined;
+    listener: (qualities: Qualities) => void,
+  ): Qualities;
 
   protected abstract subscribeVolume(
     listener: (volume: Volume) => void,
