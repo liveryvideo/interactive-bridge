@@ -198,7 +198,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     this.userFeedback = value;
   }
 
-  protected subscribeConfig(listener: (value?: Config) => void) {
+  protected subscribeConfig(listener: (value: Config) => void) {
     const changeConfig = (streamPhase: Config['streamPhase']) => {
       if (streamPhase !== this.config.streamPhase) {
         this.config.streamPhase = streamPhase;

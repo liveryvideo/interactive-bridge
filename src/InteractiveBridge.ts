@@ -287,7 +287,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of Livery stream config
    * and calls back `listener` with server side updates or when streamId is changed.
    */
-  subscribeConfig(listener: (value?: Config) => void) {
+  subscribeConfig(listener: (value: Config) => void) {
     return this.sendCommand('subscribeConfig', undefined, (value) =>
       listener(validateConfig(value)),
     ).then(validateConfig);
