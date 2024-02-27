@@ -66,7 +66,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     selected: 0,
   };
 
-  private qualitiesListeners: ((value?: Qualities) => void)[] = [];
+  private qualitiesListeners: ((value: Qualities) => void)[] = [];
 
   private volume = 1;
 
@@ -257,7 +257,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return this.playbackState;
   }
 
-  protected subscribeQualities(listener: (value?: Qualities) => void) {
+  protected subscribeQualities(listener: (value: Qualities) => void) {
     this.qualitiesListeners.push(listener);
     return this.qualities;
   }

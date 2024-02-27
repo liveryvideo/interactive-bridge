@@ -396,7 +396,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of current player stream qualities
    * and calls back `listener` with any subsequent qualities changes.
    */
-  subscribeQualities(listener: (value?: Qualities) => void) {
+  subscribeQualities(listener: (value: Qualities) => void) {
     return this.sendCommand('subscribeQualities', undefined, (value) =>
       listener(validateQualities(value)),
     ).then(validateQualities);

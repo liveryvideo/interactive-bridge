@@ -298,8 +298,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   ): PlaybackState;
 
   protected abstract subscribeQualities(
-    listener: (qualities?: Qualities) => void,
-  ): Qualities | undefined;
+    listener: (qualities: Qualities) => void,
+  ): Qualities;
 
   protected abstract subscribeVolume(
     listener: (volume: Volume) => void,
