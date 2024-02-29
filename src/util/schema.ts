@@ -228,6 +228,7 @@ export type Features = {
   fullscreen: boolean;
   pip: boolean;
   scrubber: boolean;
+  volume: boolean;
 };
 
 export const validateFeatures = createValidate<Features>(
@@ -238,6 +239,7 @@ export const validateFeatures = createValidate<Features>(
     fullscreen: zBoolean,
     pip: zBoolean,
     scrubber: zBoolean,
+    volume: zBoolean,
   }),
 );
 

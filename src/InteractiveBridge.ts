@@ -269,6 +269,8 @@ export class InteractiveBridge extends LiveryBridge {
    * that can be disallowed by the browser, e.g: when not called directly from a click event listener.
    * In that case the player will fall back to changing {@link subscribeVolume}.muted to `true`
    * to allow the volume change to persist.
+   *
+   * Requires: {@link getFeatures}.volume.
    */
   setVolume(volume: number) {
     return this.sendCommand<void>('setVolume', volume);
