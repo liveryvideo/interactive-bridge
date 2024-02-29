@@ -1,3 +1,11 @@
+## [1.12.6](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.5...v1.12.6) (2024-02-29)
+
+
+### Bug Fixes
+
+* add volume to features registry and note it as required for setVolume ([c61d8e6](https://github.com/liveryvideo/interactive-bridge/commit/c61d8e6e69539f209d274ee5b754eae15f339b0f))
+* **MockPlayerBridge:** add volume to features here as well ([095c9f6](https://github.com/liveryvideo/interactive-bridge/commit/095c9f6a973c556fbd2503fd85a91903c0d0a3e0))
+
 ## [1.12.5](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.4...v1.12.5) (2024-02-27)
 
 
