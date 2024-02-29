@@ -101,6 +101,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       fullscreen: true,
       pip: true,
       scrubber: true,
+      volume: true,
     };
   }
 
