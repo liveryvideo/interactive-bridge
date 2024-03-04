@@ -36,6 +36,8 @@ const zNumber = z.number();
 const zNumberOrNan = z.union([z.number(), z.nan()]);
 const zString = z.string();
 const zUndefined = z.undefined();
+const zBooleanOrUndefined = z.union([zBoolean, zUndefined]);
+const zNumberOrUndefined = z.union([zNumber, zUndefined]);
 const zStringOrUndefined = z.union([zString, zUndefined]);
 const zStringParams = z.record(zString, zString);
 
@@ -162,6 +164,49 @@ export const validateStreamPhase = createValidate<StreamPhase>(zStreamPhase);
  * Objects
  * ----------------------------------------------------------------
  */
+
+/**
+ * Authentication claims.
+ */
+export type AuthClaims = {
+  birthdate?: string;
+  email_verified?: string;
+  family_name?: string;
+  gender?: string;
+  given_name?: string;
+  locale?: string;
+  middle_name?: string;
+  minimum_age?: number;
+  phone_number_verified?: string;
+  picture?: string;
+  preferred_username?: string;
+  sub?: string;
+  updated_at?: string;
+  verified?: boolean;
+};
+
+export const validateAuth = createValidate<undefined | string | AuthClaims>(
+  z.union([
+    zUndefined,
+    zString,
+    z.object({
+      birthdate: zStringOrUndefined,
+      email_verified: zStringOrUndefined,
+      family_name: zStringOrUndefined,
+      gender: zStringOrUndefined,
+      given_name: zStringOrUndefined,
+      locale: zStringOrUndefined,
+      middle_name: zStringOrUndefined,
+      minimum_age: zNumberOrUndefined,
+      phone_number_verified: zStringOrUndefined,
+      picture: zStringOrUndefined,
+      preferred_username: zStringOrUndefined,
+      sub: zStringOrUndefined,
+      updated_at: zStringOrUndefined,
+      verified: zBooleanOrUndefined,
+    }),
+  ]),
+);
 
 /**
  * Public part of Livery stream config.

@@ -2,6 +2,7 @@ import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { LiveryBridge } from './LiveryBridge';
 import { reducedSubscribe } from './util/reducedSubscribe';
 import type {
+  AuthClaims,
   Config,
   DisplayMode,
   Orientation,
@@ -13,6 +14,7 @@ import type {
   Volume,
 } from './util/schema';
 import {
+  validateAuth,
   validateBoolean,
   validateConfig,
   validateDisplayMode,
@@ -48,16 +50,25 @@ import {
  * ```
  */
 export class InteractiveBridge extends LiveryBridge {
+  private options: {
+    handleAuth?: (tokenOrClaims?: string | AuthClaims) => void;
+  };
+
   /**
    * Constructs `InteractiveBridge` with specified `target` player bridge
    * or with `window.parent` as target window and with specified string as origin.
    */
-  constructor(target: AbstractPlayerBridge | string) {
+  constructor(
+    target: AbstractPlayerBridge | string,
+    options: InteractiveBridge['options'] = {},
+  ) {
     if (typeof target === 'string') {
       super({ window: window.parent, origin: target });
     } else {
       super(target);
     }
+
+    this.options = options;
   }
 
   /**
@@ -468,5 +479,23 @@ export class InteractiveBridge extends LiveryBridge {
    */
   unregisterInteractiveCommand(name: string) {
     return super.unregisterCustomCommand(name);
+  }
+
+  protected override handleCommand(
+    name: string,
+    arg: unknown,
+    listener: (value: unknown) => void,
+  ) {
+    if (name === 'authenticate') {
+      return this.handleAuth(validateAuth(arg));
+    }
+    return super.handleCommand(name, arg, listener);
+  }
+
+  private handleAuth(tokenOrClaims?: string | AuthClaims) {
+    if (!this.options.handleAuth) {
+      throw new Error('handleAuth option undefined');
+    }
+    this.options.handleAuth(tokenOrClaims);
   }
 }

@@ -33,6 +33,7 @@ export { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryB
 export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog';
 export { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock';
 export type {
+  AuthClaims,
   Config,
   DisplayMode,
   Features,
