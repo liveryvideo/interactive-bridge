@@ -35,6 +35,8 @@ import {
 // Note: We have to explicitly define return types for our named union return types to result in nice linked types
 // When one of our named object types is returned this is not necessary however
 
+// TODO: Properly document method parameters in this file and also check other files
+
 /**
  * Can be used by a Livery interactive layer element or page to communicate with the surrounding Livery Player.
  *
