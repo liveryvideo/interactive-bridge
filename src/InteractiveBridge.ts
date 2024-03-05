@@ -41,26 +41,38 @@ import {
  * @example
  * ```js
  * import { InteractiveBridge } from '@liveryvideo/interactive-bridge';
- * // The playerBridge will be provided to you as interactive element as interactive webview or iframe
- * const bridge = new InteractiveBridge(playerBridge || '*');
- * // To prevent cross site security issues:
+ *
+ * // The `playerBridge` will be provided to you as interactive element
+ * // Or, as interactive page, to prevent cross site security issues:
  * // https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#security_concerns
- * // replace the `'*'` origin above with the origin of the page that the Livery Player is on
+ * // replace `'*'` by the origin of the page that the player is expected to be on
+ * const bridge = new InteractiveBridge(playerBridge || '*');
+ *
  * bridge.getAppName().then(appName => window.alert(`appName: ${appName}`));
  * ```
  */
 export class InteractiveBridge extends LiveryBridge {
-  private options: {
-    handleAuth?: (tokenOrClaims?: string | AuthClaims) => void;
-  };
+  private options: NonNullable<
+    ConstructorParameters<typeof InteractiveBridge>[1]
+  >;
 
   /**
    * Constructs `InteractiveBridge` with specified `target` player bridge
    * or with `window.parent` as target window and with specified string as origin.
+   *
+   * @param target - Player bridge or window origin to target
+   * @param options - Options
    */
   constructor(
     target: AbstractPlayerBridge | string,
-    options: InteractiveBridge['options'] = {},
+    options: {
+      /**
+       * Handles authentication data coming from the player.
+       *
+       * @param tokenOrClaims - JWT token string or claims to authenticate with or undefined to logout
+       */
+      handleAuth?: (tokenOrClaims?: string | AuthClaims) => void;
+    } = {},
   ) {
     if (typeof target === 'string') {
       super({ window: window.parent, origin: target });
@@ -481,21 +493,21 @@ export class InteractiveBridge extends LiveryBridge {
     return super.unregisterCustomCommand(name);
   }
 
+  protected authenticate(tokenOrClaims?: string | AuthClaims) {
+    if (!this.options.handleAuth) {
+      throw new Error('handleAuth option undefined');
+    }
+    this.options.handleAuth(tokenOrClaims);
+  }
+
   protected override handleCommand(
     name: string,
     arg: unknown,
     listener: (value: unknown) => void,
   ) {
     if (name === 'authenticate') {
-      return this.handleAuth(validateAuth(arg));
+      return this.authenticate(validateAuth(arg));
     }
     return super.handleCommand(name, arg, listener);
-  }
-
-  private handleAuth(tokenOrClaims?: string | AuthClaims) {
-    if (!this.options.handleAuth) {
-      throw new Error('handleAuth option undefined');
-    }
-    this.options.handleAuth(tokenOrClaims);
   }
 }
