@@ -1,3 +1,10 @@
+## [1.13.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.1...v1.13.2) (2024-03-08)
+
+
+### Bug Fixes
+
+* **livery-bridge-interactive:** show interactive auth value as pre-formatted text ([f643e84](https://github.com/liveryvideo/interactive-bridge/commit/f643e84ce3d22bb06b288c286fed9c0fcce51fef))
+
 ## [1.13.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.0...v1.13.1) (2024-03-08)
 
 
