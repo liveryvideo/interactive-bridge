@@ -1,3 +1,10 @@
+## [1.13.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.2...v1.13.3) (2024-03-08)
+
+
+### Bug Fixes
+
+* **livery-bridge-interactive:** remove test string from interactive auth value ([90529b5](https://github.com/liveryvideo/interactive-bridge/commit/90529b572627bf5d2fcf6584b31a54e8ad48eea1))
+
 ## [1.13.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.1...v1.13.2) (2024-03-08)
 
 
