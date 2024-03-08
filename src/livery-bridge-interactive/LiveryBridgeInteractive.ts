@@ -146,6 +146,9 @@ export class LiveryBridgeInteractive extends LitElement {
 
   static readonly version = __VERSION__;
 
+  @state()
+  auth = '';
+
   /**
    * InteractiveBridge instance created by this element on first DOM connect.
    */
@@ -190,7 +193,11 @@ export class LiveryBridgeInteractive extends LitElement {
     super.connectedCallback();
 
     if (!this.interactiveBridge) {
-      this.interactiveBridge = new InteractiveBridge(this.playerBridge ?? '*');
+      this.interactiveBridge = new InteractiveBridge(this.playerBridge ?? '*', {
+        handleAuth: (tokenOrClaims) => {
+          this.auth = humanStringify(tokenOrClaims);
+        },
+      });
 
       this.interactiveBridge.registerInteractiveCommand(
         'test',
@@ -398,6 +405,11 @@ export class LiveryBridgeInteractive extends LitElement {
               </tr>
             </table>
           </form>
+        </div>
+
+        <div class="panel">
+          <b>Interactive Auth</b>
+          <span>${this.auth}</span>
         </div>
 
         <div class="panel">
