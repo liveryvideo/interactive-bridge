@@ -1,6 +1,7 @@
 import { LiveryBridge } from './LiveryBridge';
 import { reducedSubscribe } from './util/reducedSubscribe';
 import type {
+  AuthClaims,
   Config,
   DisplayMode,
   Features,
@@ -35,7 +36,17 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * Register `handler` function to be called with `arg` and `listener` when sendPlayerCommand() is called
+   * Authenticate user in interactive layer with specified token or claims,
+   * or logout the user by passing an `undefined` value.
+   *
+   * @param tokenOrClaims - JWT token string or claims to authenticate with or undefined to logout
+   */
+  authenticate(tokenOrClaims?: string | AuthClaims) {
+    return this.sendCommand<void>('authenticate', tokenOrClaims);
+  }
+
+  /**
+   * Register `handler` function to be called with `arg` and `listener` when `sendPlayerCommand()` is called
    * from the interactive layer side with matching `name`.
    */
   registerPlayerCommand(

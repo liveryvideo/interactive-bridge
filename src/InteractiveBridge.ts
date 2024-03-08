@@ -2,6 +2,7 @@ import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
 import { LiveryBridge } from './LiveryBridge';
 import { reducedSubscribe } from './util/reducedSubscribe';
 import type {
+  AuthClaims,
   Config,
   DisplayMode,
   Orientation,
@@ -13,6 +14,7 @@ import type {
   Volume,
 } from './util/schema';
 import {
+  validateAuth,
   validateBoolean,
   validateConfig,
   validateDisplayMode,
@@ -39,25 +41,46 @@ import {
  * @example
  * ```js
  * import { InteractiveBridge } from '@liveryvideo/interactive-bridge';
- * // The playerBridge will be provided to you as interactive element as interactive webview or iframe
- * const bridge = new InteractiveBridge(playerBridge || '*');
- * // To prevent cross site security issues:
+ *
+ * // The `playerBridge` will be provided to you as interactive element
+ * // Or, as interactive page, to prevent cross site security issues:
  * // https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#security_concerns
- * // replace the `'*'` origin above with the origin of the page that the Livery Player is on
+ * // replace `'*'` by the origin of the page that the player is expected to be on
+ * const bridge = new InteractiveBridge(playerBridge || '*');
+ *
  * bridge.getAppName().then(appName => window.alert(`appName: ${appName}`));
  * ```
  */
 export class InteractiveBridge extends LiveryBridge {
+  private options: NonNullable<
+    ConstructorParameters<typeof InteractiveBridge>[1]
+  >;
+
   /**
    * Constructs `InteractiveBridge` with specified `target` player bridge
    * or with `window.parent` as target window and with specified string as origin.
+   *
+   * @param target - Player bridge or window origin to target
+   * @param options - Options
    */
-  constructor(target: AbstractPlayerBridge | string) {
+  constructor(
+    target: AbstractPlayerBridge | string,
+    options: {
+      /**
+       * Handles authentication data coming from the player.
+       *
+       * @param tokenOrClaims - JWT token string or claims to authenticate with or undefined to logout
+       */
+      handleAuth?: (tokenOrClaims?: string | AuthClaims) => void;
+    } = {},
+  ) {
     if (typeof target === 'string') {
       super({ window: window.parent, origin: target });
     } else {
       super(target);
     }
+
+    this.options = options;
   }
 
   /**
@@ -161,7 +184,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
    * other side with matching `name`.
    *
-   * @deprecated Will be removed in the next major version. Use `registerPlayerCommand()` instead.
+   * @deprecated Instead use {@link registerInteractiveCommand}
    */
   override registerCustomCommand(
     name: string,
@@ -173,6 +196,9 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Register `handler` function to be called with `arg` and `listener` when `sendInteractiveCommand()` is called
    * from the player side with matching `name`.
+   *
+   * @param name - Custom command name to listen to
+   * @param handler - Function to handle those commands and whose value to return to it
    */
   registerInteractiveCommand(
     name: string,
@@ -195,6 +221,8 @@ export class InteractiveBridge extends LiveryBridge {
    * and the {@link getPlayback}.duration.
    *
    * Requires: {@link getFeatures}.scrubber.
+   *
+   * @param position - Position in seconds since start of stream/VOD to seek to
    */
   seek(position: number) {
     return this.sendCommand<void>('seek', position);
@@ -202,6 +230,8 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Select quality at specified index of {@link subscribeQualities}.list or -1 to use ABR.
+   *
+   * @param index - Index of quality to select
    */
   selectQuality(index: number) {
     return this.sendCommand<void>('selectQuality', index);
@@ -211,7 +241,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    *
-   * @deprecated Will be removed in the next major version. Use `sendPlayerCommand()` instead.
+   * @deprecated Instead use {@link sendPlayerCommand}
    */
   override sendCustomCommand<T>(
     name: string,
@@ -224,6 +254,10 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of value returned by the player's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
+   *
+   * @param name - Name of custom command to send
+   * @param arg - Optional argument to custom command to send
+   * @param listener - Optional listener function to be called with custom command handler listener call values
    */
   sendPlayerCommand<T>(
     name: string,
@@ -235,17 +269,21 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Change `disabled` to `true` to disable all default player controls and implement your own instead.
+   *
+   * @param disabled - True if default player controls should be disabled, false otherwise
    */
   setControlsDisabled(disabled: boolean) {
     return this.sendCommand<void>('setControlsDisabled', disabled);
   }
 
   /**
-   * Attempt to change `display` mode to specified value.
+   * Attempt to change display mode to specified value.
    *
    * Can reject if not allowed by the browser, e.g: when not called directly from a click event listener.
    *
    * Requires related feature, i.e: {@link getFeatures}.airplay, chromecast or fullscreen.
+   *
+   * @param display - Display mode to attempt to change to
    */
   setDisplay(display: DisplayMode) {
     return this.sendCommand<void>('setDisplay', display);
@@ -257,6 +295,8 @@ export class InteractiveBridge extends LiveryBridge {
    * Unmuting can fail if not allowed by the browser, e.g: when not called directly from a click event listener.
    * The specified state is kept track of by the player though and respected on reload when possible.
    * Look at {@link subscribeVolume}.muted state to track actual unmuting.
+   *
+   * @param muted - Muted state to attempt to change to
    */
   setMuted(muted: boolean) {
     return this.sendCommand<void>('setMuted', muted);
@@ -271,6 +311,8 @@ export class InteractiveBridge extends LiveryBridge {
    * to allow the volume change to persist.
    *
    * Requires: {@link getFeatures}.volume.
+   *
+   * @param volume - Volume, between 0 and 1, to change to
    */
   setVolume(volume: number) {
     return this.sendCommand<void>('setVolume', volume);
@@ -280,14 +322,18 @@ export class InteractiveBridge extends LiveryBridge {
    * Submit user feedback.
    *
    * Requires: {@link getFeatures}.contact.
+   *
+   * @param feedback - User feedback to submit
    */
-  submitUserFeedback(userFeedback: UserFeedback) {
-    return this.sendCommand<void>('submitUserFeedback', userFeedback);
+  submitUserFeedback(feedback: UserFeedback) {
+    return this.sendCommand<void>('submitUserFeedback', feedback);
   }
 
   /**
    * Returns promise of Livery stream config
    * and calls back `listener` with server side updates or when streamId is changed.
+   *
+   * @param listener - Listener to call when value is changed
    */
   subscribeConfig(listener: (value: Config) => void) {
     return this.sendCommand('subscribeConfig', undefined, (value) =>
@@ -298,6 +344,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current display mode
    * and calls back `listener` with any subsequent display mode changes.
+   *
+   * @param listener - Listener to call when value is changed
    */
   subscribeDisplay(
     listener: (value: DisplayMode) => void,
@@ -310,6 +358,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current player error message or undefined
    * and calls back `listener` with any subsequent errors.
+   *
+   * @param listener - Listener to call when value is changed
    */
   subscribeError(listener: (value: string | undefined) => void) {
     return this.sendCommand('subscribeError', undefined, (value) =>
@@ -332,6 +382,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
    * and calls back `listener` with any subsequent mode changes.
+   *
+   * @param listener - Listener to call when value is changed
    */
   subscribeMode(listener: (mode: PlaybackMode) => void): Promise<PlaybackMode> {
     return this.sendCommand('subscribeMode', undefined, (mode) =>
@@ -358,6 +410,8 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * Where `paused` is true if `playbackState` is `'PAUSED'` or `'ENDED'`.
    * I.e: Not playing as intended.
+   *
+   * @param listener - Listener to call when value is changed
    */
   async subscribePaused(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
@@ -370,6 +424,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current player playback state
    * and calls back `listener` with any subsequent state updates.
+   *
+   * @param listener - Listener to call when value is changed
    */
   subscribePlaybackState(
     listener: (value: PlaybackState) => void,
@@ -384,6 +440,8 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * Where `playing` is true if `playbackState` is `'PLAYING'`, `'FAST_FORWARD'`, `'SLOW_MO'` or `'REWIND'`.
    * I.e: Playing as intended.
+   *
+   * @param listener - Listener to call when value is changed
    */
   async subscribePlaying(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
@@ -397,6 +455,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current player stream qualities
    * and calls back `listener` with any subsequent qualities changes.
+   *
+   * @param listener - Listener to call when value is changed
    */
   subscribeQualities(listener: (value: Qualities) => void) {
     return this.sendCommand('subscribeQualities', undefined, (value) =>
@@ -409,6 +469,8 @@ export class InteractiveBridge extends LiveryBridge {
    * and calls back `listener` with any subsequent quality changes.
    *
    * @deprecated Instead use {@link subscribeQualities}.active
+   *
+   * @param listener - Listener to call when value is changed
    */
   subscribeQuality(listener: (value: string) => void) {
     return this.sendCommand('subscribeQuality', undefined, (value) =>
@@ -421,6 +483,8 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * Where `stalled` is true if `playbackState` is `'BUFFERING'` or `'SEEKING'`.
    * I.e: Not playing, but trying to.
+   *
+   * @param listener - Listener to call when value is changed
    */
   async subscribeStalled(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
@@ -447,6 +511,8 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Returns promise of current player volume state
    * and calls back `listener` with any subsequent volume changes.
+   *
+   * @param listener - Listener to call when value is changed
    */
   subscribeVolume(listener: (volume: Volume) => void) {
     return this.sendCommand('subscribeVolume', undefined, (value) =>
@@ -457,7 +523,7 @@ export class InteractiveBridge extends LiveryBridge {
   /**
    * Unregister custom command by name.
    *
-   * @deprecated Will be removed in the next major version. Use `unregisterInteractiveCommand()` instead.
+   * @deprecated Instead use {@link unregisterInteractiveCommand}
    */
   override unregisterCustomCommand(name: string) {
     super.unregisterCustomCommand(name);
@@ -465,8 +531,28 @@ export class InteractiveBridge extends LiveryBridge {
 
   /**
    * Unregister custom interactive command by name.
+   *
+   * @param name - Name of custom command handler to unregister
    */
   unregisterInteractiveCommand(name: string) {
     return super.unregisterCustomCommand(name);
+  }
+
+  protected override handleCommand(
+    name: string,
+    arg: unknown,
+    listener: (value: unknown) => void,
+  ) {
+    if (name === 'authenticate') {
+      return this.authenticate(validateAuth(arg));
+    }
+    return super.handleCommand(name, arg, listener);
+  }
+
+  private authenticate(tokenOrClaims?: string | AuthClaims) {
+    if (!this.options.handleAuth) {
+      throw new Error('handleAuth option undefined');
+    }
+    this.options.handleAuth(tokenOrClaims);
   }
 }

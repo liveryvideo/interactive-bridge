@@ -36,6 +36,8 @@ const zNumber = z.number();
 const zNumberOrNan = z.union([z.number(), z.nan()]);
 const zString = z.string();
 const zUndefined = z.undefined();
+const zBooleanOrUndefined = z.union([zBoolean, zUndefined]);
+const zNumberOrUndefined = z.union([zNumber, zUndefined]);
 const zStringOrUndefined = z.union([zString, zUndefined]);
 const zStringParams = z.record(zString, zString);
 
@@ -162,6 +164,85 @@ export const validateStreamPhase = createValidate<StreamPhase>(zStreamPhase);
  * Objects
  * ----------------------------------------------------------------
  */
+
+/**
+ * Authentication claims.
+ *
+ * Of these claims the following are externally defined standard OpenID:
+ * `sub, updated_at, phone_number_verified, email_verified`
+ *
+ * And these are user editable standard OpenID:
+ * `given_name, family_name, middle_name, preferred_username, picture, email, gender, birthdate, locale, phone_number`
+ *
+ * And these are Livery specific:
+ * `verified, minimum_age`
+ *
+ * For detailed descriptions see:
+ * https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+ */
+export type AuthClaims = {
+  /** Unknown claims. */
+  [claim: string]: unknown;
+  /** End-User's birthday, represented as an ISO 8601-1 [ISO8601‑1] YYYY-MM-DD format. */
+  birthdate?: string;
+  /** End-User's preferred e-mail address. */
+  email?: string;
+  /** True if the End-User's e-mail address has been verified; otherwise false. */
+  email_verified?: boolean;
+  /** Surname(s) or last name(s) of the End-User. */
+  family_name?: string;
+  /** End-User's gender. */
+  gender?: string;
+  /** Given name(s) or first name(s) of the End-User. */
+  given_name?: string;
+  /** End-User's locale, represented as a BCP47 [RFC5646] language tag. */
+  locale?: string;
+  /** Middle name(s) of the End-User. */
+  middle_name?: string;
+  /** Age as entered by user for minimum age consideration. */
+  minimum_age?: number;
+  /** End-User's preferred telephone number. */
+  phone_number?: string;
+  /** True if the End-User's phone number has been verified; otherwise false. */
+  phone_number_verified?: boolean;
+  /** URL of the End-User's profile picture. */
+  picture?: string;
+  /** Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe. */
+  preferred_username?: string;
+  /** Subject - Identifier for the End-User at the Issuer. */
+  sub?: string;
+  /** Time the End-User's information was last updated as number of seconds from 1970-01-01T00:00:00Z. */
+  updated_at?: number;
+  /** True if the user is verified, usually by email or phone number; otherwise false. */
+  verified?: boolean;
+};
+
+export const validateAuth = createValidate<undefined | string | AuthClaims>(
+  z.union([
+    zUndefined,
+    zString,
+    z
+      .object({
+        birthdate: zStringOrUndefined,
+        email: zStringOrUndefined,
+        email_verified: zBooleanOrUndefined,
+        family_name: zStringOrUndefined,
+        gender: zStringOrUndefined,
+        given_name: zStringOrUndefined,
+        locale: zStringOrUndefined,
+        middle_name: zStringOrUndefined,
+        minimum_age: zNumberOrUndefined,
+        phone_number: zStringOrUndefined,
+        phone_number_verified: zBooleanOrUndefined,
+        picture: zStringOrUndefined,
+        preferred_username: zStringOrUndefined,
+        sub: zStringOrUndefined,
+        updated_at: zNumberOrUndefined,
+        verified: zBooleanOrUndefined,
+      })
+      .passthrough(),
+  ]),
+);
 
 /**
  * Public part of Livery stream config.
