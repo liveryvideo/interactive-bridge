@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.0...v1.13.1) (2024-03-08)
+
+
+### Bug Fixes
+
+* **livery-bridge-interactive:** show interactive auth value ([44ae984](https://github.com/liveryvideo/interactive-bridge/commit/44ae984625711997522ba463da4cdcc135ea3d42))
+
 # [1.13.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.12.6...v1.13.0) (2024-03-08)
 
 
