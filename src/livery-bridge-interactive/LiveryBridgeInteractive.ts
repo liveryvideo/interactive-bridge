@@ -409,7 +409,7 @@ export class LiveryBridgeInteractive extends LitElement {
 
         <div class="panel">
           <b>Interactive Auth</b>
-          <span>${this.auth}</span>
+          <pre>foo${this.auth}</pre>
         </div>
 
         <div class="panel">
