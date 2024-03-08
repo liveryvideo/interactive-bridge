@@ -181,6 +181,8 @@ export const validateStreamPhase = createValidate<StreamPhase>(zStreamPhase);
  * https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
  */
 export type AuthClaims = {
+  /** Unknown claims. */
+  [claim: string]: unknown;
   /** End-User's birthday, represented as an ISO 8601-1 [ISO8601‑1] YYYY-MM-DD format. */
   birthdate?: string;
   /** End-User's preferred e-mail address. */
@@ -197,7 +199,7 @@ export type AuthClaims = {
   locale?: string;
   /** Middle name(s) of the End-User. */
   middle_name?: string;
-  /** Miminum age as confirmed by user to Livery. */
+  /** Age as entered by user for minimum age consideration. */
   minimum_age?: number;
   /** End-User's preferred telephone number. */
   phone_number?: string;
@@ -211,7 +213,7 @@ export type AuthClaims = {
   sub?: string;
   /** Time the End-User's information was last updated as number of seconds from 1970-01-01T00:00:00Z. */
   updated_at?: number;
-  /** True if the user is verified by Livery; otherwise false. */
+  /** True if the user is verified, usually by email or phone number; otherwise false. */
   verified?: boolean;
 };
 
@@ -219,24 +221,26 @@ export const validateAuth = createValidate<undefined | string | AuthClaims>(
   z.union([
     zUndefined,
     zString,
-    z.object({
-      birthdate: zStringOrUndefined,
-      email: zStringOrUndefined,
-      email_verified: zBooleanOrUndefined,
-      family_name: zStringOrUndefined,
-      gender: zStringOrUndefined,
-      given_name: zStringOrUndefined,
-      locale: zStringOrUndefined,
-      middle_name: zStringOrUndefined,
-      minimum_age: zNumberOrUndefined,
-      phone_number: zStringOrUndefined,
-      phone_number_verified: zBooleanOrUndefined,
-      picture: zStringOrUndefined,
-      preferred_username: zStringOrUndefined,
-      sub: zStringOrUndefined,
-      updated_at: zNumberOrUndefined,
-      verified: zBooleanOrUndefined,
-    }),
+    z
+      .object({
+        birthdate: zStringOrUndefined,
+        email: zStringOrUndefined,
+        email_verified: zBooleanOrUndefined,
+        family_name: zStringOrUndefined,
+        gender: zStringOrUndefined,
+        given_name: zStringOrUndefined,
+        locale: zStringOrUndefined,
+        middle_name: zStringOrUndefined,
+        minimum_age: zNumberOrUndefined,
+        phone_number: zStringOrUndefined,
+        phone_number_verified: zBooleanOrUndefined,
+        picture: zStringOrUndefined,
+        preferred_username: zStringOrUndefined,
+        sub: zStringOrUndefined,
+        updated_at: zNumberOrUndefined,
+        verified: zBooleanOrUndefined,
+      })
+      .passthrough(),
   ]),
 );
 
