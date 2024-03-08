@@ -46,7 +46,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   }
 
   /**
-   * Register `handler` function to be called with `arg` and `listener` when sendPlayerCommand() is called
+   * Register `handler` function to be called with `arg` and `listener` when `sendPlayerCommand()` is called
    * from the interactive layer side with matching `name`.
    */
   registerPlayerCommand(
