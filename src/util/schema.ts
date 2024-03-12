@@ -326,6 +326,21 @@ export const validateFeatures = createValidate<Features>(
 );
 
 /**
+ * Options from interactive layer for the player.
+ */
+export type InteractivePlayerOptions = {
+  /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
+  controlsDisabled?: boolean;
+};
+
+export const validateInteractivePlayerOptions =
+  createValidate<InteractivePlayerOptions>(
+    z.object({
+      controlsDisabled: zBoolean,
+    }),
+  );
+
+/**
  * Playback details, i.e: values that are continuously changing.
  */
 export type PlaybackDetails = {

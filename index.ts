@@ -5,14 +5,17 @@
  *
  * - Class {@link InteractiveBridge} enables a Livery interactive layer element or page to communicate with
  *   the surrounding Livery Player
- * - Element {@link LiveryBridgeLog} logs messages posted to specified bridge or the window
- * - Types {@link Orientation} and {@link StreamPhase} are used throughout the package
- * - Variable {@link version} specifies the version of this package
  * - Class {@link AbstractPlayerBridge} is used by LiveryPlayer for the `PlayerBridge` implementation
  *   (in the past: {@link LiveryBridge})
  * - Class {@link MockPlayerBridge} is a player bridge that returns mock data for testing
+ * - Element {@link LiveryBridgeLog} logs messages posted to specified bridge or the window
  * - Element {@link LiveryBridgeMock} mocks a LiveryPlayer with an interactive child element or iframe for testing
  * - Element {@link LiveryBridgeInteractive} is an interactive element that enables testing all interactive commands
+ * - Variable {@link version} specifies the version of this package
+ * - Schema types:
+ *   {@link AuthClaims}, {@link Config}, {@link DisplayMode}, {@link Features}, {@link InteractivePlayerOptions},
+ *   {@link Orientation}, {@link PlaybackDetails}, {@link PlaybackMode}, {@link PlaybackState}, {@link Qualities},
+ *   {@link Quality}, {@link StreamPhase}, {@link UserFeedback} and {@link Volume}.
  *
  * **Note:** When using the UMD bundle, the exports can be found as properties of `livery` in the global namespace,
  * e.g: `livery.version`.
@@ -37,6 +40,7 @@ export type {
   Config,
   DisplayMode,
   Features,
+  InteractivePlayerOptions,
   Orientation,
   PlaybackDetails,
   PlaybackMode,
