@@ -18,6 +18,7 @@ import {
   validateBoolean,
   validateDisplayMode,
   validateNumber,
+  validateUndefined,
   validateUserFeedback,
 } from './util/schema';
 
@@ -42,7 +43,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @param tokenOrClaims - JWT token string or claims to authenticate with or undefined to logout
    */
   authenticate(tokenOrClaims?: string | AuthClaims) {
-    return this.sendCommand<void>('authenticate', tokenOrClaims);
+    return this.sendCommand('authenticate', tokenOrClaims).then(
+      validateUndefined,
+    );
   }
 
   /**
@@ -60,10 +63,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * Returns promise of value returned by the interactive layer's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
-  sendInteractiveCommand<T>(
+  sendInteractiveCommand(
     name: string,
     arg?: unknown,
-    listener?: (value: T) => void,
+    listener?: (value: unknown) => void,
   ) {
     return this.sendCustomCommand(name, arg, listener);
   }

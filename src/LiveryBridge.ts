@@ -1,10 +1,7 @@
-// We carefully work with unsafe message data within this class, so we will use `any` typed variables and arguments
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
 
-interface LiveryMessage extends Record<string, any> {
+interface LiveryMessage extends Record<string, unknown> {
   id: string;
   isLivery: true;
   sourceId: string;
@@ -18,7 +15,7 @@ interface HandshakeMessage extends LiveryMessage {
 
 interface ResolveMessage extends LiveryMessage {
   type: 'resolve';
-  value: any;
+  value: unknown;
 }
 
 interface RejectMessage extends LiveryMessage {
@@ -27,20 +24,20 @@ interface RejectMessage extends LiveryMessage {
 }
 
 interface CommandMessage extends LiveryMessage {
-  arg: any;
+  arg: unknown;
   name: string;
   type: 'command';
 }
 
 interface CustomCommandMessage extends LiveryMessage {
-  arg: any;
+  arg: unknown;
   name: string;
   type: 'customCommand';
 }
 
 interface EventMessage extends LiveryMessage {
   type: 'event';
-  value: any;
+  value: unknown;
 }
 
 type Spy = (message: LiveryMessage) => void;
@@ -85,13 +82,13 @@ export class LiveryBridge {
     string,
     {
       reject: (error: Error) => void;
-      resolve: (value: any) => void;
+      resolve: (value: unknown) => void;
     }
   >();
 
-  private handshakePromise: Promise<void>;
+  private handshakePromise: Promise<unknown>;
 
-  private listenerMap = new Map<string, (value: any) => void>();
+  private listenerMap = new Map<string, (value: unknown) => void>();
 
   private sourceId = uuid();
 
@@ -117,7 +114,7 @@ export class LiveryBridge {
   constructor(target?: LiveryBridge['target']) {
     this.target = target;
 
-    this.handshakePromise = new Promise<void>((resolve, reject) => {
+    this.handshakePromise = new Promise<unknown>((resolve, reject) => {
       this.deferredMap.set(this.sourceId, { resolve, reject });
     });
 
@@ -258,16 +255,16 @@ export class LiveryBridge {
     this.customCommandMap.set(name, handler);
   }
 
-  protected sendCommand<T>(
+  protected sendCommand(
     name: string,
     arg?: unknown,
-    listener?: (value: T) => void,
+    listener?: (value: unknown) => void,
     custom = false,
   ) {
     return this.handshakePromise.then(() => {
       const id = uuid();
 
-      const promise = new Promise<T>((resolve, reject) => {
+      const promise = new Promise<unknown>((resolve, reject) => {
         this.deferredMap.set(id, { resolve, reject });
       });
 
@@ -285,10 +282,10 @@ export class LiveryBridge {
    * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
-  protected sendCustomCommand<T>(
+  protected sendCustomCommand(
     name: string,
     arg?: unknown,
-    listener?: (value: T) => void,
+    listener?: (value: unknown) => void,
   ) {
     return this.sendCommand(name, arg, listener, true);
   }

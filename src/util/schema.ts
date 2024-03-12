@@ -41,6 +41,7 @@ const zNumberOrUndefined = z.union([zNumber, zUndefined]);
 const zStringOrUndefined = z.union([zString, zUndefined]);
 const zStringParams = z.record(zString, zString);
 
+export const validateUndefined = createValidate(zUndefined);
 export const validateBoolean = createValidate(zBoolean);
 export const validateNumber = createValidate(zNumber);
 export const validateNumberOrNan = createValidate(zNumberOrNan);
