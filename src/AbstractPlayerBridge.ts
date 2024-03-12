@@ -5,6 +5,7 @@ import type {
   Config,
   DisplayMode,
   Features,
+  InteractivePlayerOptions,
   Orientation,
   PlaybackDetails,
   PlaybackMode,
@@ -17,6 +18,7 @@ import type {
 import {
   validateBoolean,
   validateDisplayMode,
+  validateInteractivePlayerOptions,
   validateNumber,
   validateUndefined,
   validateUserFeedback,
@@ -45,6 +47,24 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   authenticate(tokenOrClaims?: string | AuthClaims) {
     return this.sendCommand('authenticate', tokenOrClaims).then(
       validateUndefined,
+    );
+  }
+
+  /**
+   * Returns promise of options from interactive layer for the player.
+   *
+   * Note: In the future this could also pass options from player to the interactive layer.
+   *
+   * @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake.
+   */
+  init() {
+    // Fallback to default options when other side doesn't support this
+    const defaultOptions: InteractivePlayerOptions = {
+      controlsDisabled: false,
+    };
+    return this.sendCommand('init').then(
+      validateInteractivePlayerOptions,
+      () => defaultOptions,
     );
   }
 
@@ -124,9 +144,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     }
     if (name === 'selectQuality') {
       return this.selectQuality(validateNumber(arg));
-    }
-    if (name === 'setControlsDisabled') {
-      return this.setControlsDisabled(validateBoolean(arg));
     }
     if (name === 'setDisplay') {
       return this.setDisplay(validateDisplayMode(arg));
@@ -280,8 +297,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract seek(position: number): void;
 
   protected abstract selectQuality(index: number): void;
-
-  protected abstract setControlsDisabled(disabled: boolean): void;
 
   protected abstract setDisplay(display: DisplayMode): void;
 

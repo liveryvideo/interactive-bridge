@@ -67,6 +67,8 @@ export class InteractiveBridge extends LiveryBridge {
   constructor(
     target: AbstractPlayerBridge | string,
     options: {
+      /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
+      controlsDisabled?: boolean;
       /**
        * Handles authentication data coming from the player.
        *
@@ -266,17 +268,6 @@ export class InteractiveBridge extends LiveryBridge {
     listener?: (value: unknown) => void,
   ) {
     return super.sendCustomCommand(name, arg, listener);
-  }
-
-  /**
-   * Change `disabled` to `true` to disable all default player controls and implement your own instead.
-   *
-   * @param disabled - True if default player controls should be disabled, false otherwise
-   */
-  setControlsDisabled(disabled: boolean) {
-    return this.sendCommand('setControlsDisabled', disabled).then(
-      validateUndefined,
-    );
   }
 
   /**
@@ -551,6 +542,9 @@ export class InteractiveBridge extends LiveryBridge {
     if (name === 'authenticate') {
       return this.authenticate(validateAuth(arg));
     }
+    if (name === 'init') {
+      return this.init();
+    }
     return super.handleCommand(name, arg, listener);
   }
 
@@ -559,5 +553,11 @@ export class InteractiveBridge extends LiveryBridge {
       throw new Error('handleAuth option undefined');
     }
     this.options.handleAuth(tokenOrClaims);
+  }
+
+  private init() {
+    return {
+      controlsDisabled: this.options.controlsDisabled,
+    };
   }
 }
