@@ -163,10 +163,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     this.qualitiesListeners.forEach((listener) => listener(this.qualities));
   }
 
-  protected setControlsDisabled(disabled: boolean) {
-    this.controlsDisabled = disabled;
-  }
-
   protected setDisplay(display: DisplayMode) {
     if (display === this.display) {
       return;

@@ -29,7 +29,6 @@ const BRIDGE_GET_NAMES = [
   'reload',
   'seek',
   'selectQuality',
-  'setControlsDisabled',
   'setDisplay',
   'setMuted',
   'setVolume',
@@ -282,9 +281,6 @@ export class LiveryBridgeInteractive extends LitElement {
                     <option value="reload">reload</option>
                     <option value="seek">seek</option>
                     <option value="selectQuality">selectQuality</option>
-                    <option value="setControlsDisabled">
-                      setControlsDisabled
-                    </option>
                     <option value="setDisplay">setDisplay</option>
                     <option value="setMuted">setMuted</option>
                     <option value="setVolume">setVolume</option>
@@ -503,7 +499,6 @@ export class LiveryBridgeInteractive extends LitElement {
     }
 
     switch (methodName) {
-      case 'setControlsDisabled':
       case 'setMuted': {
         const booleanElement = this.renderRoot.querySelector(
           '#getCommandNameBoolean',
@@ -596,7 +591,6 @@ export class LiveryBridgeInteractive extends LitElement {
           );
           break;
         }
-        case 'setControlsDisabled':
         case 'setMuted': {
           const inputValue = getInputValue('Boolean');
           this.interactiveBridge[methodName](inputValue === 'true').then(
