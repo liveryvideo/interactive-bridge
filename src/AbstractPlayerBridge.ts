@@ -58,10 +58,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake.
    */
   init() {
-    // Fallback to default options when other side doesn't support this
-    const defaultOptions: InteractivePlayerOptions = {
-      controlsDisabled: false,
-    };
+    const defaultOptions: InteractivePlayerOptions = {};
     return this.sendCommand('init').then(
       validateInteractivePlayerOptions,
       () => defaultOptions,

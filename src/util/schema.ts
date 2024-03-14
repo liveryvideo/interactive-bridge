@@ -335,9 +335,11 @@ export type InteractivePlayerOptions = {
 
 export const validateInteractivePlayerOptions =
   createValidate<InteractivePlayerOptions>(
-    z.object({
-      controlsDisabled: zBoolean,
-    }),
+    z
+      .object({
+        controlsDisabled: zBoolean,
+      })
+      .partial(),
   );
 
 /**
