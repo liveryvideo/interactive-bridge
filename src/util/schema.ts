@@ -327,6 +327,8 @@ export const validateFeatures = createValidate<Features>(
 /**
  * Options from interactive layer for the player.
  */
+// !! NOTE: Make sure to copy any changes made here to the related options in InteractiveBridge !!
+// Unfortunately TypeDoc does not properly support just referencing `& InteractivePlayerOptions` from there
 export type InteractivePlayerOptions = {
   /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
   controlsDisabled?: boolean;
@@ -334,11 +336,9 @@ export type InteractivePlayerOptions = {
 
 export const validateInteractivePlayerOptions =
   createValidate<InteractivePlayerOptions>(
-    z
-      .object({
-        controlsDisabled: zBoolean,
-      })
-      .partial(),
+    z.object({
+      controlsDisabled: zBooleanOrUndefined,
+    }),
   );
 
 /**

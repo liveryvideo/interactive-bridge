@@ -5,7 +5,6 @@ import type {
   AuthClaims,
   Config,
   DisplayMode,
-  InteractivePlayerOptions,
   Orientation,
   PlaybackMode,
   PlaybackState,
@@ -20,6 +19,7 @@ import {
   validateConfig,
   validateDisplayMode,
   validateFeatures,
+  validateInteractivePlayerOptions,
   validateNumberOrNan,
   validateOrientation,
   validatePlaybackDetails,
@@ -62,11 +62,15 @@ export class InteractiveBridge extends LiveryBridge {
    * or with `window.parent` as target window and with specified string as origin.
    *
    * @param target - Player bridge or window origin to target
-   * @param options - Options
+   * @param options - Options for this bridge and {@link InteractivePlayerOptions}
    */
   constructor(
     target: AbstractPlayerBridge | string,
-    options: InteractivePlayerOptions & {
+    // !! This includes copies of all InteractivePlayerOptions from schema !!
+    // Unfortunately TypeDoc does not properly support just referencing `& InteractivePlayerOptions`
+    options: {
+      /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
+      controlsDisabled?: boolean;
       /**
        * Handles authentication data coming from the player.
        *
@@ -538,8 +542,10 @@ export class InteractiveBridge extends LiveryBridge {
     if (name === 'authenticate') {
       return this.authenticate(validateAuth(arg));
     }
+    /** @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake. */
     if (name === 'init') {
-      return this.init();
+      // Just return InteractivePlayerOptions, not handleAuth option
+      return validateInteractivePlayerOptions(this.options);
     }
     return super.handleCommand(name, arg, listener);
   }
@@ -549,11 +555,5 @@ export class InteractiveBridge extends LiveryBridge {
       throw new Error('handleAuth option undefined');
     }
     this.options.handleAuth(tokenOrClaims);
-  }
-
-  private init() {
-    return {
-      controlsDisabled: this.options.controlsDisabled,
-    };
   }
 }
