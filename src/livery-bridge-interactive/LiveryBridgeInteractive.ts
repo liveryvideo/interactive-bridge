@@ -193,6 +193,8 @@ export class LiveryBridgeInteractive extends LitElement {
 
     if (!this.interactiveBridge) {
       this.interactiveBridge = new InteractiveBridge(this.playerBridge ?? '*', {
+        // Rudimentary custom controls support is provided through the player command and subscription UI
+        controlsDisabled: true,
         handleAuth: (tokenOrClaims) => {
           this.auth = humanStringify(tokenOrClaims);
         },
