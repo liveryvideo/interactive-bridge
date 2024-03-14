@@ -5,6 +5,7 @@ import type {
   AuthClaims,
   Config,
   DisplayMode,
+  InteractivePlayerOptions,
   Orientation,
   PlaybackMode,
   PlaybackState,
@@ -65,9 +66,7 @@ export class InteractiveBridge extends LiveryBridge {
    */
   constructor(
     target: AbstractPlayerBridge | string,
-    options: {
-      /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
-      controlsDisabled?: boolean;
+    options: InteractivePlayerOptions & {
       /**
        * Handles authentication data coming from the player.
        *
