@@ -29,7 +29,6 @@ import {
   validateString,
   validateStringOrUndefined,
   validateStringParams,
-  validateUndefined,
   validateVolume,
 } from './util/schema';
 
@@ -169,7 +168,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Pause playback.
    */
   pause() {
-    return this.sendCommand('pause').then(validateUndefined);
+    return this.sendCommand('pause');
   }
 
   /**
@@ -180,7 +179,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Or if that also fails then {@link subscribePaused} will remain true.
    */
   play() {
-    return this.sendCommand('play').then(validateUndefined);
+    return this.sendCommand('play');
   }
 
   /**
@@ -214,7 +213,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Reload player, e.g: to try to recover from an error.
    */
   reload() {
-    return this.sendCommand('reload').then(validateUndefined);
+    return this.sendCommand('reload');
   }
 
   /**
@@ -228,7 +227,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param position - Position in seconds since start of stream/VOD to seek to
    */
   seek(position: number) {
-    return this.sendCommand('seek', position).then(validateUndefined);
+    return this.sendCommand('seek', position);
   }
 
   /**
@@ -237,7 +236,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param index - Index of quality to select
    */
   selectQuality(index: number) {
-    return this.sendCommand('selectQuality', index).then(validateUndefined);
+    return this.sendCommand('selectQuality', index);
   }
 
   /**
@@ -280,7 +279,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param display - Display mode to attempt to change to
    */
   setDisplay(display: DisplayMode) {
-    return this.sendCommand('setDisplay', display).then(validateUndefined);
+    return this.sendCommand('setDisplay', display);
   }
 
   /**
@@ -293,7 +292,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param muted - Muted state to attempt to change to
    */
   setMuted(muted: boolean) {
-    return this.sendCommand('setMuted', muted).then(validateUndefined);
+    return this.sendCommand('setMuted', muted);
   }
 
   /**
@@ -309,7 +308,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param volume - Volume, between 0 and 1, to change to
    */
   setVolume(volume: number) {
-    return this.sendCommand('setVolume', volume).then(validateUndefined);
+    return this.sendCommand('setVolume', volume);
   }
 
   /**
@@ -320,9 +319,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param feedback - User feedback to submit
    */
   submitUserFeedback(feedback: UserFeedback) {
-    return this.sendCommand('submitUserFeedback', feedback).then(
-      validateUndefined,
-    );
+    return this.sendCommand('submitUserFeedback', feedback);
   }
 
   /**

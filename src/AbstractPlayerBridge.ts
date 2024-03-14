@@ -20,7 +20,6 @@ import {
   validateDisplayMode,
   validateInteractivePlayerOptions,
   validateNumber,
-  validateUndefined,
   validateUserFeedback,
 } from './util/schema';
 
@@ -45,9 +44,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @param tokenOrClaims - JWT token string or claims to authenticate with or undefined to logout
    */
   authenticate(tokenOrClaims?: string | AuthClaims) {
-    return this.sendCommand('authenticate', tokenOrClaims).then(
-      validateUndefined,
-    );
+    return this.sendCommand('authenticate', tokenOrClaims);
   }
 
   /**
