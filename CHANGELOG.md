@@ -1,3 +1,10 @@
+## [1.13.4](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.3...v1.13.4) (2024-03-15)
+
+
+### Bug Fixes
+
+* don't flash default controls when using custom interactive player controls ([#33](https://github.com/liveryvideo/interactive-bridge/issues/33)) ([275141f](https://github.com/liveryvideo/interactive-bridge/commit/275141f2c1838a18a63ef5f4064282a389e61129))
+
 ## [1.13.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.2...v1.13.3) (2024-03-08)
 
 
