@@ -3,10 +3,30 @@ import { ZodError, z } from 'zod';
 // Note: We can't use z.infer<typeof zSchema> because it results in ugly .d.ts typing that typedoc doesn't support
 // We do validate that our types match our schemas using the createValidate<T> template type argument
 
+/**
+ * Returns value validation function using specified Zod schema and optional defaults,
+ * which in turn returns a type checked value or throw an Error.
+ *
+ * @param schema - Zod schema to use to parse the value
+ * @param defaultValue - Default value to use; if this is an object it will be shallow merged
+ */
 const createValidate =
-  <T>(schema: Zod.ZodSchema<T>) =>
+  <T>(schema: Zod.ZodSchema<T>, defaultValue?: T) =>
   (value: unknown) => {
+    if (defaultValue && value === undefined) {
+      return defaultValue;
+    }
+
     try {
+      if (
+        typeof defaultValue === 'object' &&
+        defaultValue !== null &&
+        typeof value === 'object' &&
+        value !== null
+      ) {
+        // Note: This just performs a shallow object merge
+        return schema.parse({ ...defaultValue, ...value });
+      }
       return schema.parse(value);
     } catch (error: unknown) {
       if (!(error instanceof ZodError)) {
@@ -331,14 +351,17 @@ export const validateFeatures = createValidate<Features>(
 // Unfortunately TypeDoc does not properly support just referencing `& InteractivePlayerOptions` from there
 export type InteractivePlayerOptions = {
   /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
-  controlsDisabled?: boolean;
+  controlsDisabled: boolean;
 };
 
 export const validateInteractivePlayerOptions =
   createValidate<InteractivePlayerOptions>(
     z.object({
-      controlsDisabled: zBooleanOrUndefined,
+      controlsDisabled: zBoolean,
     }),
+    {
+      controlsDisabled: false,
+    },
   );
 
 /**

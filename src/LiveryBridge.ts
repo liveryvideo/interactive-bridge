@@ -2,7 +2,7 @@ import { isSemVerCompatible } from './util/semver';
 import { uuid } from './util/uuid';
 
 // TODO: Replace type validation code here by using Zod in schema?
-// TODO: At next major release add support for options to handshake protocol and use that to replace init command
+// TODO: At next major release add support for options to handshake protocol and use that to replace options command
 
 interface LiveryMessage extends Record<string, unknown> {
   id: string;

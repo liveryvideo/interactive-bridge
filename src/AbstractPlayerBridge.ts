@@ -5,7 +5,6 @@ import type {
   Config,
   DisplayMode,
   Features,
-  InteractivePlayerOptions,
   Orientation,
   PlaybackDetails,
   PlaybackMode,
@@ -49,16 +48,16 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
 
   /**
    * Returns promise of options from interactive layer for the player.
+   * Or default options if the interactive bridge doesn't support this/these yet.
    *
    * Note: In the future this could also pass options from player to the interactive layer.
    *
    * @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake.
    */
-  init() {
-    const defaultOptions: InteractivePlayerOptions = {};
-    return this.sendCommand('init').then(
-      validateInteractivePlayerOptions,
-      () => defaultOptions,
+  options() {
+    return this.sendCommand('options').then(
+      (value) => validateInteractivePlayerOptions(value),
+      () => validateInteractivePlayerOptions(undefined),
     );
   }
 

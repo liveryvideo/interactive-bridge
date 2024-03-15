@@ -543,7 +543,7 @@ export class InteractiveBridge extends LiveryBridge {
       return this.authenticate(validateAuth(arg));
     }
     /** @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake. */
-    if (name === 'init') {
+    if (name === 'options') {
       // Just return InteractivePlayerOptions, not handleAuth option
       return validateInteractivePlayerOptions(this.options);
     }
