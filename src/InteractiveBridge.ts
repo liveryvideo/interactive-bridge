@@ -19,6 +19,7 @@ import {
   validateConfig,
   validateDisplayMode,
   validateFeatures,
+  validateInteractivePlayerOptions,
   validateNumberOrNan,
   validateOrientation,
   validatePlaybackDetails,
@@ -61,11 +62,15 @@ export class InteractiveBridge extends LiveryBridge {
    * or with `window.parent` as target window and with specified string as origin.
    *
    * @param target - Player bridge or window origin to target
-   * @param options - Options
+   * @param options - Options for this bridge and {@link InteractivePlayerOptions}
    */
   constructor(
     target: AbstractPlayerBridge | string,
+    // !! This includes copies of all InteractivePlayerOptions from schema !!
+    // Unfortunately TypeDoc does not properly support just referencing `& InteractivePlayerOptions`
     options: {
+      /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
+      controlsDisabled?: boolean;
       /**
        * Handles authentication data coming from the player.
        *
@@ -166,7 +171,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Pause playback.
    */
   pause() {
-    return this.sendCommand<void>('pause');
+    return this.sendCommand('pause');
   }
 
   /**
@@ -177,7 +182,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Or if that also fails then {@link subscribePaused} will remain true.
    */
   play() {
-    return this.sendCommand<void>('play');
+    return this.sendCommand('play');
   }
 
   /**
@@ -211,7 +216,7 @@ export class InteractiveBridge extends LiveryBridge {
    * Reload player, e.g: to try to recover from an error.
    */
   reload() {
-    return this.sendCommand<void>('reload');
+    return this.sendCommand('reload');
   }
 
   /**
@@ -225,7 +230,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param position - Position in seconds since start of stream/VOD to seek to
    */
   seek(position: number) {
-    return this.sendCommand<void>('seek', position);
+    return this.sendCommand('seek', position);
   }
 
   /**
@@ -234,7 +239,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param index - Index of quality to select
    */
   selectQuality(index: number) {
-    return this.sendCommand<void>('selectQuality', index);
+    return this.sendCommand('selectQuality', index);
   }
 
   /**
@@ -243,10 +248,10 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @deprecated Instead use {@link sendPlayerCommand}
    */
-  override sendCustomCommand<T>(
+  override sendCustomCommand(
     name: string,
     arg?: unknown,
-    listener?: (value: T) => void,
+    listener?: (value: unknown) => void,
   ) {
     return super.sendCustomCommand(name, arg, listener);
   }
@@ -259,21 +264,12 @@ export class InteractiveBridge extends LiveryBridge {
    * @param arg - Optional argument to custom command to send
    * @param listener - Optional listener function to be called with custom command handler listener call values
    */
-  sendPlayerCommand<T>(
+  sendPlayerCommand(
     name: string,
     arg?: unknown,
-    listener?: (value: T) => void,
+    listener?: (value: unknown) => void,
   ) {
     return super.sendCustomCommand(name, arg, listener);
-  }
-
-  /**
-   * Change `disabled` to `true` to disable all default player controls and implement your own instead.
-   *
-   * @param disabled - True if default player controls should be disabled, false otherwise
-   */
-  setControlsDisabled(disabled: boolean) {
-    return this.sendCommand<void>('setControlsDisabled', disabled);
   }
 
   /**
@@ -286,7 +282,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param display - Display mode to attempt to change to
    */
   setDisplay(display: DisplayMode) {
-    return this.sendCommand<void>('setDisplay', display);
+    return this.sendCommand('setDisplay', display);
   }
 
   /**
@@ -299,7 +295,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param muted - Muted state to attempt to change to
    */
   setMuted(muted: boolean) {
-    return this.sendCommand<void>('setMuted', muted);
+    return this.sendCommand('setMuted', muted);
   }
 
   /**
@@ -315,7 +311,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param volume - Volume, between 0 and 1, to change to
    */
   setVolume(volume: number) {
-    return this.sendCommand<void>('setVolume', volume);
+    return this.sendCommand('setVolume', volume);
   }
 
   /**
@@ -326,7 +322,7 @@ export class InteractiveBridge extends LiveryBridge {
    * @param feedback - User feedback to submit
    */
   submitUserFeedback(feedback: UserFeedback) {
-    return this.sendCommand<void>('submitUserFeedback', feedback);
+    return this.sendCommand('submitUserFeedback', feedback);
   }
 
   /**
@@ -545,6 +541,11 @@ export class InteractiveBridge extends LiveryBridge {
   ) {
     if (name === 'authenticate') {
       return this.authenticate(validateAuth(arg));
+    }
+    /** @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake. */
+    if (name === 'options') {
+      // Just return InteractivePlayerOptions, not handleAuth option
+      return validateInteractivePlayerOptions(this.options);
     }
     return super.handleCommand(name, arg, listener);
   }

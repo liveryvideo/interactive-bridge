@@ -1,3 +1,4 @@
+import type { PropertyValues } from 'lit';
 import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import type { LiveryBridge } from '../LiveryBridge';
@@ -91,20 +92,18 @@ export class LiveryBridgeLog extends LitElement {
     this.messages = [];
   }
 
+  override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    this.updateMessages();
+  }
+
   override render() {
     return html`<pre><code id="container"></code></pre>`;
   }
 
   private addMessage(message: string) {
     this.messages.unshift(message);
-
-    while (this.messages.length > this.maxMessages) {
-      this.messages.pop();
-    }
-
-    if (this.container) {
-      this.container.innerText = this.messages.join('\n');
-    }
+    this.updateMessages();
   }
 
   private handleWindowMessage = (event: MessageEvent) => {
@@ -113,6 +112,16 @@ export class LiveryBridgeLog extends LitElement {
 
     this.addMessage(`${event.origin}: ${humanStringify(event.data, true)}`);
   };
+
+  private updateMessages() {
+    while (this.messages.length > this.maxMessages) {
+      this.messages.pop();
+    }
+
+    if (this.container) {
+      this.container.innerText = this.messages.join('\n');
+    }
+  }
 }
 
 defineVersionedElement('livery-bridge-log', LiveryBridgeLog);

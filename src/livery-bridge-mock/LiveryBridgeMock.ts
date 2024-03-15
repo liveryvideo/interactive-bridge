@@ -134,6 +134,11 @@ export class LiveryBridgeMock extends LitElement {
       this.playerBridge = new MockPlayerBridge();
     }
 
+    this.playerBridge.options().catch((reason) => {
+      // eslint-disable-next-line no-console -- TODO: output to DOM somewhere
+      console.error('PlayerBridge options() rejected', reason);
+    });
+
     this.dispatchEvent(new Event('load'));
   }
 

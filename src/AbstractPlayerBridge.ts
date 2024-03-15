@@ -17,6 +17,7 @@ import type {
 import {
   validateBoolean,
   validateDisplayMode,
+  validateInteractivePlayerOptions,
   validateNumber,
   validateUserFeedback,
 } from './util/schema';
@@ -42,7 +43,22 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * @param tokenOrClaims - JWT token string or claims to authenticate with or undefined to logout
    */
   authenticate(tokenOrClaims?: string | AuthClaims) {
-    return this.sendCommand<void>('authenticate', tokenOrClaims);
+    return this.sendCommand('authenticate', tokenOrClaims);
+  }
+
+  /**
+   * Returns promise of options from interactive layer for the player.
+   * Or default options if the interactive bridge doesn't support this/these yet.
+   *
+   * Note: In the future this could also pass options from player to the interactive layer.
+   *
+   * @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake.
+   */
+  options() {
+    return this.sendCommand('options').then(
+      (value) => validateInteractivePlayerOptions(value),
+      () => validateInteractivePlayerOptions(undefined),
+    );
   }
 
   /**
@@ -60,10 +76,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * Returns promise of value returned by the interactive layer's custom command handler with matching `name` that is passed `arg`.
    * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
    */
-  sendInteractiveCommand<T>(
+  sendInteractiveCommand(
     name: string,
     arg?: unknown,
-    listener?: (value: T) => void,
+    listener?: (value: unknown) => void,
   ) {
     return this.sendCustomCommand(name, arg, listener);
   }
@@ -121,9 +137,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     }
     if (name === 'selectQuality') {
       return this.selectQuality(validateNumber(arg));
-    }
-    if (name === 'setControlsDisabled') {
-      return this.setControlsDisabled(validateBoolean(arg));
     }
     if (name === 'setDisplay') {
       return this.setDisplay(validateDisplayMode(arg));
@@ -277,8 +290,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract seek(position: number): void;
 
   protected abstract selectQuality(index: number): void;
-
-  protected abstract setControlsDisabled(disabled: boolean): void;
 
   protected abstract setDisplay(display: DisplayMode): void;
 
