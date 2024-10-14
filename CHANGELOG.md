@@ -1,3 +1,10 @@
+## [1.13.5](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.4...v1.13.5) (2024-10-14)
+
+
+### Bug Fixes
+
+* use @liveryvideo/biome-lit, fix lint errors, update configs and most* dependencies ([5761c98](https://github.com/liveryvideo/interactive-bridge/commit/5761c9889b50f55023bef3197a9e9fb97b34bb36))
+
 ## [1.13.4](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.3...v1.13.4) (2024-03-15)
 
 
