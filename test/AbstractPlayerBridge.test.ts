@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { InteractiveBridge } from '../src/InteractiveBridge';
-import { MockPlayerBridge } from '../src/MockPlayerBridge';
+import { InteractiveBridge } from '../src/InteractiveBridge.ts';
+import { MockPlayerBridge } from '../src/MockPlayerBridge.ts';
 
 function stubWindowLocationSearch(search: string) {
   const originalSearch = window.location.search;
@@ -37,8 +37,8 @@ describe('AbstractPlayerBridge', () => {
       const result = await interactiveBridge.getLiveryParams();
       expect(result).to.deep.equal({
         'foo:bar': 'hey you',
-        no_val: '',
         multi: '1',
+        no_val: '',
       });
     });
   });

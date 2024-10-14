@@ -1,9 +1,9 @@
 import type { PropertyValues } from 'lit';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { property } from 'lit/decorators.js';
-import '../livery-bridge-log/LiveryBridgeLog';
-import { MockPlayerBridge } from '../MockPlayerBridge';
-import { defineVersionedElement } from '../util/defineVersionedElement';
+import '../livery-bridge-log/LiveryBridgeLog.ts';
+import { MockPlayerBridge } from '../MockPlayerBridge.ts';
+import { defineVersionedElement } from '../util/defineVersionedElement.ts';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -21,6 +21,7 @@ declare global {
  * e.g. by using a Livery Interactive element.
  *
  * @group Elements
+ * @noInheritDoc
  * @example
  * ```js
  * const mock = document.createElement('livery-bridge-mock');
@@ -102,7 +103,7 @@ export class LiveryBridgeMock extends LitElement {
    * @group Attributes
    * @defaultValue window.origin
    */
-  @property({ type: String, reflect: true })
+  @property({ reflect: true, type: String })
   interactiveOrigin = window.origin;
 
   @property({ type: Object })
@@ -127,15 +128,15 @@ export class LiveryBridgeMock extends LitElement {
         throw new Error('iframe contentWindow undefined');
       }
       this.playerBridge = new MockPlayerBridge({
-        window: iframe.contentWindow,
         origin: this.interactiveOrigin,
+        window: iframe.contentWindow,
       });
     } else {
       this.playerBridge = new MockPlayerBridge();
     }
 
     this.playerBridge.options().catch((reason) => {
-      // eslint-disable-next-line no-console -- TODO: output to DOM somewhere
+      // biome-ignore lint/suspicious/noConsole: TODO: output to DOM somewhere
       console.error('PlayerBridge options() rejected', reason);
     });
 
@@ -143,7 +144,6 @@ export class LiveryBridgeMock extends LitElement {
   }
 
   override render() {
-    /* eslint-disable @typescript-eslint/unbound-method -- lit html handles event listener binding */
     return html`
       <div class="panel">
         <h2>Mock Livery Player</h2>
@@ -170,14 +170,15 @@ export class LiveryBridgeMock extends LitElement {
       <div class="panel">
         <h2>Mock Bridge Messages</h2>
         <!-- Note: playerBridge only becomes available after firstUpdated -->
-        ${this.playerBridge
-          ? html`<livery-bridge-log
+        ${
+          this.playerBridge
+            ? html`<livery-bridge-log
               .bridge=${this.playerBridge}
             ></livery-bridge-log>`
-          : ''}
+            : ''
+        }
       </div>
     `;
-    /* eslint-enable @typescript-eslint/unbound-method */
   }
 }
 

@@ -1,7 +1,4 @@
-# Copy any changes made here to .eslintignore
-
 ## editors
-/.idea
 /.vscode
 
 ## system files
@@ -10,9 +7,6 @@
 ## npm
 /node_modules/
 /npm-debug.log
-
-## temp folders
-/.tmp/
 
 ## dist
 /dist/

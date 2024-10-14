@@ -1,5 +1,5 @@
-import { LiveryBridge } from './LiveryBridge';
-import { reducedSubscribe } from './util/reducedSubscribe';
+import { LiveryBridge } from './LiveryBridge.ts';
+import { reducedSubscribe } from './util/reducedSubscribe.ts';
 import type {
   AuthClaims,
   Config,
@@ -13,28 +13,32 @@ import type {
   StreamPhase,
   UserFeedback,
   Volume,
-} from './util/schema';
+} from './util/schema.ts';
 import {
   validateBoolean,
   validateDisplayMode,
   validateInteractivePlayerOptions,
   validateNumber,
   validateUserFeedback,
-} from './util/schema';
+} from './util/schema.ts';
+
+// Not supported by TypeScript for strict reasons, but this should be fine here
+// https://github.com/microsoft/TypeScript/issues/36275
+function narrowIncludes<T extends string>(
+  names: readonly T[],
+  name: string,
+): name is T {
+  return (names as unknown as string[]).includes(name);
+}
 
 /**
  * Abstract player bridge class which implements part of the player side API based on browser logic
  * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
  */
 export abstract class AbstractPlayerBridge extends LiveryBridge {
-  protected portraitQuery = window.matchMedia('(orientation: portrait)');
-
   protected abstract config: Config;
 
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor -- Restrict target type
-  constructor(target?: { origin: string; window: Window }) {
-    super(target);
-  }
+  protected portraitQuery = window.matchMedia('(orientation: portrait)');
 
   /**
    * Authenticate user in interactive layer with specified token or claims,
@@ -42,7 +46,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    *
    * @param tokenOrClaims - JWT token string or claims to authenticate with or undefined to logout
    */
-  authenticate(tokenOrClaims?: string | AuthClaims) {
+  authenticate(tokenOrClaims?: AuthClaims | string) {
     return this.sendCommand('authenticate', tokenOrClaims);
   }
 
@@ -91,47 +95,39 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return this.unregisterCustomCommand(name);
   }
 
+  protected abstract getEndpointId(): string;
+
+  protected abstract getFeatures(): Features;
+
+  protected abstract getPlayback(): PlaybackDetails;
+
+  protected abstract getPlayerVersion(): string;
+
+  protected abstract getStreamId(): string;
+
   protected override handleCommand(
     name: string,
     arg: unknown,
     listener: (value: unknown) => void,
   ) {
-    if (name === 'getAppName') {
-      return this.getAppName();
+    const simpleMethods = [
+      'getAppName',
+      'getCustomerId',
+      'getEndpointId',
+      'getFeatures',
+      'getLatency',
+      'getLiveryParams',
+      'getPlayback',
+      'getPlayerVersion',
+      'getStreamId',
+      'pause',
+      'play',
+      'reload',
+    ] as const;
+    if (narrowIncludes(simpleMethods, name)) {
+      return this[name]();
     }
-    if (name === 'getCustomerId') {
-      return this.getCustomerId();
-    }
-    if (name === 'getEndpointId') {
-      return this.getEndpointId();
-    }
-    if (name === 'getFeatures') {
-      return this.getFeatures();
-    }
-    if (name === 'getLatency') {
-      return this.getLatency();
-    }
-    if (name === 'getLiveryParams') {
-      return this.getLiveryParams();
-    }
-    if (name === 'getPlayback') {
-      return this.getPlayback();
-    }
-    if (name === 'getPlayerVersion') {
-      return this.getPlayerVersion();
-    }
-    if (name === 'getStreamId') {
-      return this.getStreamId();
-    }
-    if (name === 'pause') {
-      return this.pause();
-    }
-    if (name === 'play') {
-      return this.play();
-    }
-    if (name === 'reload') {
-      return this.reload();
-    }
+
     if (name === 'seek') {
       return this.seek(validateNumber(arg));
     }
@@ -150,42 +146,70 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     if (name === 'submitUserFeedback') {
       return this.submitUserFeedback(validateUserFeedback(arg));
     }
-    if (name === 'subscribeConfig') {
-      return this.subscribeConfig(listener);
-    }
-    if (name === 'subscribeDisplay') {
-      return this.subscribeDisplay(listener);
-    }
-    if (name === 'subscribeError') {
-      return this.subscribeError(listener);
-    }
-    if (name === 'subscribeFullscreen') {
-      return this.subscribeFullscreen(listener);
-    }
-    if (name === 'subscribeMode') {
-      return this.subscribeMode(listener);
-    }
-    if (name === 'subscribeOrientation') {
-      return this.subscribeOrientation(listener);
-    }
-    if (name === 'subscribePlaybackState') {
-      return this.subscribePlaybackState(listener);
-    }
-    if (name === 'subscribeQualities') {
-      return this.subscribeQualities(listener);
-    }
-    if (name === 'subscribeQuality') {
-      return this.subscribeQuality(listener);
-    }
-    if (name === 'subscribeStreamPhase') {
-      return this.subscribeStreamPhase(listener);
-    }
-    if (name === 'subscribeVolume') {
-      return this.subscribeVolume(listener);
+
+    const subscribeMethods = [
+      'subscribeConfig',
+      'subscribeDisplay',
+      'subscribeError',
+      'subscribeFullscreen',
+      'subscribeMode',
+      'subscribeOrientation',
+      'subscribePlaybackState',
+      'subscribeQualities',
+      'subscribeQuality',
+      'subscribeStreamPhase',
+      'subscribeVolume',
+    ] as const;
+    if (narrowIncludes(subscribeMethods, name)) {
+      return this[name](listener);
     }
 
     return super.handleCommand(name, arg, listener);
   }
+
+  protected abstract pause(): void;
+
+  protected abstract play(): void;
+
+  protected abstract reload(): void;
+
+  protected abstract seek(position: number): void;
+
+  protected abstract selectQuality(index: number): void;
+
+  protected abstract setDisplay(display: DisplayMode): void;
+
+  protected abstract setMuted(muted: boolean): void;
+
+  protected abstract setVolume(volume: number): void;
+
+  protected abstract submitUserFeedback(value: UserFeedback): void;
+
+  protected abstract subscribeConfig(listener: (value: Config) => void): Config;
+
+  protected abstract subscribeDisplay(
+    listener: (display: DisplayMode) => void,
+  ): DisplayMode;
+
+  protected abstract subscribeError(
+    listener: (error: string | undefined) => void,
+  ): string | undefined;
+
+  protected abstract subscribeMode(
+    listener: (mode: PlaybackMode) => void,
+  ): PlaybackMode;
+
+  protected abstract subscribePlaybackState(
+    listener: (playbackState: PlaybackState) => void,
+  ): PlaybackState;
+
+  protected abstract subscribeQualities(
+    listener: (qualities: Qualities) => void,
+  ): Qualities;
+
+  protected abstract subscribeVolume(
+    listener: (volume: Volume) => void,
+  ): Volume;
 
   private getAppName() {
     return window.location.hostname;
@@ -235,7 +259,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use addListener()
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
     if (this.portraitQuery.addEventListener === undefined) {
-      // eslint-disable-next-line deprecation/deprecation -- For backwards compatibility
+      // For backwards compatibility
       this.portraitQuery.addListener((event) => {
         listener(event.matches ? 'portrait' : 'landscape');
       });
@@ -270,58 +294,4 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       listener,
     );
   }
-
-  protected abstract getEndpointId(): string;
-
-  protected abstract getFeatures(): Features;
-
-  protected abstract getPlayback(): PlaybackDetails;
-
-  protected abstract getPlayerVersion(): string;
-
-  protected abstract getStreamId(): string;
-
-  protected abstract pause(): void;
-
-  protected abstract play(): void;
-
-  protected abstract reload(): void;
-
-  protected abstract seek(position: number): void;
-
-  protected abstract selectQuality(index: number): void;
-
-  protected abstract setDisplay(display: DisplayMode): void;
-
-  protected abstract setMuted(muted: boolean): void;
-
-  protected abstract setVolume(volume: number): void;
-
-  protected abstract submitUserFeedback(value: UserFeedback): void;
-
-  protected abstract subscribeConfig(listener: (value: Config) => void): Config;
-
-  protected abstract subscribeDisplay(
-    listener: (display: DisplayMode) => void,
-  ): DisplayMode;
-
-  protected abstract subscribeError(
-    listener: (error: string | undefined) => void,
-  ): string | undefined;
-
-  protected abstract subscribeMode(
-    listener: (mode: PlaybackMode) => void,
-  ): PlaybackMode;
-
-  protected abstract subscribePlaybackState(
-    listener: (playbackState: PlaybackState) => void,
-  ): PlaybackState;
-
-  protected abstract subscribeQualities(
-    listener: (qualities: Qualities) => void,
-  ): Qualities;
-
-  protected abstract subscribeVolume(
-    listener: (volume: Volume) => void,
-  ): Volume;
 }

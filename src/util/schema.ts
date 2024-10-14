@@ -237,7 +237,7 @@ export type AuthClaims = {
   verified?: boolean;
 };
 
-export const validateAuth = createValidate<undefined | string | AuthClaims>(
+export const validateAuth = createValidate<AuthClaims | string | undefined>(
   z.union([
     zUndefined,
     zString,

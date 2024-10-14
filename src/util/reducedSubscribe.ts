@@ -9,7 +9,7 @@
  * @returns Initial reduced value
  */
 export async function reducedSubscribe<T, R>(
-  subscribe: (unreducedListener: (unreducedValue: T) => void) => T | Promise<T>,
+  subscribe: (unreducedListener: (unreducedValue: T) => void) => Promise<T> | T,
   reducer: (unreducedValue: T) => R,
   listener: (value: R) => void,
 ) {

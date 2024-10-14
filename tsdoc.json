@@ -5,9 +5,14 @@
     {
       "tagName": "@group",
       "syntaxKind": "block"
+    },
+    {
+      "tagName": "@noInheritDoc",
+      "syntaxKind": "block"
     }
   ],
   "supportForTags": {
-    "@group": true
+    "@group": true,
+    "@noInheritDoc": true
   }
 }

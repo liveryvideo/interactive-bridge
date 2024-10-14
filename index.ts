@@ -28,13 +28,14 @@
  */
 export const version = __VERSION__;
 
-export { AbstractPlayerBridge } from './src/AbstractPlayerBridge';
-export { InteractiveBridge } from './src/InteractiveBridge';
-export { LiveryBridge } from './src/LiveryBridge';
-export { MockPlayerBridge } from './src/MockPlayerBridge';
-export { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive';
-export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog';
-export { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock';
+// biome-ignore lint/performance/noBarrelFile: Required for compatibility and it should be fine with named exports
+export { AbstractPlayerBridge } from './src/AbstractPlayerBridge.ts';
+export { InteractiveBridge } from './src/InteractiveBridge.ts';
+export { LiveryBridge } from './src/LiveryBridge.ts';
+export { MockPlayerBridge } from './src/MockPlayerBridge.ts';
+export { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive.ts';
+export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog.ts';
+export { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock.ts';
 export type {
   AuthClaims,
   Config,
@@ -50,4 +51,4 @@ export type {
   StreamPhase,
   UserFeedback,
   Volume,
-} from './src/util/schema';
+} from './src/util/schema.ts';

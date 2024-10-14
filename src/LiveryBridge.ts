@@ -1,5 +1,13 @@
-import { isSemVerCompatible } from './util/semver';
-import { uuid } from './util/uuid';
+import { isSemVerCompatible } from './util/semver.ts';
+import { uuid } from './util/uuid.ts';
+
+type LiveryBridgeTarget =
+  | {
+      origin: string;
+      window: Window;
+    }
+  | LiveryBridge
+  | undefined;
 
 // TODO: Replace type validation code here by using Zod in schema?
 // TODO: At next major release add support for options to handshake protocol and use that to replace options command
@@ -47,11 +55,11 @@ type Spy = (message: LiveryMessage) => void;
 
 const version = __VERSION__;
 
-// eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
-function hasOwnProperty<X extends {}, Y extends PropertyKey>(
+// Used to narrow down unknown object ({}) type
+function hasProperty<X extends {}, Y extends PropertyKey>(
   obj: X,
   prop: Y,
-): obj is X & Record<Y, unknown> {
+): obj is Record<Y, unknown> & X {
   return Object.hasOwnProperty.call(obj, prop);
 }
 
@@ -61,13 +69,13 @@ function hasOwnProperty<X extends {}, Y extends PropertyKey>(
  * This package can be loaded multiple times so unfortunately we can't simply use `instanceof LiveryBridge`.
  */
 function isLiveryBridge(
-  target: undefined | LiveryBridge | { origin: string; window: Window },
+  target: { origin: string; window: Window } | LiveryBridge | undefined,
 ): target is LiveryBridge {
   if (!target) {
     return false;
   }
-  const { constructor } = target;
-  return 'isLiveryBridge' in constructor && constructor.isLiveryBridge === true;
+  const Target = target.constructor;
+  return 'isLiveryBridge' in Target && Target.isLiveryBridge === true;
 }
 
 /**
@@ -97,13 +105,7 @@ export class LiveryBridge {
 
   private spies: Spy[] = [];
 
-  private target:
-    | undefined
-    | LiveryBridge
-    | {
-        origin: string;
-        window: Window;
-      };
+  private target: LiveryBridgeTarget;
 
   /**
    * Constructs a LiveryBridge.
@@ -114,11 +116,11 @@ export class LiveryBridge {
    *
    * @param target - LiveryBridge target
    */
-  constructor(target?: LiveryBridge['target']) {
+  constructor(target?: LiveryBridgeTarget) {
     this.target = target;
 
     this.handshakePromise = new Promise<unknown>((resolve, reject) => {
-      this.deferredMap.set(this.sourceId, { resolve, reject });
+      this.deferredMap.set(this.sourceId, { reject, resolve });
     });
 
     if (target) {
@@ -135,16 +137,15 @@ export class LiveryBridge {
   }
 
   private static assertMessagePropertyType(
-    // eslint-disable-next-line @typescript-eslint/ban-types -- used to narrow down unknown object ({}) type
-    message: {},
+    message: Record<string, unknown>,
     key: string,
     type: string,
   ) {
     const messageType =
-      hasOwnProperty(message, 'type') && typeof message.type === 'string'
+      hasProperty(message, 'type') && typeof message.type === 'string'
         ? message.type
         : '';
-    if (!hasOwnProperty(message, key)) {
+    if (!hasProperty(message, key)) {
       throw new Error(`${messageType} message does not have property: ${key}`);
     }
     const actualType = typeof message[key];
@@ -195,7 +196,7 @@ export class LiveryBridge {
     if (
       typeof object !== 'object' ||
       object === null ||
-      !hasOwnProperty(object, 'isLivery') ||
+      !hasProperty(object, 'isLivery') ||
       object.isLivery !== true
     ) {
       return false;
@@ -236,16 +237,13 @@ export class LiveryBridge {
     };
   }
 
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  // eslint-disable-next-line class-methods-use-this -- Overridable method
   protected handleCommand(
     name: string,
-    arg: unknown,
-    listener: (value: unknown) => void,
+    _arg: unknown,
+    _listener: (value: unknown) => void,
   ): unknown {
     throw new Error(`Unsupported command: ${name}`);
   }
-  /* eslint-enable @typescript-eslint/no-unused-vars */
 
   /**
    * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
@@ -268,14 +266,14 @@ export class LiveryBridge {
       const id = uuid();
 
       const promise = new Promise<unknown>((resolve, reject) => {
-        this.deferredMap.set(id, { resolve, reject });
+        this.deferredMap.set(id, { reject, resolve });
       });
 
       if (listener) {
         this.listenerMap.set(id, listener);
       }
 
-      this.sendMessage(custom ? 'customCommand' : 'command', id, { name, arg });
+      this.sendMessage(custom ? 'customCommand' : 'command', id, { arg, name });
 
       return promise;
     });
@@ -375,8 +373,8 @@ export class LiveryBridge {
       try {
         spy(message);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('LiveryBridge spy callback threw error', error);
+        // biome-ignore lint/suspicious/noConsole: Shouldn't happen, for now this is good enough
+        console.error('LiveryBridge spy function error', { error, spy });
       }
     }
 
@@ -445,10 +443,10 @@ export class LiveryBridge {
     }
 
     const message: LiveryMessage = {
+      id,
       isLivery: true,
       sourceId: this.sourceId,
       type,
-      id,
       ...properties,
     };
 

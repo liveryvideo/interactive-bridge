@@ -1,18 +1,18 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["./dist/index.d.ts"],
-  "tsconfig": "./tsconfig-typedoc.json",
+  "tsconfig": "./tsconfig-typedoc.jsonc",
   "out": "dist/doc",
-  "plugin": ["typedoc-plugin-markdown"],
+  "plugin": ["typedoc-plugin-no-inherit", "typedoc-plugin-markdown"],
   "categorizeByGroup": true,
   "disableSources": true,
-  "excludeExternals": true,
   "excludePrivate": true,
   "excludeProtected": true,
   "excludeNotDocumented": true,
   "includeVersion": true,
   "readme": "none",
+  // TODO: Once we update typedoc: "suppressCommentWarningsInDeclarationFiles": true,
   /* typedoc-plugin-markdown */
-  "entryDocument": "index.md",
-  "hideInPageTOC": true
+  "entryFileName": "index",
+  "hidePageHeader": true
 }

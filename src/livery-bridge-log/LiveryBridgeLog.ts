@@ -1,9 +1,9 @@
 import type { PropertyValues } from 'lit';
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
-import type { LiveryBridge } from '../LiveryBridge';
-import { defineVersionedElement } from '../util/defineVersionedElement';
-import { humanStringify } from '../util/humanStringify';
+import type { LiveryBridge } from '../LiveryBridge.ts';
+import { defineVersionedElement } from '../util/defineVersionedElement.ts';
+import { humanStringify } from '../util/humanStringify.ts';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -15,6 +15,7 @@ declare global {
  * Element defined as `<livery-bridge-log>` which logs messages posted to specified {@link bridge} or the window.
  *
  * @group Elements
+ * @noInheritDoc
  * @example
  * ```html
  * <livery-bridge-log maxmessages="3"></livery-bridge-log>
@@ -55,7 +56,7 @@ export class LiveryBridgeLog extends LitElement {
    * @group Attributes
    * @defaultValue 10
    */
-  @property({ type: Number, reflect: true })
+  @property({ reflect: true, type: Number })
   maxMessages = 10;
 
   @query('#container')
@@ -70,7 +71,7 @@ export class LiveryBridgeLog extends LitElement {
 
     if (this.bridge) {
       this.removeSpy = this.bridge.spy((message) => {
-        // eslint-disable-next-line no-console
+        // biome-ignore lint/suspicious/noConsole lint/suspicious/noConsoleLog: Log to console as documented
         console.log(message);
         this.addMessage(humanStringify(message, true));
       });
@@ -107,7 +108,7 @@ export class LiveryBridgeLog extends LitElement {
   }
 
   private handleWindowMessage = (event: MessageEvent) => {
-    // eslint-disable-next-line no-console
+    // biome-ignore lint/suspicious/noConsole lint/suspicious/noConsoleLog: Log to console as documented
     console.log(event.origin, event.data);
 
     this.addMessage(`${event.origin}: ${humanStringify(event.data, true)}`);

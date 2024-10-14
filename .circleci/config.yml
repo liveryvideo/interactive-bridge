@@ -12,7 +12,7 @@
 #
 # Note: We used to use the cimg/node -browsers docker image variant and circleci/browser-tools to install
 # Chrome to be able to run our tests in that browser.
-#We might want to do that again soon, so I've just commented that out for now.
+# We might want to do that again soon, so I've just commented that out for now.
 
 version: 2.1
 
@@ -23,7 +23,7 @@ executors:
   default:
     docker:
       # - image: cimg/node:18.12.1-browsers
-      - image: cimg/node:20.11.0
+      - image: cimg/node:20.18.0
 
 commands:
   npm_install:
@@ -42,7 +42,7 @@ commands:
           key: node_modules-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
-  test:
+  npm_lint_test:
     steps:
       - checkout
       - npm_install
@@ -55,18 +55,16 @@ jobs:
   test:
     executor: default
     steps:
-      - test
+      - npm_lint_test
 
   test_and_release:
     executor: default
     steps:
-      - test
+      - npm_lint_test
       # Disable husky git hooks to prevent commitlint from tripping on the generated changelog commit message
       - run: HUSKY=0 npx semantic-release
 
 workflows:
-  version: 2
-
   release_or_not:
     jobs:
       - test:

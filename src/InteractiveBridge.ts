@@ -1,6 +1,6 @@
-import type { AbstractPlayerBridge } from './AbstractPlayerBridge';
-import { LiveryBridge } from './LiveryBridge';
-import { reducedSubscribe } from './util/reducedSubscribe';
+import type { AbstractPlayerBridge } from './AbstractPlayerBridge.ts';
+import { LiveryBridge } from './LiveryBridge.ts';
+import { reducedSubscribe } from './util/reducedSubscribe.ts';
 import type {
   AuthClaims,
   Config,
@@ -12,7 +12,7 @@ import type {
   StreamPhase,
   UserFeedback,
   Volume,
-} from './util/schema';
+} from './util/schema.ts';
 import {
   validateAuth,
   validateBoolean,
@@ -31,7 +31,7 @@ import {
   validateStringOrUndefined,
   validateStringParams,
   validateVolume,
-} from './util/schema';
+} from './util/schema.ts';
 
 // Note: We have to explicitly define return types for our named union return types to result in nice linked types
 // When one of our named object types is returned this is not necessary however
@@ -76,11 +76,11 @@ export class InteractiveBridge extends LiveryBridge {
        *
        * @param tokenOrClaims - JWT token string or claims to authenticate with or undefined to logout
        */
-      handleAuth?: (tokenOrClaims?: string | AuthClaims) => void;
+      handleAuth?: (tokenOrClaims?: AuthClaims | string) => void;
     } = {},
   ) {
     if (typeof target === 'string') {
-      super({ window: window.parent, origin: target });
+      super({ origin: target, window: window.parent });
     } else {
       super(target);
     }
@@ -550,7 +550,7 @@ export class InteractiveBridge extends LiveryBridge {
     return super.handleCommand(name, arg, listener);
   }
 
-  private authenticate(tokenOrClaims?: string | AuthClaims) {
+  private authenticate(tokenOrClaims?: AuthClaims | string) {
     if (!this.options.handleAuth) {
       throw new Error('handleAuth option undefined');
     }

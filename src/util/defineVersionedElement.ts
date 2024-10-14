@@ -1,4 +1,4 @@
-import { isSemVerCompatible } from './semver';
+import { isSemVerCompatible } from './semver.ts';
 
 // TODO: Just perform this version compatibility test once within /index.ts and define elements there?
 
@@ -6,7 +6,7 @@ const version = __VERSION__;
 
 export function defineVersionedElement(
   name: string,
-  Class: typeof HTMLElement & { version: string },
+  Class: { version: string } & typeof HTMLElement,
 ) {
   const defined = customElements.get(name);
   if (defined) {

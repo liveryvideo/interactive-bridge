@@ -1,11 +1,11 @@
-import { css, html, LitElement } from 'lit';
+import { LitElement, css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
-import type { AbstractPlayerBridge } from '../AbstractPlayerBridge';
-import { InteractiveBridge } from '../InteractiveBridge';
-import '../livery-bridge-log/LiveryBridgeLog';
-import { defineVersionedElement } from '../util/defineVersionedElement';
-import { humanStringify } from '../util/humanStringify';
-import { validateDisplayMode, type UserFeedback } from '../util/schema';
+import type { AbstractPlayerBridge } from '../AbstractPlayerBridge.ts';
+import { InteractiveBridge } from '../InteractiveBridge.ts';
+import '../livery-bridge-log/LiveryBridgeLog.ts';
+import { defineVersionedElement } from '../util/defineVersionedElement.ts';
+import { humanStringify } from '../util/humanStringify.ts';
+import { type UserFeedback, validateDisplayMode } from '../util/schema.ts';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -71,6 +71,7 @@ function isBridgeSubscribeMethodName(
  * This dispatches a 'load' event once it's loaded and `interactiveBridge` has been assigned.
  *
  * @group Elements
+ * @noInheritDoc
  * @example
  * ```js
  * const interactive = document.createElement('livery-bridge-interactive');
@@ -171,16 +172,16 @@ export class LiveryBridgeInteractive extends LitElement {
    * @group Attributes
    * @defaultValue null
    */
-  @property({ type: String, reflect: true })
-  region: string | null = null;
+  @property({ reflect: true, type: String })
+  region: null | string = null;
 
   /**
    * Id of tenant that interactive element should use on server.
    * @group Attributes
    * @defaultValue null
    */
-  @property({ type: String, reflect: true })
-  tenantId: string | null = null;
+  @property({ reflect: true, type: String })
+  tenantId: null | string = null;
 
   @state()
   private interactiveCommandArg = '';
@@ -218,7 +219,6 @@ export class LiveryBridgeInteractive extends LitElement {
   }
 
   override render() {
-    /* eslint-disable @typescript-eslint/unbound-method -- lit html handles event listener binding */
     return html`
       <div class="controls-space">
         <!-- Livery Player controls can be shown here -->
@@ -439,12 +439,11 @@ export class LiveryBridgeInteractive extends LitElement {
         <!-- Livery Player controls can be shown here -->
       </div>
     `;
-    /* eslint-enable @typescript-eslint/unbound-method */
   }
 
   private createSetText(selector: string) {
     const element = this.renderRoot.querySelector(selector);
-    if (!element || !(element instanceof HTMLElement)) {
+    if (!(element && element instanceof HTMLElement)) {
       throw new Error(`No HTMLElement found with selector: ${selector}`);
     }
 
@@ -453,6 +452,8 @@ export class LiveryBridgeInteractive extends LitElement {
     };
   }
 
+  // See below, or actually we might want to refactor this element altogether; it has outgrown it's basic setup
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: reduce Tyler's complexity below, e.g: DRY
   private handleGetSelectChange(event: Event) {
     const { target } = event;
 
@@ -550,7 +551,7 @@ export class LiveryBridgeInteractive extends LitElement {
   }
 
   private handlePlayerCall(type: 'get' | 'subscribe', event: Event) {
-    if (!event.target || !(event.target instanceof HTMLFormElement)) {
+    if (!(event.target && event.target instanceof HTMLFormElement)) {
       throw new Error('Unsupported event target');
     }
     if (!this.interactiveBridge) {
@@ -567,7 +568,7 @@ export class LiveryBridgeInteractive extends LitElement {
 
     const setText = this.createSetText(`#${type}CommandOutput`);
 
-    const getInputValue = (field: 'Input' | 'Boolean' | 'Display') => {
+    const getInputValue = (field: 'Boolean' | 'Display' | 'Input') => {
       const inputValue = formData.get(`${type}CommandName${field}`)?.toString();
 
       if (typeof inputValue !== 'string') {
@@ -587,10 +588,9 @@ export class LiveryBridgeInteractive extends LitElement {
         case 'selectQuality':
         case 'setVolume': {
           const inputValue = getInputValue('Input');
-          this.interactiveBridge[methodName](parseFloat(inputValue)).then(
-            setText,
-            setText,
-          );
+          this.interactiveBridge[methodName](
+            Number.parseFloat(inputValue),
+          ).then(setText, setText);
           break;
         }
         case 'setMuted': {
@@ -603,9 +603,9 @@ export class LiveryBridgeInteractive extends LitElement {
         }
         case 'submitUserFeedback': {
           const inputValue: UserFeedback = {
-            name: 'dummy-name',
-            email: 'dummy-email',
             comments: 'dummy-comments',
+            email: 'dummy-email',
+            name: 'dummy-name',
           };
           this.interactiveBridge[methodName](inputValue).then(setText, setText);
           break;
@@ -630,7 +630,7 @@ export class LiveryBridgeInteractive extends LitElement {
   }
 
   private handlePlayerCommand(event: Event) {
-    if (!event.target || !(event.target instanceof HTMLFormElement)) {
+    if (!(event.target && event.target instanceof HTMLFormElement)) {
       throw new Error('Unsupported event target');
     }
     if (!this.interactiveBridge) {
@@ -642,7 +642,7 @@ export class LiveryBridgeInteractive extends LitElement {
     const data = new FormData(event.target);
     const name = data.get('name') as string;
     const argStr = data.get('arg') as string;
-    const arg: unknown = !argStr ? undefined : JSON.parse(argStr);
+    const arg: unknown = argStr ? JSON.parse(argStr) : undefined;
 
     const setText = (value: unknown) => {
       this.playerCommandValue = humanStringify(value);

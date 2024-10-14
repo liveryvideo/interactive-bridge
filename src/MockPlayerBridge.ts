@@ -1,4 +1,4 @@
-import { AbstractPlayerBridge } from './AbstractPlayerBridge';
+import { AbstractPlayerBridge } from './AbstractPlayerBridge.ts';
 import type {
   Config,
   DisplayMode,
@@ -7,7 +7,7 @@ import type {
   Qualities,
   UserFeedback,
   Volume,
-} from './util/schema';
+} from './util/schema.ts';
 
 const buildQuality = (index: number) => ({
   audio: {
@@ -109,14 +109,14 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return this.playbackState === 'PLAYING'
       ? {
           buffer: 2.8,
-          duration: Infinity,
+          duration: Number.POSITIVE_INFINITY,
           latency: 2.98,
           position: (Date.now() - this.zeroTimestamp - 2980) / 1000,
         }
       : {
-          buffer: NaN,
-          duration: Infinity,
-          latency: NaN,
+          buffer: Number.NaN,
+          duration: Number.POSITIVE_INFINITY,
+          latency: Number.NaN,
           position: 0,
         };
   }
@@ -160,7 +160,9 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       throw new Error(`Invalid qualities index: ${index}`);
     }
     this.qualities.selected = index;
-    this.qualitiesListeners.forEach((listener) => listener(this.qualities));
+    for (const listener of this.qualitiesListeners) {
+      listener(this.qualities);
+    }
   }
 
   protected setDisplay(display: DisplayMode) {
@@ -168,7 +170,9 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       return;
     }
     this.display = display;
-    this.displayListeners.forEach((listener) => listener(this.display));
+    for (const listener of this.displayListeners) {
+      listener(this.display);
+    }
   }
 
   protected setMuted(muted: boolean) {
@@ -176,9 +180,9 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       return;
     }
     this.muted = muted;
-    this.volumeListeners.forEach((listener) =>
-      listener({ muted: this.muted, volume: this.volume }),
-    );
+    for (const listener of this.volumeListeners) {
+      listener({ muted: this.muted, volume: this.volume });
+    }
   }
 
   protected setVolume(volume: number) {
@@ -186,9 +190,9 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       return;
     }
     this.volume = volume;
-    this.volumeListeners.forEach((listener) =>
-      listener({ muted: this.muted, volume: this.volume }),
-    );
+    for (const listener of this.volumeListeners) {
+      listener({ muted: this.muted, volume: this.volume });
+    }
   }
 
   protected submitUserFeedback(value: UserFeedback) {
@@ -269,6 +273,8 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       return;
     }
     this.playbackState = playbackState;
-    this.playbackStateListeners.forEach((listener) => listener(playbackState));
+    for (const listener of this.playbackStateListeners) {
+      listener(playbackState);
+    }
   }
 }
