@@ -14,7 +14,7 @@ import type {
   Volume,
 } from './util/schema.ts';
 import {
-  validateAuth,
+  validateAuthClaims,
   validateBoolean,
   validateConfig,
   validateDisplayMode,
@@ -540,7 +540,7 @@ export class InteractiveBridge extends LiveryBridge {
     listener: (value: unknown) => void,
   ) {
     if (name === 'authenticate') {
-      return this.authenticate(validateAuth(arg));
+      return this.authenticate(validateAuthClaims(arg));
     }
     /** @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake. */
     if (name === 'options') {

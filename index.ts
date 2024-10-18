@@ -16,6 +16,7 @@
  *   {@link AuthClaims}, {@link Config}, {@link DisplayMode}, {@link Features}, {@link InteractivePlayerOptions},
  *   {@link Orientation}, {@link PlaybackDetails}, {@link PlaybackMode}, {@link PlaybackState}, {@link Qualities},
  *   {@link Quality}, {@link StreamPhase}, {@link UserFeedback} and {@link Volume}.
+ * - Schema validators: validateAuthClaims.
  *
  * **Note:** When using the UMD bundle, the exports can be found as properties of `livery` in the global namespace,
  * e.g: `livery.version`.
@@ -36,6 +37,7 @@ export { MockPlayerBridge } from './src/MockPlayerBridge.ts';
 export { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive.ts';
 export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog.ts';
 export { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock.ts';
+export { validateAuthClaims } from './src/util/schema.ts';
 export type {
   AuthClaims,
   Config,

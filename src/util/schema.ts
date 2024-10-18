@@ -205,6 +205,16 @@ export type AuthClaims = {
   [claim: string]: unknown;
   /** End-User's birthday, represented as an ISO 8601-1 [ISO8601‑1] YYYY-MM-DD format. */
   birthdate?: string;
+  /** Custom Livery user property 1. */
+  custom1?: string;
+  /** Custom Livery user property 2. */
+  custom2?: string;
+  /** Custom Livery user property 3. */
+  custom3?: string;
+  /** Custom Livery user property 4. */
+  custom4?: string;
+  /** Custom Livery user property 5. */
+  custom5?: string;
   /** End-User's preferred e-mail address. */
   email?: string;
   /** True if the End-User's e-mail address has been verified; otherwise false. */
@@ -237,7 +247,9 @@ export type AuthClaims = {
   verified?: boolean;
 };
 
-export const validateAuth = createValidate<AuthClaims | string | undefined>(
+export const validateAuthClaims = createValidate<
+  AuthClaims | string | undefined
+>(
   z.union([
     zUndefined,
     zString,
