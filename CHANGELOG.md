@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.5...v1.14.0) (2024-10-18)
+
+
+### Features
+
+* add custom1..5 string properties to AuthClaims and export validateAuthClaims ([#34](https://github.com/liveryvideo/interactive-bridge/issues/34)) ([0ef6084](https://github.com/liveryvideo/interactive-bridge/commit/0ef6084e9df9f6835c7deafd658c8a9323eeb890))
+
 ## [1.13.5](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.4...v1.13.5) (2024-10-14)
 
 
