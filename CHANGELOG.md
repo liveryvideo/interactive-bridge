@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.14.0...v1.14.1) (2024-10-18)
+
+
+### Bug Fixes
+
+* **validateAuthClaims:** add custom1..5 string properties here as well ([3ed5973](https://github.com/liveryvideo/interactive-bridge/commit/3ed59733e262c46d0c0c6ff23da2c80c932b7b0d))
+
 # [1.14.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.13.5...v1.14.0) (2024-10-18)
 
 
