@@ -256,6 +256,11 @@ export const validateAuthClaims = createValidate<
     z
       .object({
         birthdate: zStringOrUndefined,
+        custom1: zStringOrUndefined,
+        custom2: zStringOrUndefined,
+        custom3: zStringOrUndefined,
+        custom4: zStringOrUndefined,
+        custom5: zStringOrUndefined,
         email: zStringOrUndefined,
         email_verified: zBooleanOrUndefined,
         family_name: zStringOrUndefined,
