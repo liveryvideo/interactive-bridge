@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.14.1...v1.14.2) (2024-10-21)
+
+
+### Bug Fixes
+
+* add support for last 3 (not 2) versions of iOS (i.e: currently v16) ([d78e705](https://github.com/liveryvideo/interactive-bridge/commit/d78e7054b3d4cfe4f402dac16351c50a9d64d709))
+
 ## [1.14.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.14.0...v1.14.1) (2024-10-18)
 
 
