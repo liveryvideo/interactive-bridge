@@ -39,8 +39,8 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       scrubber: true,
     },
     customerId: 'dummy-customer-id',
-    streamPhase: 'LIVE',
     streamPhases: [[Date.now(), 'LIVE']],
+    streamPhase: 'LIVE',
     tenantId: 'dummy-tenant-id',
   };
 
@@ -48,17 +48,19 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   userFeedback: UserFeedback | null = null;
 
-  private display: DisplayMode = 'DEFAULT';
-
   private displayListeners: ((value: DisplayMode) => void)[] = [];
+
+  private display: DisplayMode = 'DEFAULT';
 
   private muted = true;
 
   private playbackMode: PlaybackMode = 'LIVE';
 
+  private playbackStateListeners: ((value: PlaybackState) => void)[] = [];
+
   private playbackState: PlaybackState = 'PLAYING';
 
-  private playbackStateListeners: ((value: PlaybackState) => void)[] = [];
+  private qualitiesListeners: ((value: Qualities) => void)[] = [];
 
   private qualities: Qualities = {
     active: 0,
@@ -66,11 +68,9 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     selected: 0,
   };
 
-  private qualitiesListeners: ((value: Qualities) => void)[] = [];
+  private volumeListeners: ((value: Volume) => void)[] = [];
 
   private volume = 1;
-
-  private volumeListeners: ((value: Volume) => void)[] = [];
 
   private zeroTimestamp = Date.now();
 

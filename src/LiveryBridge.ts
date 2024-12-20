@@ -1,38 +1,8 @@
 import { isSemVerCompatible } from './util/semver.ts';
 import { uuid } from './util/uuid.ts';
 
-type LiveryBridgeTarget =
-  | {
-      origin: string;
-      window: Window;
-    }
-  | LiveryBridge
-  | undefined;
-
 // TODO: Replace type validation code here by using Zod in schema?
 // TODO: At next major release add support for options to handshake protocol and use that to replace options command
-
-interface LiveryMessage extends Record<string, unknown> {
-  id: string;
-  isLivery: true;
-  sourceId: string;
-  type: string;
-}
-
-interface HandshakeMessage extends LiveryMessage {
-  type: 'handshake';
-  version: string;
-}
-
-interface ResolveMessage extends LiveryMessage {
-  type: 'resolve';
-  value: unknown;
-}
-
-interface RejectMessage extends LiveryMessage {
-  error: string;
-  type: 'reject';
-}
 
 interface CommandMessage extends LiveryMessage {
   arg: unknown;
@@ -51,6 +21,36 @@ interface EventMessage extends LiveryMessage {
   value: unknown;
 }
 
+interface HandshakeMessage extends LiveryMessage {
+  type: 'handshake';
+  version: string;
+}
+
+type LiveryBridgeTarget =
+  | LiveryBridge
+  | {
+      origin: string;
+      window: Window;
+    }
+  | undefined;
+
+interface LiveryMessage extends Record<string, unknown> {
+  id: string;
+  isLivery: true;
+  sourceId: string;
+  type: string;
+}
+
+interface RejectMessage extends LiveryMessage {
+  error: string;
+  type: 'reject';
+}
+
+interface ResolveMessage extends LiveryMessage {
+  type: 'resolve';
+  value: unknown;
+}
+
 type Spy = (message: LiveryMessage) => void;
 
 const version = __VERSION__;
@@ -61,21 +61,6 @@ function hasProperty<X extends {}, Y extends PropertyKey>(
   prop: Y,
 ): obj is Record<Y, unknown> & X {
   return Object.hasOwnProperty.call(obj, prop);
-}
-
-/**
- * Returns true if specified target is a LiveryBridge instance.
- *
- * This package can be loaded multiple times so unfortunately we can't simply use `instanceof LiveryBridge`.
- */
-function isLiveryBridge(
-  target: { origin: string; window: Window } | LiveryBridge | undefined,
-): target is LiveryBridge {
-  if (!target) {
-    return false;
-  }
-  const Target = target.constructor;
-  return 'isLiveryBridge' in Target && Target.isLiveryBridge === true;
 }
 
 /**
@@ -464,4 +449,19 @@ export class LiveryBridge {
   private sendResolve(id: string, value: unknown) {
     this.sendMessage('resolve', id, { value });
   }
+}
+
+/**
+ * Returns true if specified target is a LiveryBridge instance.
+ *
+ * This package can be loaded multiple times so unfortunately we can't simply use `instanceof LiveryBridge`.
+ */
+function isLiveryBridge(
+  target: LiveryBridge | { origin: string; window: Window } | undefined,
+): target is LiveryBridge {
+  if (!target) {
+    return false;
+  }
+  const Target = target.constructor;
+  return 'isLiveryBridge' in Target && Target.isLiveryBridge === true;
 }

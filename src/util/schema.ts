@@ -215,10 +215,10 @@ export type AuthClaims = {
   custom4?: string;
   /** Custom Livery user property 5. */
   custom5?: string;
-  /** End-User's preferred e-mail address. */
-  email?: string;
   /** True if the End-User's e-mail address has been verified; otherwise false. */
   email_verified?: boolean;
+  /** End-User's preferred e-mail address. */
+  email?: string;
   /** Surname(s) or last name(s) of the End-User. */
   family_name?: string;
   /** End-User's gender. */
@@ -231,10 +231,10 @@ export type AuthClaims = {
   middle_name?: string;
   /** Age as entered by user for minimum age consideration. */
   minimum_age?: number;
-  /** End-User's preferred telephone number. */
-  phone_number?: string;
   /** True if the End-User's phone number has been verified; otherwise false. */
   phone_number_verified?: boolean;
+  /** End-User's preferred telephone number. */
+  phone_number?: string;
   /** URL of the End-User's profile picture. */
   picture?: string;
   /** Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe. */
@@ -261,16 +261,16 @@ export const validateAuthClaims = createValidate<
         custom3: zStringOrUndefined,
         custom4: zStringOrUndefined,
         custom5: zStringOrUndefined,
-        email: zStringOrUndefined,
         email_verified: zBooleanOrUndefined,
+        email: zStringOrUndefined,
         family_name: zStringOrUndefined,
         gender: zStringOrUndefined,
         given_name: zStringOrUndefined,
         locale: zStringOrUndefined,
         middle_name: zStringOrUndefined,
         minimum_age: zNumberOrUndefined,
-        phone_number: zStringOrUndefined,
         phone_number_verified: zBooleanOrUndefined,
+        phone_number: zStringOrUndefined,
         picture: zStringOrUndefined,
         preferred_username: zStringOrUndefined,
         sub: zStringOrUndefined,
@@ -308,10 +308,10 @@ export type Config = {
   };
   /** Livery customer ID. */
   customerId: string;
-  /** Livery stream phase, i.e: PRE/LIVE/POST before/while/after streaming to viewers. */
-  streamPhase: StreamPhase;
   /** Array of [unixTimestamp, streamPhase] tuples listing the times at which those phases started. */
   streamPhases: [number, StreamPhase][];
+  /** Livery stream phase, i.e: PRE/LIVE/POST before/while/after streaming to viewers. */
+  streamPhase: StreamPhase;
   /** Livery tenant ID. */
   tenantId: string;
 };
@@ -330,8 +330,8 @@ export const validateConfig = createValidate<Config>(
       scrubber: zBoolean,
     }),
     customerId: zString,
-    streamPhase: zStreamPhase,
     streamPhases: z.array(z.tuple([zNumber, zStreamPhase])),
+    streamPhase: zStreamPhase,
     tenantId: zString,
   }),
 );
@@ -405,6 +405,18 @@ export const validatePlaybackDetails = createValidate<PlaybackDetails>(
 );
 
 /**
+ * Stream qualities.
+ */
+export type Qualities = {
+  /** Index of quality that is being played, or -1 if no quality is active yet. */
+  active: number;
+  /** List of qualities that can be played. */
+  list: Quality[];
+  /** Index of quality that is selected to be played, or -1 if ABR is used. */
+  selected: number;
+};
+
+/**
  * Stream audio and video quality.
  */
 export type Quality = {
@@ -424,18 +436,6 @@ export type Quality = {
     /** Video width in pixels. */
     width: number;
   };
-};
-
-/**
- * Stream qualities.
- */
-export type Qualities = {
-  /** Index of quality that is being played, or -1 if no quality is active yet. */
-  active: number;
-  /** List of qualities that can be played. */
-  list: Quality[];
-  /** Index of quality that is selected to be played, or -1 if ABR is used. */
-  selected: number;
 };
 
 export const validateQualities = createValidate<Qualities>(

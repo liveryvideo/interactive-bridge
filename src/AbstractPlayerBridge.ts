@@ -22,15 +22,6 @@ import {
   validateUserFeedback,
 } from './util/schema.ts';
 
-// Not supported by TypeScript for strict reasons, but this should be fine here
-// https://github.com/microsoft/TypeScript/issues/36275
-function narrowIncludes<T extends string>(
-  names: readonly T[],
-  name: string,
-): name is T {
-  return (names as unknown as string[]).includes(name);
-}
-
 /**
  * Abstract player bridge class which implements part of the player side API based on browser logic
  * and defines abstract methods to be implemented to complete support for all InteractiveBridge commands.
@@ -294,4 +285,13 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       listener,
     );
   }
+}
+
+// Not supported by TypeScript for strict reasons, but this should be fine here
+// https://github.com/microsoft/TypeScript/issues/36275
+function narrowIncludes<T extends string>(
+  names: readonly T[],
+  name: string,
+): name is T {
+  return (names as unknown as string[]).includes(name);
 }

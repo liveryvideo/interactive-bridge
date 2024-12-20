@@ -54,16 +54,6 @@ const BRIDGE_SUBSCRIBE_NAMES = [
 type BridgeGetName = (typeof BRIDGE_GET_NAMES)[number];
 type BridgeSubscribeName = (typeof BRIDGE_SUBSCRIBE_NAMES)[number];
 
-function isBridgeGetMethodName(name: string): name is BridgeGetName {
-  return (BRIDGE_GET_NAMES as unknown as string[]).includes(name);
-}
-
-function isBridgeSubscribeMethodName(
-  name: string,
-): name is BridgeSubscribeName {
-  return (BRIDGE_SUBSCRIBE_NAMES as unknown as string[]).includes(name);
-}
-
 /**
  * Test element defined as `<livery-bridge-interactive>` which can be used as Livery Interactive element
  * for testing purposes.
@@ -469,8 +459,8 @@ export class LiveryBridgeInteractive extends LitElement {
 
     switch (methodName) {
       case 'seek':
-      case 'setVolume':
-      case 'selectQuality': {
+      case 'selectQuality':
+      case 'setVolume': {
         const inputElement = this.renderRoot.querySelector(
           '#getCommandNameInput',
         );
@@ -593,6 +583,13 @@ export class LiveryBridgeInteractive extends LitElement {
           ).then(setText, setText);
           break;
         }
+        case 'setDisplay': {
+          const inputValue = getInputValue('Display');
+          this.interactiveBridge[methodName](
+            validateDisplayMode(inputValue),
+          ).then(setText, setText);
+          break;
+        }
         case 'setMuted': {
           const inputValue = getInputValue('Boolean');
           this.interactiveBridge[methodName](inputValue === 'true').then(
@@ -608,13 +605,6 @@ export class LiveryBridgeInteractive extends LitElement {
             name: 'dummy-name',
           };
           this.interactiveBridge[methodName](inputValue).then(setText, setText);
-          break;
-        }
-        case 'setDisplay': {
-          const inputValue = getInputValue('Display');
-          this.interactiveBridge[methodName](
-            validateDisplayMode(inputValue),
-          ).then(setText, setText);
           break;
         }
         default: {
@@ -661,6 +651,16 @@ export class LiveryBridgeInteractive extends LitElement {
     event.preventDefault();
     this.handlePlayerCall('subscribe', event);
   }
+}
+
+function isBridgeGetMethodName(name: string): name is BridgeGetName {
+  return (BRIDGE_GET_NAMES as unknown as string[]).includes(name);
+}
+
+function isBridgeSubscribeMethodName(
+  name: string,
+): name is BridgeSubscribeName {
+  return (BRIDGE_SUBSCRIBE_NAMES as unknown as string[]).includes(name);
 }
 
 defineVersionedElement('livery-bridge-interactive', LiveryBridgeInteractive);

@@ -9,6 +9,18 @@ import { defineConfig } from 'vitest/config';
 import { dependencies } from './package.json';
 
 /**
+ * Returns environment string.
+ *
+ * For 'test' runs and 'lib:*' builds this will just return the mode string.
+ * For local 'development' and amplify 'production' builds this will append a '-[git branch]' suffix.
+ */
+function getEnv(mode: string) {
+  return mode === 'development' || mode === 'production'
+    ? `${mode}-${getGitBranch()}`
+    : mode;
+}
+
+/**
  * Returns git branch.
  *
  * Note: From AWS Amplify CD (e.g: using a detached git HEAD) we can't use git for this
@@ -24,18 +36,6 @@ function getGitBranch() {
 }
 
 /**
- * Returns environment string.
- *
- * For 'test' runs and 'lib:*' builds this will just return the mode string.
- * For local 'development' and amplify 'production' builds this will append a '-[git branch]' suffix.
- */
-function getEnv(mode: string) {
-  return mode === 'development' || mode === 'production'
-    ? `${mode}-${getGitBranch()}`
-    : mode;
-}
-
-/**
  * Returns version string using git describe; more readable and relevant then a git hash.
  */
 function getVersion() {
@@ -43,6 +43,52 @@ function getVersion() {
     .toString()
     .trim()
     .replace(/^v/, '');
+}
+
+/**
+ * Patches @packageDocumentation from index.ts back into dist/index.d.ts bundle (vite-plugin-dts v3.8 regression).
+ * Only uses publicly exported globals defined by index.ts instead of also declaring internal and dependency globals.
+ * Strips 'Excluded from this release type' and private class member lines from bundle.
+ *
+ * See also: https://github.com/microsoft/rushstack/issues/1709
+ *
+ * Note: This is just a brittle hacked together regex work around, but it's good enough for now.
+ */
+function patchDts() {
+  let pass = 0;
+  return (filePath: string, content: string) => {
+    // Ignore other files
+    if (relativePath('.', filePath) !== 'dist/index.d.ts') {
+      return;
+    }
+
+    // dist/index.d.ts passes through twice, global declares are only added after the first pass
+    pass += 1;
+    if (pass === 1) {
+      return;
+    }
+
+    const ts = readFileSync('./index.ts', 'utf-8');
+    const pkgDoc = ts.match(
+      /^\/\*\*[\s\S]*?^ \* @packageDocumentation\n \*\/\n/m,
+    )![0];
+
+    // convert CRLF output of vite-plugin-dts to LF
+    const lfContent = content.replace(/\r/g, '');
+
+    // Our manually curated declare global block from the entry file: index.ts should be the first match
+    const declare = lfContent.match(/^declare global {[\s\S]*?^}\n/m)![0];
+
+    const stripped = lfContent
+      .replace(/^declare global {[\s\S]*?^}\n+/gm, '')
+      .replace(/^ *\/\* Excluded from this release type: .* \*\/\n+/gm, '')
+      .replace(/^ +private .*\n+/gm, '');
+
+    return {
+      content: `${pkgDoc}\n${stripped}\n${declare}`,
+      filePath,
+    };
+  };
 }
 
 /**
@@ -103,52 +149,6 @@ function tsBundleUrlPlugin(): PluginOption {
 
       return transformed;
     },
-  };
-}
-
-/**
- * Patches @packageDocumentation from index.ts back into dist/index.d.ts bundle (vite-plugin-dts v3.8 regression).
- * Only uses publicly exported globals defined by index.ts instead of also declaring internal and dependency globals.
- * Strips 'Excluded from this release type' and private class member lines from bundle.
- *
- * See also: https://github.com/microsoft/rushstack/issues/1709
- *
- * Note: This is just a brittle hacked together regex work around, but it's good enough for now.
- */
-function patchDts() {
-  let pass = 0;
-  return (filePath: string, content: string) => {
-    // Ignore other files
-    if (relativePath('.', filePath) !== 'dist/index.d.ts') {
-      return;
-    }
-
-    // dist/index.d.ts passes through twice, global declares are only added after the first pass
-    pass += 1;
-    if (pass === 1) {
-      return;
-    }
-
-    const ts = readFileSync('./index.ts', 'utf-8');
-    const pkgDoc = ts.match(
-      /^\/\*\*[\s\S]*?^ \* @packageDocumentation\n \*\/\n/m,
-    )![0];
-
-    // convert CRLF output of vite-plugin-dts to LF
-    const lfContent = content.replace(/\r/g, '');
-
-    // Our manually curated declare global block from the entry file: index.ts should be the first match
-    const declare = lfContent.match(/^declare global {[\s\S]*?^}\n/m)![0];
-
-    const stripped = lfContent
-      .replace(/^declare global {[\s\S]*?^}\n+/gm, '')
-      .replace(/^ *\/\* Excluded from this release type: .* \*\/\n+/gm, '')
-      .replace(/^ +private .*\n+/gm, '');
-
-    return {
-      content: `${pkgDoc}\n${stripped}\n${declare}`,
-      filePath,
-    };
   };
 }
 

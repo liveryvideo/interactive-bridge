@@ -1,25 +1,3 @@
-function stringifyArray(obj: unknown[], multiline: boolean, stack: unknown[]) {
-  const recurseStack = stack.slice(0);
-  recurseStack.push(obj);
-  const arrayStr = obj
-    .map((item) => humanStringify(item, multiline, recurseStack, true))
-    .join(', ');
-  return `[${arrayStr}]`;
-}
-
-function stringifyObject(obj: object, multiline: boolean, stack: unknown[]) {
-  const recurseStack = stack.concat(obj);
-  const newline = multiline ? '\n' : ' ';
-  const indent = multiline ? '  '.repeat(recurseStack.length) : '';
-  const objStr = Object.entries(obj)
-    .map(
-      ([key, value]) =>
-        `${indent}${key}: ${humanStringify(value, multiline, recurseStack, true)}`,
-    )
-    .join(`,${newline}`);
-  return `{${newline}${objStr}${newline}${multiline ? '  '.repeat(stack.length) : ''}}`;
-}
-
 /**
  * Recursion safe compact human readable stringify function.
  *
@@ -60,4 +38,26 @@ export function humanStringify(
 
   // typeof obj === number | boolean
   return String(obj);
+}
+
+function stringifyArray(obj: unknown[], multiline: boolean, stack: unknown[]) {
+  const recurseStack = stack.slice(0);
+  recurseStack.push(obj);
+  const arrayStr = obj
+    .map((item) => humanStringify(item, multiline, recurseStack, true))
+    .join(', ');
+  return `[${arrayStr}]`;
+}
+
+function stringifyObject(obj: object, multiline: boolean, stack: unknown[]) {
+  const recurseStack = stack.concat(obj);
+  const newline = multiline ? '\n' : ' ';
+  const indent = multiline ? '  '.repeat(recurseStack.length) : '';
+  const objStr = Object.entries(obj)
+    .map(
+      ([key, value]) =>
+        `${indent}${key}: ${humanStringify(value, multiline, recurseStack, true)}`,
+    )
+    .join(`,${newline}`);
+  return `{${newline}${objStr}${newline}${multiline ? '  '.repeat(stack.length) : ''}}`;
 }
