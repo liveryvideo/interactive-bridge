@@ -27,7 +27,7 @@
     "build": "vite build",
     "dev": "vite",
     "lint": "biome check && eslint && tsc",
-    "lint:fix": "biome check --fix && eslint --fix",
+    "lint:fix": "eslint --fix && biome check --fix",
     "prepare": "husky",
     "prepublishOnly": "npm run build:lib",
     "preview": "vite preview",
