@@ -34,6 +34,7 @@ declare global {
  * ```
  */
 export class LiveryBridgeMock extends LitElement {
+  /** @internal */
   static override readonly styles = css`
     :host {
       display: block;
@@ -109,6 +110,7 @@ export class LiveryBridgeMock extends LitElement {
   @property({ type: Object })
   playerBridge?: MockPlayerBridge;
 
+  /** @internal */
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
 
@@ -143,6 +145,7 @@ export class LiveryBridgeMock extends LitElement {
     this.dispatchEvent(new Event('load'));
   }
 
+  /** @internal */
   override render() {
     return html`
       <div class="panel">

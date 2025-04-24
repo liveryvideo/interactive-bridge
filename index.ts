@@ -24,6 +24,10 @@
  * @packageDocumentation
  */
 
+import type { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive.ts';
+import type { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog.ts';
+import type { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock.ts';
+
 /**
  * Livery Interactive SDK version.
  */
@@ -54,3 +58,12 @@ export type {
   UserFeedback,
   Volume,
 } from './src/util/schema.ts';
+
+// Redeclare all exported public globals to be included in our bundle, see: vite.config.ts patchDts()
+declare global {
+  interface HTMLElementTagNameMap {
+    'livery-bridge-interactive': LiveryBridgeInteractive;
+    'livery-bridge-log': LiveryBridgeLog;
+    'livery-bridge-mock': LiveryBridgeMock;
+  }
+}

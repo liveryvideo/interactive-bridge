@@ -22,6 +22,7 @@ declare global {
  * ```
  */
 export class LiveryBridgeLog extends LitElement {
+  /** @internal */
   static override readonly styles = css`
     :host {
       display: block;
@@ -66,6 +67,7 @@ export class LiveryBridgeLog extends LitElement {
 
   private removeSpy?: () => void;
 
+  /** @internal */
   override connectedCallback() {
     super.connectedCallback();
 
@@ -80,6 +82,7 @@ export class LiveryBridgeLog extends LitElement {
     }
   }
 
+  /** @internal */
   override disconnectedCallback() {
     super.disconnectedCallback();
 
@@ -93,11 +96,13 @@ export class LiveryBridgeLog extends LitElement {
     this.messages = [];
   }
 
+  /** @internal */
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     this.updateMessages();
   }
 
+  /** @internal */
   override render() {
     return html`<pre><code id="container"></code></pre>`;
   }

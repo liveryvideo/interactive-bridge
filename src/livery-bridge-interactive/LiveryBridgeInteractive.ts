@@ -72,6 +72,7 @@ type BridgeSubscribeName = (typeof BRIDGE_SUBSCRIBE_NAMES)[number];
  * ```
  */
 export class LiveryBridgeInteractive extends LitElement {
+  /** @internal */
   static override readonly styles = css`
     :host {
       color: #000;
@@ -179,6 +180,7 @@ export class LiveryBridgeInteractive extends LitElement {
   @state()
   private playerCommandValue = '';
 
+  /** @internal */
   override connectedCallback() {
     super.connectedCallback();
 
@@ -208,6 +210,7 @@ export class LiveryBridgeInteractive extends LitElement {
     }
   }
 
+  /** @internal */
   override render() {
     return html`
       <div class="controls-space">
