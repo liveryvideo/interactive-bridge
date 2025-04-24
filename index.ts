@@ -14,8 +14,8 @@
  * - Variable {@link version} specifies the version of this package
  * - Schema types:
  *   {@link AuthClaims}, {@link Config}, {@link DisplayMode}, {@link Features}, {@link InteractivePlayerOptions},
- *   {@link Orientation}, {@link PlaybackDetails}, {@link PlaybackMode}, {@link PlaybackState}, {@link Qualities},
- *   {@link Quality}, {@link StreamPhase}, {@link UserFeedback} and {@link Volume}.
+ *   {@link PlaybackDetails}, {@link PlaybackMode}, {@link PlaybackState}, {@link Qualities}, {@link Quality},
+ *   {@link StreamPhase}, {@link UserFeedback} and {@link Volume}.
  * - Schema validators: validateAuthClaims.
  *
  * **Note:** When using the UMD bundle, the exports can be found as properties of `livery` in the global namespace,
@@ -48,7 +48,6 @@ export type {
   DisplayMode,
   Features,
   InteractivePlayerOptions,
-  Orientation,
   PlaybackDetails,
   PlaybackMode,
   PlaybackState,

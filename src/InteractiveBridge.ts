@@ -5,28 +5,22 @@ import type {
   AuthClaims,
   Config,
   DisplayMode,
-  Orientation,
   PlaybackMode,
   PlaybackState,
   Qualities,
-  StreamPhase,
   UserFeedback,
   Volume,
 } from './util/schema.ts';
 import {
   validateAuthClaims,
-  validateBoolean,
   validateConfig,
   validateDisplayMode,
   validateFeatures,
   validateInteractivePlayerOptions,
-  validateNumberOrNan,
-  validateOrientation,
   validatePlaybackDetails,
   validatePlaybackMode,
   validatePlaybackState,
   validateQualities,
-  validateStreamPhase,
   validateString,
   validateStringOrUndefined,
   validateStringParams,
@@ -96,15 +90,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of player customer id.
-   *
-   * @deprecated Instead use {@link subscribeConfig}.customerId
-   */
-  getCustomerId() {
-    return this.sendCommand('getCustomerId').then(validateString);
-  }
-
-  /**
    * Returns promise of player Pinpoint analytics endpoint id.
    */
   getEndpointId() {
@@ -116,15 +101,6 @@ export class InteractiveBridge extends LiveryBridge {
    */
   getFeatures() {
     return this.sendCommand('getFeatures').then(validateFeatures);
-  }
-
-  /**
-   * Returns promise of current player latency in seconds.
-   *
-   * @deprecated Instead use {@link getPlayback}.latency
-   */
-  getLatency() {
-    return this.sendCommand('getLatency').then(validateNumberOrNan);
   }
 
   /**
@@ -186,19 +162,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
-   * other side with matching `name`.
-   *
-   * @deprecated Instead use {@link registerInteractiveCommand}
-   */
-  override registerCustomCommand(
-    name: string,
-    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
-  ) {
-    return super.registerCustomCommand(name, handler);
-  }
-
-  /**
    * Register `handler` function to be called with `arg` and `listener` when `sendInteractiveCommand()` is called
    * from the player side with matching `name`.
    *
@@ -240,20 +203,6 @@ export class InteractiveBridge extends LiveryBridge {
    */
   selectQuality(index: number) {
     return this.sendCommand('selectQuality', index);
-  }
-
-  /**
-   * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
-   * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
-   *
-   * @deprecated Instead use {@link sendPlayerCommand}
-   */
-  override sendCustomCommand(
-    name: string,
-    arg?: unknown,
-    listener?: (value: unknown) => void,
-  ) {
-    return super.sendCustomCommand(name, arg, listener);
   }
 
   /**
@@ -364,18 +313,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current player fullscreen state
-   * and calls back `listener` with any subsequent state changes.
-   *
-   * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
-   */
-  subscribeFullscreen(listener: (value: boolean) => void) {
-    return this.sendCommand('subscribeFullscreen', undefined, (value) =>
-      listener(validateBoolean(value)),
-    ).then(validateBoolean);
-  }
-
-  /**
    * Returns promise of current mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
    * and calls back `listener` with any subsequent mode changes.
    *
@@ -385,20 +322,6 @@ export class InteractiveBridge extends LiveryBridge {
     return this.sendCommand('subscribeMode', undefined, (mode) =>
       listener(validatePlaybackMode(mode)),
     ).then((mode) => validatePlaybackMode(mode));
-  }
-
-  /**
-   * Returns promise of current player window orientation (`'landscape' \| 'portrait'`)
-   * and calls back `listener` with any subsequent orientations.
-   *
-   * @deprecated Will be removed in the next major version.
-   */
-  subscribeOrientation(
-    listener: (value: Orientation) => void,
-  ): Promise<Orientation> {
-    return this.sendCommand('subscribeOrientation', undefined, (value) =>
-      listener(validateOrientation(value)),
-    ).then(validateOrientation);
   }
 
   /**
@@ -461,20 +384,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current player stream quality
-   * and calls back `listener` with any subsequent quality changes.
-   *
-   * @deprecated Instead use {@link subscribeQualities}.active
-   *
-   * @param listener - Listener to call when value is changed
-   */
-  subscribeQuality(listener: (value: string) => void) {
-    return this.sendCommand('subscribeQuality', undefined, (value) =>
-      listener(validateString(value)),
-    ).then(validateString);
-  }
-
-  /**
    * Returns promise of current `stalled` state and calls back `listener` with any subsequent `stalled` state updates.
    *
    * Where `stalled` is true if `playbackState` is `'BUFFERING'` or `'SEEKING'`.
@@ -491,20 +400,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current player stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
-   * and calls back `listener` with any subsequent phases.
-   *
-   * @deprecated Instead use {@link subscribeConfig}.streamPhase
-   */
-  subscribeStreamPhase(
-    listener: (phase: StreamPhase) => void,
-  ): Promise<StreamPhase> {
-    return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
-      listener(validateStreamPhase(value)),
-    ).then(validateStreamPhase);
-  }
-
-  /**
    * Returns promise of current player volume state
    * and calls back `listener` with any subsequent volume changes.
    *
@@ -514,15 +409,6 @@ export class InteractiveBridge extends LiveryBridge {
     return this.sendCommand('subscribeVolume', undefined, (value) =>
       listener(validateVolume(value)),
     ).then(validateVolume);
-  }
-
-  /**
-   * Unregister custom command by name.
-   *
-   * @deprecated Instead use {@link unregisterInteractiveCommand}
-   */
-  override unregisterCustomCommand(name: string) {
-    super.unregisterCustomCommand(name);
   }
 
   /**

@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { relative as relativePath } from 'node:path';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import dts from 'vite-plugin-dts';
@@ -38,6 +39,11 @@ function patchDts() {
       return;
     }
 
+    const ts = readFileSync('./index.ts', 'utf-8');
+    const pkgDoc = ts.match(
+      /^\/\*\*[\s\S]*?^ \* @packageDocumentation\n \*\/\n/m,
+    )![0];
+
     // convert CRLF output of vite-plugin-dts to LF
     const lfContent = content.replace(/\r/g, '');
 
@@ -50,7 +56,7 @@ function patchDts() {
       .replace(/^ +private .*\n+/gm, '');
 
     return {
-      content: `${stripped}\n${declare}`,
+      content: `${pkgDoc}\n${stripped}\n${declare}`,
       filePath,
     };
   };

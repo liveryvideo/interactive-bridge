@@ -16,10 +16,8 @@ declare global {
 // TODO: Refactor this fancy TypeScript to just using plain lit element state properties and click handler methods
 const BRIDGE_GET_NAMES = [
   'getAppName',
-  'getCustomerId',
   'getEndpointId',
   'getFeatures',
-  'getLatency',
   'getLiveryParams',
   'getPlayback',
   'getPlayerVersion',
@@ -38,16 +36,12 @@ const BRIDGE_SUBSCRIBE_NAMES = [
   'subscribeConfig',
   'subscribeDisplay',
   'subscribeError',
-  'subscribeFullscreen',
   'subscribeMode',
-  'subscribeOrientation',
   'subscribePaused',
   'subscribePlaybackState',
   'subscribePlaying',
   'subscribeQualities',
-  'subscribeQuality',
   'subscribeStalled',
-  'subscribeStreamPhase',
   'subscribeVolume',
 ] as const;
 
@@ -263,10 +257,8 @@ export class LiveryBridgeInteractive extends LitElement {
                     @change=${this.handleGetSelectChange}
                   >
                     <option value="getAppName">getAppName</option>
-                    <option value="getCustomerId">getCustomerId</option>
                     <option value="getEndpointId">getEndpointId</option>
                     <option value="getFeatures">getFeatures</option>
-                    <option value="getLatency">getLatency</option>
                     <option value="getLiveryParams">getLiveryParams</option>
                     <option value="getPlayback">getPlayback</option>
                     <option value="getPlayerVersion">getPlayerVersion</option>
@@ -333,13 +325,7 @@ export class LiveryBridgeInteractive extends LitElement {
                     <option value="subscribeConfig">subscribeConfig</option>
                     <option value="subscribeDisplay">subscribeDisplay</option>
                     <option value="subscribeError">subscribeError</option>
-                    <option value="subscribeFullscreen">
-                      subscribeFullscreen
-                    </option>
                     <option value="subscribeMode">subscribeMode</option>
-                    <option value="subscribeOrientation">
-                      subscribeOrientation
-                    </option>
                     <option value="subscribePaused">subscribePaused</option>
                     <option value="subscribePlaybackState">
                       subscribePlaybackState
@@ -348,11 +334,7 @@ export class LiveryBridgeInteractive extends LitElement {
                     <option value="subscribeQualities">
                       subscribeQualities
                     </option>
-                    <option value="subscribeQuality">subscribeQuality</option>
                     <option value="subscribeStalled">subscribeStalled</option>
-                    <option value="subscribeStreamPhase">
-                      subscribeStreamPhase
-                    </option>
                     <option value="subscribeVolume">subscribeVolume</option>
                   </select>
                   <button type="submit">Send</button>

@@ -63,7 +63,6 @@ const zStringParams = z.record(zString, zString);
 
 export const validateBoolean = createValidate(zBoolean);
 export const validateNumber = createValidate(zNumber);
-export const validateNumberOrNan = createValidate(zNumberOrNan);
 export const validateString = createValidate(zString);
 export const validateStringOrUndefined = createValidate(zStringOrUndefined);
 export const validateStringParams =
@@ -99,17 +98,6 @@ export const validateDisplayMode = createValidate<DisplayMode>(
     z.literal('FULLSCREEN'),
     z.literal('PIP'),
   ]),
-);
-
-/**
- * Player window orientation (`'landscape' \| 'portrait'`).
- *
- * @deprecated Will be removed in the next major version
- */
-export type Orientation = 'landscape' | 'portrait';
-
-export const validateOrientation = createValidate<Orientation>(
-  z.union([z.literal('landscape'), z.literal('portrait')]),
 );
 
 /**
@@ -176,8 +164,6 @@ const zStreamPhase = z.union([
   z.literal('POST'),
   z.literal('PRE'),
 ]);
-
-export const validateStreamPhase = createValidate<StreamPhase>(zStreamPhase);
 
 /**
  * ----------------------------------------------------------------

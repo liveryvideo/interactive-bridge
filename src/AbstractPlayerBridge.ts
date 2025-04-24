@@ -1,16 +1,13 @@
 import { LiveryBridge } from './LiveryBridge.ts';
-import { reducedSubscribe } from './util/reducedSubscribe.ts';
 import type {
   AuthClaims,
   Config,
   DisplayMode,
   Features,
-  Orientation,
   PlaybackDetails,
   PlaybackMode,
   PlaybackState,
   Qualities,
-  StreamPhase,
   UserFeedback,
   Volume,
 } from './util/schema.ts';
@@ -29,8 +26,6 @@ import {
 export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract config: Config;
 
-  protected portraitQuery = window.matchMedia('(orientation: portrait)');
-
   /**
    * Authenticate user in interactive layer with specified token or claims,
    * or logout the user by passing an `undefined` value.
@@ -48,6 +43,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
    * Note: In the future this could also pass options from player to the interactive layer.
    *
    * @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake.
+   * TODO: Integrate options passing into LiveryBridge handshake
    */
   options() {
     return this.sendCommand('options').then(
@@ -103,10 +99,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   ) {
     const simpleMethods = [
       'getAppName',
-      'getCustomerId',
       'getEndpointId',
       'getFeatures',
-      'getLatency',
       'getLiveryParams',
       'getPlayback',
       'getPlayerVersion',
@@ -142,13 +136,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       'subscribeConfig',
       'subscribeDisplay',
       'subscribeError',
-      'subscribeFullscreen',
       'subscribeMode',
-      'subscribeOrientation',
       'subscribePlaybackState',
       'subscribeQualities',
-      'subscribeQuality',
-      'subscribeStreamPhase',
       'subscribeVolume',
     ] as const;
     if (narrowIncludes(subscribeMethods, name)) {
@@ -206,20 +196,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return window.location.hostname;
   }
 
-  /**
-   * @deprecated Instead use {@link subscribeConfig}.customerId
-   */
-  private getCustomerId() {
-    return this.config.customerId;
-  }
-
-  /**
-   * @deprecated Instead use {@link getPlayback}.latency
-   */
-  private getLatency() {
-    return this.getPlayback().latency;
-  }
-
   private getLiveryParams(queryString = window.location.search) {
     const urlParams = new URLSearchParams(queryString);
     const result: Record<string, string> = {};
@@ -230,60 +206,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       }
     }
     return result;
-  }
-
-  /**
-   * @deprecated Instead compare {@link subscribeDisplay} value to 'FULLSCREEN'
-   */
-  private subscribeFullscreen(listener: (value: boolean) => void) {
-    return reducedSubscribe<DisplayMode, boolean>(
-      (unreducedListener) => this.subscribeDisplay(unreducedListener),
-      (display) => display === 'FULLSCREEN',
-      listener,
-    );
-  }
-
-  /**
-   * @deprecated Will be removed in the next major version.
-   */
-  private subscribeOrientation(listener: (value: Orientation) => void) {
-    // Prior to Safari 14, MediaQueryList is based on EventTarget, so you must use addListener()
-    // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/addListener
-    if (this.portraitQuery.addEventListener === undefined) {
-      // For backwards compatibility
-      this.portraitQuery.addListener((event) => {
-        listener(event.matches ? 'portrait' : 'landscape');
-      });
-    } else {
-      this.portraitQuery.addEventListener('change', (event) => {
-        listener(event.matches ? 'portrait' : 'landscape');
-      });
-    }
-
-    return this.portraitQuery.matches ? 'portrait' : 'landscape';
-  }
-
-  /**
-   * @deprecated Instead use {@link subscribeQualities}.active to get the active quality index
-   * and use the index to get the active quality label from {@link subscribQualities}.list
-   */
-  private subscribeQuality(listener: (quality: string) => void) {
-    return reducedSubscribe<Qualities, string>(
-      (unreducedListener) => this.subscribeQualities(unreducedListener),
-      (value) => value.list[value.active]?.label ?? '',
-      listener,
-    );
-  }
-
-  /**
-   * @deprecated Instead use {@link subscribeConfig}.streamPhase
-   */
-  private subscribeStreamPhase(listener: (streamPhase: StreamPhase) => void) {
-    return reducedSubscribe<Config, StreamPhase>(
-      (unreducedListener) => this.subscribeConfig(unreducedListener),
-      (config) => config.streamPhase,
-      listener,
-    );
   }
 }
 
