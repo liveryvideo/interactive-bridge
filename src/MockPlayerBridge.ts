@@ -75,7 +75,11 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   private zeroTimestamp = Date.now();
 
   constructor(target?: ConstructorParameters<typeof AbstractPlayerBridge>[0]) {
-    super(target);
+    super(target, {
+      endpointId: 'dummy-endpoint-id',
+      playerVersion: '1.0.0-dummy-version',
+      streamId: 'dummy-stream-id',
+    });
 
     this.registerCustomCommand('subscribeAuthToken', (arg, listener) => {
       if (typeof arg !== 'string') {
@@ -87,10 +91,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
       return `${arg}-test-token-1`;
     });
-  }
-
-  protected getEndpointId() {
-    return 'dummy-endpoint-id';
   }
 
   protected getFeatures() {
@@ -119,14 +119,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
           latency: Number.NaN,
           position: 0,
         };
-  }
-
-  protected getPlayerVersion() {
-    return '1.0.0-dummy-version';
-  }
-
-  protected getStreamId() {
-    return 'dummy-stream-id';
   }
 
   protected pause() {

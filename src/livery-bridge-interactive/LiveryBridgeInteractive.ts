@@ -15,13 +15,9 @@ declare global {
 
 // TODO: Refactor this fancy TypeScript to just using plain lit element state properties and click handler methods
 const BRIDGE_GET_NAMES = [
-  'getAppName',
-  'getEndpointId',
   'getFeatures',
-  'getLiveryParams',
+  'getOptions',
   'getPlayback',
-  'getPlayerVersion',
-  'getStreamId',
   'pause',
   'play',
   'reload',
@@ -256,13 +252,9 @@ export class LiveryBridgeInteractive extends LitElement {
                     name="getCommandName"
                     @change=${this.handleGetSelectChange}
                   >
-                    <option value="getAppName">getAppName</option>
-                    <option value="getEndpointId">getEndpointId</option>
                     <option value="getFeatures">getFeatures</option>
-                    <option value="getLiveryParams">getLiveryParams</option>
+                    <option value="getOptions">getOptions</option>
                     <option value="getPlayback">getPlayback</option>
-                    <option value="getPlayerVersion">getPlayerVersion</option>
-                    <option value="getStreamId">getStreamId</option>
                     <option value="pause">pause</option>
                     <option value="play">play</option>
                     <option value="reload">reload</option>

@@ -137,9 +137,9 @@ export class LiveryBridgeMock extends LitElement {
       this.playerBridge = new MockPlayerBridge();
     }
 
-    this.playerBridge.options().catch((reason) => {
+    this.playerBridge.getOptions().catch((reason) => {
       // biome-ignore lint/suspicious/noConsole: TODO: output to DOM somewhere
-      console.error('PlayerBridge options() rejected', reason);
+      console.error('PlayerBridge getOptions() rejected', reason);
     });
 
     this.dispatchEvent(new Event('load'));

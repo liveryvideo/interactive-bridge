@@ -7,6 +7,7 @@ import type {
   PlaybackDetails,
   PlaybackMode,
   PlaybackState,
+  PlayerInteractiveOptions,
   Qualities,
   UserFeedback,
   Volume,
@@ -27,6 +28,41 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract config: Config;
 
   /**
+   * Constructs an AbstractPlayerBridge.
+   *
+   * This adds InteractivePlayerOptions: appName and liveryParams, so only requires:
+   * endpointId, playerVersion and streamId.
+   *
+   * @param target - Undefined or InteractiveBridge window and origin
+   * @param targetOptions - Options to pass InteractiveBridge
+   */
+  constructor(
+    target: { origin: string; window: Window } | undefined,
+    options: Pick<
+      PlayerInteractiveOptions,
+      'endpointId' | 'playerVersion' | 'streamId'
+    >,
+  ) {
+    super(target, {
+      appName: window.location.hostname,
+      liveryParams: AbstractPlayerBridge.getLiveryParams(),
+      ...options,
+    });
+  }
+
+  private static getLiveryParams(queryString = window.location.search) {
+    const urlParams = new URLSearchParams(queryString);
+    const result: Record<string, string> = {};
+    for (const [name, value] of urlParams.entries()) {
+      if (name.startsWith('livery_')) {
+        const key = name.substring(7);
+        result[key] = result[key] ?? value;
+      }
+    }
+    return result;
+  }
+
+  /**
    * Authenticate user in interactive layer with specified token or claims,
    * or logout the user by passing an `undefined` value.
    *
@@ -38,18 +74,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
 
   /**
    * Returns promise of options from interactive layer for the player.
-   * Or default options if the interactive bridge doesn't support this/these yet.
-   *
-   * Note: In the future this could also pass options from player to the interactive layer.
-   *
-   * @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake.
-   * TODO: Integrate options passing into LiveryBridge handshake
    */
-  options() {
-    return this.sendCommand('options').then(
-      (value) => validateInteractivePlayerOptions(value),
-      () => validateInteractivePlayerOptions(undefined),
-    );
+  override async getOptions() {
+    return validateInteractivePlayerOptions(await super.getOptions());
   }
 
   /**
@@ -82,15 +109,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return this.unregisterCustomCommand(name);
   }
 
-  protected abstract getEndpointId(): string;
-
   protected abstract getFeatures(): Features;
 
   protected abstract getPlayback(): PlaybackDetails;
-
-  protected abstract getPlayerVersion(): string;
-
-  protected abstract getStreamId(): string;
 
   protected override handleCommand(
     name: string,
@@ -98,13 +119,8 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     listener: (value: unknown) => void,
   ) {
     const simpleMethods = [
-      'getAppName',
-      'getEndpointId',
       'getFeatures',
-      'getLiveryParams',
       'getPlayback',
-      'getPlayerVersion',
-      'getStreamId',
       'pause',
       'play',
       'reload',
@@ -191,22 +207,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeVolume(
     listener: (volume: Volume) => void,
   ): Volume;
-
-  private getAppName() {
-    return window.location.hostname;
-  }
-
-  private getLiveryParams(queryString = window.location.search) {
-    const urlParams = new URLSearchParams(queryString);
-    const result: Record<string, string> = {};
-    for (const [name, value] of urlParams.entries()) {
-      if (name.startsWith('livery_')) {
-        const key = name.substring(7);
-        result[key] = result[key] ?? value;
-      }
-    }
-    return result;
-  }
 }
 
 // Not supported by TypeScript for strict reasons, but this should be fine here

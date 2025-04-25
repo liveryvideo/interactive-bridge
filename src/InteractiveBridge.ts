@@ -20,10 +20,9 @@ import {
   validatePlaybackDetails,
   validatePlaybackMode,
   validatePlaybackState,
+  validatePlayerInteractiveOptions,
   validateQualities,
-  validateString,
   validateStringOrUndefined,
-  validateStringParams,
   validateVolume,
 } from './util/schema.ts';
 
@@ -43,7 +42,7 @@ import {
  * // replace `'*'` by the origin of the page that the player is expected to be on
  * const bridge = new InteractiveBridge(playerBridge || '*');
  *
- * bridge.getAppName().then(appName => window.alert(`appName: ${appName}`));
+ * bridge.getOptions().then(options => window.alert(`appName: ${options.appName}`));
  * ```
  */
 export class InteractiveBridge extends LiveryBridge {
@@ -83,20 +82,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of player application name.
-   */
-  getAppName() {
-    return this.sendCommand('getAppName').then(validateString);
-  }
-
-  /**
-   * Returns promise of player Pinpoint analytics endpoint id.
-   */
-  getEndpointId() {
-    return this.sendCommand('getEndpointId').then(validateString);
-  }
-
-  /**
    * Returns promise of a registry of features supported by the player in general and under given circumstances.
    */
   getFeatures() {
@@ -104,22 +89,10 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of an object of key-value string parameters from player.
-   *
-   * Android and iOS players will call a callback and pass on the returned values.
-   *
-   * The web player will return all 'livery_' prefixed query parameters with:
-   *
-   * - The prefix stripped from the names (snake_case will not be converted to camelCase)
-   * - Parameter names and values URL decoded
-   * - Empty string (not `null`) values for parameters without a value
-   * - Only the first value of a repeated parameter (no multiple value array support)
-   *
-   * So given location.search: `'?foo&livery_foo%3Abar=hey+you&livery_no_val&livery_multi=1&livery_multi=2'`
-   * this will return: `{ 'foo:bar': 'hey you', no_val: '', multi: '1' }`.
+   * Returns promise of options from interactive layer for the player.
    */
-  getLiveryParams() {
-    return this.sendCommand('getLiveryParams').then(validateStringParams);
+  override async getOptions() {
+    return validatePlayerInteractiveOptions(await super.getOptions());
   }
 
   /**
@@ -127,20 +100,6 @@ export class InteractiveBridge extends LiveryBridge {
    */
   getPlayback() {
     return this.sendCommand('getPlayback').then(validatePlaybackDetails);
-  }
-
-  /**
-   * Returns promise of player version.
-   */
-  getPlayerVersion() {
-    return this.sendCommand('getPlayerVersion').then(validateString);
-  }
-
-  /**
-   * Returns promise of player stream id.
-   */
-  getStreamId() {
-    return this.sendCommand('getStreamId').then(validateString);
   }
 
   /**

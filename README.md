@@ -30,5 +30,5 @@ const bridge = new InteractiveBridge(playerBridge || '*');
 // To prevent cross site security issues:
 // https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage#security_concerns
 // replace the `'*'` origin above with the origin of the page that the Livery Player is on
-bridge.getAppName().then(appName => window.alert(`appName: ${appName}`));
+bridge.getOptions().then(options => window.alert(`appName: ${options.appName}`));
 ```
