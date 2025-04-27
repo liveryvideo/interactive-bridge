@@ -89,7 +89,7 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of options from interactive layer for the player.
+   * Returns promise of options from player for the interactive layer.
    */
   override async getOptions() {
     return validatePlayerInteractiveOptions(await super.getOptions());
