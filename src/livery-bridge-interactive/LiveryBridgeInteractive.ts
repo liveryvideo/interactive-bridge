@@ -255,7 +255,7 @@ export class LiveryBridgeInteractive extends LitElement {
         <div class="panel">
           <table>
             <tr>
-              <th>Player Command:</th>
+              <th>Player Command</th>
             </tr>
             <tr>
               <td>
@@ -308,15 +308,20 @@ export class LiveryBridgeInteractive extends LitElement {
               </td>
             </tr>
             <tr>
-              <th>Last Command Value:</th>
+              <th>Value:</th>
             </tr>
             <tr>
               <td>
                 <pre id="getCommandOutput"></pre>
               </td>
             </tr>
+          </table>
+        </div>
+
+        <div class="panel">
+          <table>
             <tr>
-              <th>Player Subscription:</th>
+              <th>Player Subscribe Command</th>
             </tr>
             <tr>
               <td>
@@ -345,7 +350,7 @@ export class LiveryBridgeInteractive extends LitElement {
               </td>
             </tr>
             <tr>
-              <th>Last Subscription Value:</th>
+              <th>Value:</th>
             </tr>
             <tr>
               <td>
@@ -364,7 +369,7 @@ export class LiveryBridgeInteractive extends LitElement {
               <tr>
                 <th>Name:</th>
                 <td>
-                  <input type="text" name="name" value="subscribeDummy" />
+                  <input type="text" name="name" value="subscribeTest" />
                 </td>
               </tr>
               <tr>

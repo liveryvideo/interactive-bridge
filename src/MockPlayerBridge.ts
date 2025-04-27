@@ -23,7 +23,7 @@ const buildQuality = (index: number) => ({
 
 /**
  * Mock player bridge for testing purposes; returning dummy values where real values are not available.
- * And with dummy support for custom command: `subscribeDummy` as used on the test page.
+ * And with dummy support for custom command: `subscribeTest` as used on the test page.
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
   config: Config = {
@@ -81,15 +81,15 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       streamId: 'dummy-stream-id',
     });
 
-    this.registerCustomCommand('subscribeDummy', (arg, listener) => {
+    this.registerCustomCommand('subscribeTest', (arg, listener) => {
       if (typeof arg !== 'string') {
         throw new Error(`Argument type: ${typeof arg}, should be: string`);
       }
 
-      window.setTimeout(() => listener(`${arg}-dummy-2`), 3000);
-      window.setTimeout(() => listener(`${arg}-dummy-3`), 10000);
+      window.setTimeout(() => listener(`${arg}-test-2`), 3000);
+      window.setTimeout(() => listener(`${arg}-test-3`), 10000);
 
-      return `${arg}-dummy-1`;
+      return `${arg}-test-1`;
     });
   }
 
