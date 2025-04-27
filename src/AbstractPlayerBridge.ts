@@ -50,7 +50,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     });
   }
 
-  private static getLiveryParams(queryString = window.location.search) {
+  static getLiveryParams(queryString = window.location.search) {
     const urlParams = new URLSearchParams(queryString);
     const result: Record<string, string> = {};
     for (const [name, value] of urlParams.entries()) {

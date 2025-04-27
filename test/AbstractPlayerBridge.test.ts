@@ -1,6 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { InteractiveBridge } from '../src/InteractiveBridge.ts';
-import { MockPlayerBridge } from '../src/MockPlayerBridge.ts';
+import { afterEach, describe, expect, it } from 'vitest';
+import { AbstractPlayerBridge } from '../src/AbstractPlayerBridge';
 
 function stubWindowLocationSearch(search: string) {
   const originalSearch = window.location.search;
@@ -14,27 +13,18 @@ function stubWindowLocationSearch(search: string) {
 }
 
 describe('AbstractPlayerBridge', () => {
-  // We can't test an abstract class so we'll just access the base class methods through MockPlayerBridge
-  let playerBridge: MockPlayerBridge;
-  let interactiveBridge: InteractiveBridge;
-
-  beforeEach(() => {
-    playerBridge = new MockPlayerBridge();
-    interactiveBridge = new InteractiveBridge(playerBridge);
-  });
-
-  describe('getLiveryParams()', () => {
+  describe('static getLiveryParams()', () => {
     let restoreSearch: () => void;
 
     afterEach(() => {
       restoreSearch();
     });
 
-    it('returns query parameters as specified', async () => {
+    it('returns query parameters as specified', () => {
       restoreSearch = stubWindowLocationSearch(
         '?foo&livery_foo%3Abar=hey+you&livery_no_val&livery_multi=1&livery_multi=2',
       );
-      const result = await interactiveBridge.getLiveryParams();
+      const result = AbstractPlayerBridge.getLiveryParams();
       expect(result).to.deep.equal({
         'foo:bar': 'hey you',
         multi: '1',
