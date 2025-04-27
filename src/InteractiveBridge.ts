@@ -72,10 +72,12 @@ export class InteractiveBridge extends LiveryBridge {
       handleAuth?: (tokenOrClaims?: AuthClaims | string) => void;
     } = {},
   ) {
+    // Just pass InteractivePlayerOptions to player bridge
+    const bridgeOptions = validateInteractivePlayerOptions(options);
     if (typeof target === 'string') {
-      super({ origin: target, window: window.parent });
+      super({ origin: target, window: window.parent }, bridgeOptions);
     } else {
-      super(target);
+      super(target, bridgeOptions);
     }
 
     this.options = options;
@@ -386,11 +388,6 @@ export class InteractiveBridge extends LiveryBridge {
   ) {
     if (name === 'authenticate') {
       return this.authenticate(validateAuthClaims(arg));
-    }
-    /** @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake. */
-    if (name === 'options') {
-      // Just return InteractivePlayerOptions, not handleAuth option
-      return validateInteractivePlayerOptions(this.options);
     }
     return super.handleCommand(name, arg, listener);
   }
