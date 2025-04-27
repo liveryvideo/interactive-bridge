@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { AbstractPlayerBridge } from '../src/AbstractPlayerBridge';
+import { AbstractPlayerBridge } from '../src/AbstractPlayerBridge.ts';
 
 function stubWindowLocationSearch(search: string) {
   const originalSearch = window.location.search;
