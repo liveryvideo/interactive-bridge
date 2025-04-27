@@ -1,9 +1,10 @@
 import type { PropertyValues } from 'lit';
 import { LitElement, css, html } from 'lit';
-import { property } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import '../livery-bridge-log/LiveryBridgeLog.ts';
 import { MockPlayerBridge } from '../MockPlayerBridge.ts';
 import { defineVersionedElement } from '../util/defineVersionedElement.ts';
+import { humanStringify } from '../util/humanStringify.ts';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -110,6 +111,9 @@ export class LiveryBridgeMock extends LitElement {
   @property({ type: Object })
   playerBridge?: MockPlayerBridge;
 
+  @state()
+  private playerOptions?: string;
+
   /** @internal */
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -137,10 +141,10 @@ export class LiveryBridgeMock extends LitElement {
       this.playerBridge = new MockPlayerBridge();
     }
 
-    this.playerBridge.getOptions().catch((reason) => {
-      // biome-ignore lint/suspicious/noConsole: TODO: output to DOM somewhere
-      console.error('PlayerBridge getOptions() rejected', reason);
-    });
+    const setOptionsText = (value: unknown) => {
+      this.playerOptions = humanStringify(value, true);
+    };
+    this.playerBridge.getOptions().then(setOptionsText, setOptionsText);
 
     this.dispatchEvent(new Event('load'));
   }
@@ -169,6 +173,11 @@ export class LiveryBridgeMock extends LitElement {
       </div>
 
       <!-- TODO: Add form to send custom Interactive Command 'test' -->
+
+      <div class="panel">
+        <b>Player Options</b>
+        <pre>${this.playerOptions}</pre>
+      </div>
 
       <div class="panel">
         <h2>Mock Bridge Messages</h2>

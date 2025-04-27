@@ -13,10 +13,9 @@ declare global {
   }
 }
 
-// TODO: Refactor this fancy TypeScript to just using plain lit element state properties and click handler methods
+// TODO: Refactor this complicated code to something simpler based on Lit conventions
 const BRIDGE_GET_NAMES = [
   'getFeatures',
-  'getOptions',
   'getPlayback',
   'pause',
   'play',
@@ -168,6 +167,9 @@ export class LiveryBridgeInteractive extends LitElement {
   private interactiveCommandArg = '';
 
   @state()
+  private interactiveOptions?: string;
+
+  @state()
   private playerCommandValue = '';
 
   /** @internal */
@@ -182,6 +184,11 @@ export class LiveryBridgeInteractive extends LitElement {
           this.auth = humanStringify(tokenOrClaims);
         },
       });
+
+      const setOptionsText = (value: unknown) => {
+        this.interactiveOptions = humanStringify(value, true);
+      };
+      this.interactiveBridge.getOptions().then(setOptionsText, setOptionsText);
 
       this.interactiveBridge.registerInteractiveCommand(
         'test',
@@ -241,6 +248,11 @@ export class LiveryBridgeInteractive extends LitElement {
 
       <main>
         <div class="panel">
+          <b>Interactive Options</b>
+          <pre>${this.interactiveOptions}</pre>
+        </div>
+
+        <div class="panel">
           <table>
             <tr>
               <th>Player Command:</th>
@@ -253,7 +265,6 @@ export class LiveryBridgeInteractive extends LitElement {
                     @change=${this.handleGetSelectChange}
                   >
                     <option value="getFeatures">getFeatures</option>
-                    <option value="getOptions">getOptions</option>
                     <option value="getPlayback">getPlayback</option>
                     <option value="pause">pause</option>
                     <option value="play">play</option>
@@ -353,7 +364,7 @@ export class LiveryBridgeInteractive extends LitElement {
               <tr>
                 <th>Name:</th>
                 <td>
-                  <input type="text" name="name" value="subscribeAuthToken" />
+                  <input type="text" name="name" value="subscribeDummy" />
                 </td>
               </tr>
               <tr>
@@ -518,7 +529,7 @@ export class LiveryBridgeInteractive extends LitElement {
   }
 
   private handlePlayerCall(type: 'get' | 'subscribe', event: Event) {
-    if (!(event.target && event.target instanceof HTMLFormElement)) {
+    if (!(event.target instanceof HTMLFormElement)) {
       throw new Error('Unsupported event target');
     }
     if (!this.interactiveBridge) {
