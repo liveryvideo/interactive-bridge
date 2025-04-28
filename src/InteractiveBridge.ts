@@ -58,7 +58,8 @@ export class InteractiveBridge extends LiveryBridge {
    * While the remaing options are passed to the PlayerBridge: `controlsDisabled`.
    *
    * @param target - Player bridge or window origin to target
-   * @param options - Options for this bridge and to pass to PlayerBridge
+   * @param options - Options for this bridge
+   * @param playerOptions - Options to pass to PlayerBridge
    */
   constructor(
     target: AbstractPlayerBridge | string,
