@@ -5,6 +5,7 @@ import type {
   AuthClaims,
   Config,
   DisplayMode,
+  InteractivePlayerOptions,
   PlaybackMode,
   PlaybackState,
   Qualities,
@@ -16,7 +17,6 @@ import {
   validateConfig,
   validateDisplayMode,
   validateFeatures,
-  validateInteractivePlayerOptions,
   validatePlaybackDetails,
   validatePlaybackMode,
   validatePlaybackState,
@@ -62,11 +62,7 @@ export class InteractiveBridge extends LiveryBridge {
    */
   constructor(
     target: AbstractPlayerBridge | string,
-    // !! This includes copies of all InteractivePlayerOptions from schema !!
-    // Unfortunately TypeDoc does not properly support just referencing `& InteractivePlayerOptions`
     options: {
-      /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
-      controlsDisabled?: boolean;
       /**
        * Handles authentication data coming from the player.
        *
@@ -74,13 +70,12 @@ export class InteractiveBridge extends LiveryBridge {
        */
       handleAuth?: (tokenOrClaims?: AuthClaims | string) => void;
     } = {},
+    playerOptions: Partial<InteractivePlayerOptions> = {},
   ) {
-    // Just pass InteractivePlayerOptions to player bridge
-    const bridgeOptions = validateInteractivePlayerOptions(options);
     if (typeof target === 'string') {
-      super({ origin: target, window: window.parent }, bridgeOptions);
+      super({ origin: target, window: window.parent }, playerOptions);
     } else {
-      super(target, bridgeOptions);
+      super(target, playerOptions);
     }
 
     this.options = options;

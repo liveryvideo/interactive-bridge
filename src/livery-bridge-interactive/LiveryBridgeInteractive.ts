@@ -177,13 +177,18 @@ export class LiveryBridgeInteractive extends LitElement {
     super.connectedCallback();
 
     if (!this.interactiveBridge) {
-      this.interactiveBridge = new InteractiveBridge(this.playerBridge ?? '*', {
-        // Rudimentary custom controls support is provided through the player command and subscription UI
-        controlsDisabled: true,
-        handleAuth: (tokenOrClaims) => {
-          this.auth = humanStringify(tokenOrClaims);
+      this.interactiveBridge = new InteractiveBridge(
+        this.playerBridge ?? '*',
+        {
+          handleAuth: (tokenOrClaims) => {
+            this.auth = humanStringify(tokenOrClaims);
+          },
         },
-      });
+        {
+          // Rudimentary custom controls support is provided through the player command and subscription UI
+          controlsDisabled: true,
+        },
+      );
 
       const setOptionsText = (value: unknown) => {
         this.interactiveOptions = humanStringify(value, true);
