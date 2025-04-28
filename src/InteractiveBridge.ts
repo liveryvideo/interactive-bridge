@@ -292,7 +292,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @param listener - Listener to call when value is changed
    */
-  async subscribePaused(listener: (value: boolean) => void) {
+  subscribePaused(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
       (unreducedListener) => this.subscribePlaybackState(unreducedListener),
       (value) => ['ENDED', 'PAUSED'].includes(value),
@@ -322,7 +322,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @param listener - Listener to call when value is changed
    */
-  async subscribePlaying(listener: (value: boolean) => void) {
+  subscribePlaying(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
       (unreducedListener) => this.subscribePlaybackState(unreducedListener),
       (value) =>
@@ -351,7 +351,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @param listener - Listener to call when value is changed
    */
-  async subscribeStalled(listener: (value: boolean) => void) {
+  subscribeStalled(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
       (unreducedListener) => this.subscribePlaybackState(unreducedListener),
       (value) => ['BUFFERING', 'SEEKING'].includes(value),
