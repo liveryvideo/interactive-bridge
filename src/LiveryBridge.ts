@@ -2,7 +2,6 @@ import { isSemVerCompatible } from './util/semver.ts';
 import { uuid } from './util/uuid.ts';
 
 // TODO: Replace type validation code here by using Zod in schema?
-// TODO: At next major release add support for options to handshake protocol and use that to replace options command
 
 interface CommandMessage extends LiveryMessage {
   arg: unknown;
@@ -22,6 +21,7 @@ interface EventMessage extends LiveryMessage {
 }
 
 interface HandshakeMessage extends LiveryMessage {
+  options: Record<string, unknown>;
   type: 'handshake';
   version: string;
 }
@@ -92,6 +92,8 @@ export class LiveryBridge {
 
   private target: LiveryBridgeTarget;
 
+  private targetOptions?: Record<string, unknown>;
+
   /**
    * Constructs a LiveryBridge.
    *
@@ -100,9 +102,14 @@ export class LiveryBridge {
    * and for that in turn to pass it's reference here.
    *
    * @param target - LiveryBridge target
+   * @param options - Options to pass to LiveryBridge target
    */
-  constructor(target?: LiveryBridgeTarget) {
+  constructor(
+    target?: LiveryBridgeTarget,
+    options: Record<string, unknown> = {},
+  ) {
     this.target = target;
+    this.targetOptions = options;
 
     this.handshakePromise = new Promise<unknown>((resolve, reject) => {
       this.deferredMap.set(this.sourceId, { reject, resolve });
@@ -117,7 +124,7 @@ export class LiveryBridge {
         );
       }
 
-      this.sendMessage('handshake', this.sourceId, { version });
+      this.sendMessage('handshake', this.sourceId, { options, version });
     }
   }
 
@@ -173,6 +180,7 @@ export class LiveryBridge {
     if (message.type !== 'handshake') {
       return false;
     }
+    LiveryBridge.assertMessagePropertyType(message, 'options', 'object');
     LiveryBridge.assertMessagePropertyType(message, 'version', 'string');
     return true;
   }
@@ -206,6 +214,13 @@ export class LiveryBridge {
     message: LiveryMessage,
   ): message is ResolveMessage {
     return message.type === 'resolve';
+  }
+
+  /**
+   * Returns promise of options from target bridge.
+   */
+  getOptions() {
+    return this.handshakePromise;
   }
 
   /**
@@ -342,11 +357,11 @@ export class LiveryBridge {
     // Resolve our handshake promise if it wasn't already
     const deferred = this.deferredMap.get(this.sourceId);
     if (deferred) {
-      deferred.resolve(version);
+      deferred.resolve(message.options);
       this.deferredMap.delete(this.sourceId);
     }
 
-    this.sendResolve(message.id, version);
+    this.sendResolve(message.id, this.targetOptions);
   }
 
   private handleLiveryMessage(message: LiveryMessage) {

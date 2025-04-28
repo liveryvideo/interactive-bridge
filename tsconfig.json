@@ -7,11 +7,13 @@
     "module": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     // TODO: Don't use this as it also skips checking our .d.ts files
-    // Instead we should try to fix the errors in (currently) ext/aws-sdk, mqtt and @vitest
+    // Instead we should try to fix the errors in (currently):
+    // ext/aws-sdk, types/AudioContextState, browserslist-to-esbuild, vite-plugin-dts and vite
     "skipLibCheck": true,
 
     /* Bundler mode */
     // TODO: Switch to bundler once vite-plugin-dts supports it to match conventional vite tsconfig
+    // Note: This seems to work fine in player-web with vite-plugin-dts already, but not here in interactive-bridge
     // "moduleResolution": "bundler",
     "moduleResolution": "node",
     "allowImportingTsExtensions": true,

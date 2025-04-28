@@ -13,17 +13,10 @@ declare global {
   }
 }
 
-// TODO: Refactor this fancy TypeScript to just using plain lit element state properties and click handler methods
+// TODO: Refactor this complicated code to something simpler based on Lit conventions
 const BRIDGE_GET_NAMES = [
-  'getAppName',
-  'getCustomerId',
-  'getEndpointId',
   'getFeatures',
-  'getLatency',
-  'getLiveryParams',
   'getPlayback',
-  'getPlayerVersion',
-  'getStreamId',
   'pause',
   'play',
   'reload',
@@ -38,16 +31,12 @@ const BRIDGE_SUBSCRIBE_NAMES = [
   'subscribeConfig',
   'subscribeDisplay',
   'subscribeError',
-  'subscribeFullscreen',
   'subscribeMode',
-  'subscribeOrientation',
   'subscribePaused',
   'subscribePlaybackState',
   'subscribePlaying',
   'subscribeQualities',
-  'subscribeQuality',
   'subscribeStalled',
-  'subscribeStreamPhase',
   'subscribeVolume',
 ] as const;
 
@@ -72,6 +61,7 @@ type BridgeSubscribeName = (typeof BRIDGE_SUBSCRIBE_NAMES)[number];
  * ```
  */
 export class LiveryBridgeInteractive extends LitElement {
+  /** @internal */
   static override readonly styles = css`
     :host {
       color: #000;
@@ -177,19 +167,33 @@ export class LiveryBridgeInteractive extends LitElement {
   private interactiveCommandArg = '';
 
   @state()
+  private interactiveOptions?: string;
+
+  @state()
   private playerCommandValue = '';
 
+  /** @internal */
   override connectedCallback() {
     super.connectedCallback();
 
     if (!this.interactiveBridge) {
-      this.interactiveBridge = new InteractiveBridge(this.playerBridge ?? '*', {
-        // Rudimentary custom controls support is provided through the player command and subscription UI
-        controlsDisabled: true,
-        handleAuth: (tokenOrClaims) => {
-          this.auth = humanStringify(tokenOrClaims);
+      this.interactiveBridge = new InteractiveBridge(
+        this.playerBridge ?? '*',
+        {
+          handleAuth: (tokenOrClaims) => {
+            this.auth = humanStringify(tokenOrClaims);
+          },
         },
-      });
+        {
+          // Rudimentary custom controls support is provided through the player command and subscription UI
+          controlsDisabled: true,
+        },
+      );
+
+      const setOptionsText = (value: unknown) => {
+        this.interactiveOptions = humanStringify(value, true);
+      };
+      this.interactiveBridge.getOptions().then(setOptionsText, setOptionsText);
 
       this.interactiveBridge.registerInteractiveCommand(
         'test',
@@ -208,6 +212,7 @@ export class LiveryBridgeInteractive extends LitElement {
     }
   }
 
+  /** @internal */
   override render() {
     return html`
       <div class="controls-space">
@@ -248,9 +253,14 @@ export class LiveryBridgeInteractive extends LitElement {
 
       <main>
         <div class="panel">
+          <b>Interactive Options</b>
+          <pre>${this.interactiveOptions}</pre>
+        </div>
+
+        <div class="panel">
           <table>
             <tr>
-              <th>Player Command:</th>
+              <th>Player Command</th>
             </tr>
             <tr>
               <td>
@@ -259,15 +269,8 @@ export class LiveryBridgeInteractive extends LitElement {
                     name="getCommandName"
                     @change=${this.handleGetSelectChange}
                   >
-                    <option value="getAppName">getAppName</option>
-                    <option value="getCustomerId">getCustomerId</option>
-                    <option value="getEndpointId">getEndpointId</option>
                     <option value="getFeatures">getFeatures</option>
-                    <option value="getLatency">getLatency</option>
-                    <option value="getLiveryParams">getLiveryParams</option>
                     <option value="getPlayback">getPlayback</option>
-                    <option value="getPlayerVersion">getPlayerVersion</option>
-                    <option value="getStreamId">getStreamId</option>
                     <option value="pause">pause</option>
                     <option value="play">play</option>
                     <option value="reload">reload</option>
@@ -310,15 +313,20 @@ export class LiveryBridgeInteractive extends LitElement {
               </td>
             </tr>
             <tr>
-              <th>Last Command Value:</th>
+              <th>Value:</th>
             </tr>
             <tr>
               <td>
                 <pre id="getCommandOutput"></pre>
               </td>
             </tr>
+          </table>
+        </div>
+
+        <div class="panel">
+          <table>
             <tr>
-              <th>Player Subscription:</th>
+              <th>Player Subscribe Command</th>
             </tr>
             <tr>
               <td>
@@ -330,13 +338,7 @@ export class LiveryBridgeInteractive extends LitElement {
                     <option value="subscribeConfig">subscribeConfig</option>
                     <option value="subscribeDisplay">subscribeDisplay</option>
                     <option value="subscribeError">subscribeError</option>
-                    <option value="subscribeFullscreen">
-                      subscribeFullscreen
-                    </option>
                     <option value="subscribeMode">subscribeMode</option>
-                    <option value="subscribeOrientation">
-                      subscribeOrientation
-                    </option>
                     <option value="subscribePaused">subscribePaused</option>
                     <option value="subscribePlaybackState">
                       subscribePlaybackState
@@ -345,11 +347,7 @@ export class LiveryBridgeInteractive extends LitElement {
                     <option value="subscribeQualities">
                       subscribeQualities
                     </option>
-                    <option value="subscribeQuality">subscribeQuality</option>
                     <option value="subscribeStalled">subscribeStalled</option>
-                    <option value="subscribeStreamPhase">
-                      subscribeStreamPhase
-                    </option>
                     <option value="subscribeVolume">subscribeVolume</option>
                   </select>
                   <button type="submit">Send</button>
@@ -357,7 +355,7 @@ export class LiveryBridgeInteractive extends LitElement {
               </td>
             </tr>
             <tr>
-              <th>Last Subscription Value:</th>
+              <th>Value:</th>
             </tr>
             <tr>
               <td>
@@ -376,7 +374,7 @@ export class LiveryBridgeInteractive extends LitElement {
               <tr>
                 <th>Name:</th>
                 <td>
-                  <input type="text" name="name" value="subscribeAuthToken" />
+                  <input type="text" name="name" value="subscribeTest" />
                 </td>
               </tr>
               <tr>
@@ -541,7 +539,7 @@ export class LiveryBridgeInteractive extends LitElement {
   }
 
   private handlePlayerCall(type: 'get' | 'subscribe', event: Event) {
-    if (!(event.target && event.target instanceof HTMLFormElement)) {
+    if (!(event.target instanceof HTMLFormElement)) {
       throw new Error('Unsupported event target');
     }
     if (!this.interactiveBridge) {

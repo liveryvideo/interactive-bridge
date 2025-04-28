@@ -63,11 +63,7 @@ const zStringParams = z.record(zString, zString);
 
 export const validateBoolean = createValidate(zBoolean);
 export const validateNumber = createValidate(zNumber);
-export const validateNumberOrNan = createValidate(zNumberOrNan);
-export const validateString = createValidate(zString);
 export const validateStringOrUndefined = createValidate(zStringOrUndefined);
-export const validateStringParams =
-  createValidate<Record<string, string>>(zStringParams);
 
 /**
  * ----------------------------------------------------------------
@@ -99,17 +95,6 @@ export const validateDisplayMode = createValidate<DisplayMode>(
     z.literal('FULLSCREEN'),
     z.literal('PIP'),
   ]),
-);
-
-/**
- * Player window orientation (`'landscape' \| 'portrait'`).
- *
- * @deprecated Will be removed in the next major version
- */
-export type Orientation = 'landscape' | 'portrait';
-
-export const validateOrientation = createValidate<Orientation>(
-  z.union([z.literal('landscape'), z.literal('portrait')]),
 );
 
 /**
@@ -176,8 +161,6 @@ const zStreamPhase = z.union([
   z.literal('POST'),
   z.literal('PRE'),
 ]);
-
-export const validateStreamPhase = createValidate<StreamPhase>(zStreamPhase);
 
 /**
  * ----------------------------------------------------------------
@@ -364,8 +347,6 @@ export const validateFeatures = createValidate<Features>(
 /**
  * Options from interactive layer for the player.
  */
-// !! NOTE: Make sure to copy any changes made here to the related options in InteractiveBridge !!
-// Unfortunately TypeDoc does not properly support just referencing `& InteractivePlayerOptions` from there
 export type InteractivePlayerOptions = {
   /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
   controlsDisabled: boolean;
@@ -379,6 +360,50 @@ export const validateInteractivePlayerOptions =
     {
       controlsDisabled: false,
     },
+  );
+
+/**
+ * Options from player for the interactive layer.
+ */
+export type PlayerInteractiveOptions = {
+  /** Player application name. */
+  appName: string;
+  /** Player Pinpoint analytics endpoint id. */
+  endpointId: string;
+  /**
+   * An object of key-value string parameters from player.
+   *
+   * Android and iOS players will call a callback and pass on the returned values.
+   *
+   * The web player will return all 'livery_' prefixed query parameters with:
+   *
+   * - The prefix stripped from the names (snake_case will not be converted to camelCase)
+   * - Parameter names and values URL decoded
+   * - Empty string (not `null`) values for parameters without a value
+   * - Only the first value of a repeated parameter (no multiple value array support)
+   *
+   * So given location.search: `'?foo&livery_foo%3Abar=hey+you&livery_no_val&livery_multi=1&livery_multi=2'`
+   * this will return: `{ 'foo:bar': 'hey you', no_val: '', multi: '1' }`.
+   */
+  liveryParams: Record<string, string>;
+  /** Player version. */
+  playerVersion: string;
+  /** Player stream id. */
+  streamId: string;
+};
+
+export const validatePlayerInteractiveOptions =
+  createValidate<PlayerInteractiveOptions>(
+    z.object({
+      appName: zString,
+      endpointId: zString,
+      liveryParams: zStringParams,
+      playerVersion: zString,
+      streamId: zString,
+    }),
+    // For any future options add default values here for backwards compatibility
+    // {
+    // },
   );
 
 /**

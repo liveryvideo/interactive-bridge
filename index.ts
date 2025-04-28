@@ -14,8 +14,8 @@
  * - Variable {@link version} specifies the version of this package
  * - Schema types:
  *   {@link AuthClaims}, {@link Config}, {@link DisplayMode}, {@link Features}, {@link InteractivePlayerOptions},
- *   {@link Orientation}, {@link PlaybackDetails}, {@link PlaybackMode}, {@link PlaybackState}, {@link Qualities},
- *   {@link Quality}, {@link StreamPhase}, {@link UserFeedback} and {@link Volume}.
+ *   {@link PlaybackDetails}, {@link PlaybackMode}, {@link PlaybackState}, {@link Qualities}, {@link Quality},
+ *   {@link StreamPhase}, {@link UserFeedback} and {@link Volume}.
  * - Schema validators: validateAuthClaims.
  *
  * **Note:** When using the UMD bundle, the exports can be found as properties of `livery` in the global namespace,
@@ -23,6 +23,10 @@
  *
  * @packageDocumentation
  */
+
+import type { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive.ts';
+import type { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog.ts';
+import type { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock.ts';
 
 /**
  * Livery Interactive SDK version.
@@ -44,7 +48,6 @@ export type {
   DisplayMode,
   Features,
   InteractivePlayerOptions,
-  Orientation,
   PlaybackDetails,
   PlaybackMode,
   PlaybackState,
@@ -54,3 +57,12 @@ export type {
   UserFeedback,
   Volume,
 } from './src/util/schema.ts';
+
+// Redeclare all exported public globals to be included in our bundle, see: vite.config.ts patchDts()
+declare global {
+  interface HTMLElementTagNameMap {
+    'livery-bridge-interactive': LiveryBridgeInteractive;
+    'livery-bridge-log': LiveryBridgeLog;
+    'livery-bridge-mock': LiveryBridgeMock;
+  }
+}

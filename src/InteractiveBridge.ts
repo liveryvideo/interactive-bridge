@@ -5,31 +5,24 @@ import type {
   AuthClaims,
   Config,
   DisplayMode,
-  Orientation,
+  InteractivePlayerOptions,
   PlaybackMode,
   PlaybackState,
   Qualities,
-  StreamPhase,
   UserFeedback,
   Volume,
 } from './util/schema.ts';
 import {
   validateAuthClaims,
-  validateBoolean,
   validateConfig,
   validateDisplayMode,
   validateFeatures,
-  validateInteractivePlayerOptions,
-  validateNumberOrNan,
-  validateOrientation,
   validatePlaybackDetails,
   validatePlaybackMode,
   validatePlaybackState,
+  validatePlayerInteractiveOptions,
   validateQualities,
-  validateStreamPhase,
-  validateString,
   validateStringOrUndefined,
-  validateStringParams,
   validateVolume,
 } from './util/schema.ts';
 
@@ -49,7 +42,7 @@ import {
  * // replace `'*'` by the origin of the page that the player is expected to be on
  * const bridge = new InteractiveBridge(playerBridge || '*');
  *
- * bridge.getAppName().then(appName => window.alert(`appName: ${appName}`));
+ * bridge.getOptions().then(options => window.alert(`appName: ${options.appName}`));
  * ```
  */
 export class InteractiveBridge extends LiveryBridge {
@@ -61,16 +54,16 @@ export class InteractiveBridge extends LiveryBridge {
    * Constructs `InteractiveBridge` with specified `target` player bridge
    * or with `window.parent` as target window and with specified string as origin.
    *
+   * The following options are local for this bridge: `handleAuth`.
+   * While the remaing options are passed to the PlayerBridge: `controlsDisabled`.
+   *
    * @param target - Player bridge or window origin to target
-   * @param options - Options for this bridge and {@link InteractivePlayerOptions}
+   * @param options - Options for this bridge
+   * @param playerOptions - Options to pass to PlayerBridge
    */
   constructor(
     target: AbstractPlayerBridge | string,
-    // !! This includes copies of all InteractivePlayerOptions from schema !!
-    // Unfortunately TypeDoc does not properly support just referencing `& InteractivePlayerOptions`
     options: {
-      /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
-      controlsDisabled?: boolean;
       /**
        * Handles authentication data coming from the player.
        *
@@ -78,37 +71,15 @@ export class InteractiveBridge extends LiveryBridge {
        */
       handleAuth?: (tokenOrClaims?: AuthClaims | string) => void;
     } = {},
+    playerOptions: Partial<InteractivePlayerOptions> = {},
   ) {
     if (typeof target === 'string') {
-      super({ origin: target, window: window.parent });
+      super({ origin: target, window: window.parent }, playerOptions);
     } else {
-      super(target);
+      super(target, playerOptions);
     }
 
     this.options = options;
-  }
-
-  /**
-   * Returns promise of player application name.
-   */
-  getAppName() {
-    return this.sendCommand('getAppName').then(validateString);
-  }
-
-  /**
-   * Returns promise of player customer id.
-   *
-   * @deprecated Instead use {@link subscribeConfig}.customerId
-   */
-  getCustomerId() {
-    return this.sendCommand('getCustomerId').then(validateString);
-  }
-
-  /**
-   * Returns promise of player Pinpoint analytics endpoint id.
-   */
-  getEndpointId() {
-    return this.sendCommand('getEndpointId').then(validateString);
   }
 
   /**
@@ -119,31 +90,10 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current player latency in seconds.
-   *
-   * @deprecated Instead use {@link getPlayback}.latency
+   * Returns promise of options from player for the interactive layer.
    */
-  getLatency() {
-    return this.sendCommand('getLatency').then(validateNumberOrNan);
-  }
-
-  /**
-   * Returns promise of an object of key-value string parameters from player.
-   *
-   * Android and iOS players will call a callback and pass on the returned values.
-   *
-   * The web player will return all 'livery_' prefixed query parameters with:
-   *
-   * - The prefix stripped from the names (snake_case will not be converted to camelCase)
-   * - Parameter names and values URL decoded
-   * - Empty string (not `null`) values for parameters without a value
-   * - Only the first value of a repeated parameter (no multiple value array support)
-   *
-   * So given location.search: `'?foo&livery_foo%3Abar=hey+you&livery_no_val&livery_multi=1&livery_multi=2'`
-   * this will return: `{ 'foo:bar': 'hey you', no_val: '', multi: '1' }`.
-   */
-  getLiveryParams() {
-    return this.sendCommand('getLiveryParams').then(validateStringParams);
+  override async getOptions() {
+    return validatePlayerInteractiveOptions(await super.getOptions());
   }
 
   /**
@@ -151,20 +101,6 @@ export class InteractiveBridge extends LiveryBridge {
    */
   getPlayback() {
     return this.sendCommand('getPlayback').then(validatePlaybackDetails);
-  }
-
-  /**
-   * Returns promise of player version.
-   */
-  getPlayerVersion() {
-    return this.sendCommand('getPlayerVersion').then(validateString);
-  }
-
-  /**
-   * Returns promise of player stream id.
-   */
-  getStreamId() {
-    return this.sendCommand('getStreamId').then(validateString);
   }
 
   /**
@@ -183,19 +119,6 @@ export class InteractiveBridge extends LiveryBridge {
    */
   play() {
     return this.sendCommand('play');
-  }
-
-  /**
-   * Register `handler` function to be called with `arg` and `listener` when `sendCustomCommand()` is called on
-   * other side with matching `name`.
-   *
-   * @deprecated Instead use {@link registerInteractiveCommand}
-   */
-  override registerCustomCommand(
-    name: string,
-    handler: (arg: unknown, listener: (value: unknown) => void) => unknown,
-  ) {
-    return super.registerCustomCommand(name, handler);
   }
 
   /**
@@ -240,20 +163,6 @@ export class InteractiveBridge extends LiveryBridge {
    */
   selectQuality(index: number) {
     return this.sendCommand('selectQuality', index);
-  }
-
-  /**
-   * Returns promise of value returned by other side's custom command handler with matching `name` that is passed `arg`.
-   * Any `handler` `listener` calls will subsequently also be bridged to this `listener` callback.
-   *
-   * @deprecated Instead use {@link sendPlayerCommand}
-   */
-  override sendCustomCommand(
-    name: string,
-    arg?: unknown,
-    listener?: (value: unknown) => void,
-  ) {
-    return super.sendCustomCommand(name, arg, listener);
   }
 
   /**
@@ -364,18 +273,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current player fullscreen state
-   * and calls back `listener` with any subsequent state changes.
-   *
-   * @deprecated Instead use {@link subscribeDisplay}.display value "FULLSCREEN"
-   */
-  subscribeFullscreen(listener: (value: boolean) => void) {
-    return this.sendCommand('subscribeFullscreen', undefined, (value) =>
-      listener(validateBoolean(value)),
-    ).then(validateBoolean);
-  }
-
-  /**
    * Returns promise of current mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
    * and calls back `listener` with any subsequent mode changes.
    *
@@ -388,20 +285,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current player window orientation (`'landscape' \| 'portrait'`)
-   * and calls back `listener` with any subsequent orientations.
-   *
-   * @deprecated Will be removed in the next major version.
-   */
-  subscribeOrientation(
-    listener: (value: Orientation) => void,
-  ): Promise<Orientation> {
-    return this.sendCommand('subscribeOrientation', undefined, (value) =>
-      listener(validateOrientation(value)),
-    ).then(validateOrientation);
-  }
-
-  /**
    * Returns promise of current `paused` state and calls back `listener` with any subsequent `paused` state updates.
    *
    * Where `paused` is true if `playbackState` is `'PAUSED'` or `'ENDED'`.
@@ -409,7 +292,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @param listener - Listener to call when value is changed
    */
-  async subscribePaused(listener: (value: boolean) => void) {
+  subscribePaused(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
       (unreducedListener) => this.subscribePlaybackState(unreducedListener),
       (value) => ['ENDED', 'PAUSED'].includes(value),
@@ -439,7 +322,7 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @param listener - Listener to call when value is changed
    */
-  async subscribePlaying(listener: (value: boolean) => void) {
+  subscribePlaying(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
       (unreducedListener) => this.subscribePlaybackState(unreducedListener),
       (value) =>
@@ -461,20 +344,6 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
-   * Returns promise of current player stream quality
-   * and calls back `listener` with any subsequent quality changes.
-   *
-   * @deprecated Instead use {@link subscribeQualities}.active
-   *
-   * @param listener - Listener to call when value is changed
-   */
-  subscribeQuality(listener: (value: string) => void) {
-    return this.sendCommand('subscribeQuality', undefined, (value) =>
-      listener(validateString(value)),
-    ).then(validateString);
-  }
-
-  /**
    * Returns promise of current `stalled` state and calls back `listener` with any subsequent `stalled` state updates.
    *
    * Where `stalled` is true if `playbackState` is `'BUFFERING'` or `'SEEKING'`.
@@ -482,26 +351,12 @@ export class InteractiveBridge extends LiveryBridge {
    *
    * @param listener - Listener to call when value is changed
    */
-  async subscribeStalled(listener: (value: boolean) => void) {
+  subscribeStalled(listener: (value: boolean) => void) {
     return reducedSubscribe<PlaybackState, boolean>(
       (unreducedListener) => this.subscribePlaybackState(unreducedListener),
       (value) => ['BUFFERING', 'SEEKING'].includes(value),
       listener,
     );
-  }
-
-  /**
-   * Returns promise of current player stream phase (`'PRE' \| 'LIVE' \| 'POST'`)
-   * and calls back `listener` with any subsequent phases.
-   *
-   * @deprecated Instead use {@link subscribeConfig}.streamPhase
-   */
-  subscribeStreamPhase(
-    listener: (phase: StreamPhase) => void,
-  ): Promise<StreamPhase> {
-    return this.sendCommand('subscribeStreamPhase', undefined, (value) =>
-      listener(validateStreamPhase(value)),
-    ).then(validateStreamPhase);
   }
 
   /**
@@ -514,15 +369,6 @@ export class InteractiveBridge extends LiveryBridge {
     return this.sendCommand('subscribeVolume', undefined, (value) =>
       listener(validateVolume(value)),
     ).then(validateVolume);
-  }
-
-  /**
-   * Unregister custom command by name.
-   *
-   * @deprecated Instead use {@link unregisterInteractiveCommand}
-   */
-  override unregisterCustomCommand(name: string) {
-    super.unregisterCustomCommand(name);
   }
 
   /**
@@ -541,11 +387,6 @@ export class InteractiveBridge extends LiveryBridge {
   ) {
     if (name === 'authenticate') {
       return this.authenticate(validateAuthClaims(arg));
-    }
-    /** @deprecated In the next major version options passing should be integrated into the LiveryBridge handshake. */
-    if (name === 'options') {
-      // Just return InteractivePlayerOptions, not handleAuth option
-      return validateInteractivePlayerOptions(this.options);
     }
     return super.handleCommand(name, arg, listener);
   }
