@@ -63,10 +63,7 @@ const zStringParams = z.record(zString, zString);
 
 export const validateBoolean = createValidate(zBoolean);
 export const validateNumber = createValidate(zNumber);
-export const validateString = createValidate(zString);
 export const validateStringOrUndefined = createValidate(zStringOrUndefined);
-export const validateStringParams =
-  createValidate<Record<string, string>>(zStringParams);
 
 /**
  * ----------------------------------------------------------------
