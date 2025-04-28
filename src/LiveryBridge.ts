@@ -102,7 +102,7 @@ export class LiveryBridge {
    * and for that in turn to pass it's reference here.
    *
    * @param target - LiveryBridge target
-   * @param targetOptions - Options to pass to LiveryBridge target
+   * @param options - Options to pass to LiveryBridge target
    */
   constructor(
     target?: LiveryBridgeTarget,

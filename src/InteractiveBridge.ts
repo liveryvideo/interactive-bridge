@@ -54,8 +54,11 @@ export class InteractiveBridge extends LiveryBridge {
    * Constructs `InteractiveBridge` with specified `target` player bridge
    * or with `window.parent` as target window and with specified string as origin.
    *
+   * The following options are local for this bridge: `handleAuth`.
+   * While the remaing options are passed to the PlayerBridge: `controlsDisabled`.
+   *
    * @param target - Player bridge or window origin to target
-   * @param options - Options for this bridge and {@link InteractivePlayerOptions}
+   * @param options - Options for this bridge and to pass to PlayerBridge
    */
   constructor(
     target: AbstractPlayerBridge | string,

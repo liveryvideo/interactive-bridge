@@ -30,11 +30,15 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   /**
    * Constructs an AbstractPlayerBridge.
    *
+   * Target can be either undefined or a window and origin.
+   * If undefined this waits for the other bridge to be passed this instance
+   * and for that in turn to pass it's reference here.
+   *
    * This adds InteractivePlayerOptions: appName and liveryParams, so only requires:
    * endpointId, playerVersion and streamId.
    *
    * @param target - Undefined or InteractiveBridge window and origin
-   * @param targetOptions - Options to pass InteractiveBridge
+   * @param options - Options to pass to InteractiveBridge
    */
   constructor(
     target: { origin: string; window: Window } | undefined,
