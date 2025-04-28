@@ -28,10 +28,9 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract config: Config;
 
   /**
-   * Constructs an AbstractPlayerBridge.
-   *
-   * Target can be either undefined or a window and origin.
-   * If undefined this waits for the other bridge to be passed this instance
+   * Constructs `AbstractPlayerBridge` with either an undefined target
+   * or the window and origin containing an InteractiveBridge.
+   * If undefined this waits for the InteractiveBridge to be passed this instance
    * and for that in turn to pass it's reference here.
    *
    * This adds InteractivePlayerOptions: appName and liveryParams, so only requires:
