@@ -7,13 +7,11 @@
     "module": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     // TODO: Don't use this as it also skips checking our .d.ts files
-    // Instead we should try to fix the errors in (currently) ext/aws-sdk, mqtt and @vitest
+    // Instead we should try to fix the errors in various dependencies
     "skipLibCheck": true,
 
     /* Bundler mode */
-    // TODO: Switch to bundler once vite-plugin-dts supports it to match conventional vite tsconfig
-    // "moduleResolution": "bundler",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,

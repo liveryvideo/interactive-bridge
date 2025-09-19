@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/style/noMagicNumbers: This is a mock for testing where these make sense */
+
 import { AbstractPlayerBridge } from './AbstractPlayerBridge.ts';
 import type {
   Config,
@@ -50,7 +52,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private display: DisplayMode = 'DEFAULT';
 
-  private displayListeners: ((value: DisplayMode) => void)[] = [];
+  private readonly displayListeners: ((value: DisplayMode) => void)[] = [];
 
   private muted = true;
 
@@ -58,19 +60,20 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private playbackState: PlaybackState = 'PLAYING';
 
-  private playbackStateListeners: ((value: PlaybackState) => void)[] = [];
+  private readonly playbackStateListeners: ((value: PlaybackState) => void)[] =
+    [];
 
-  private qualities: Qualities = {
+  private readonly qualities: Qualities = {
     active: 0,
     list: [buildQuality(1), buildQuality(2), buildQuality(3)],
     selected: 0,
   };
 
-  private qualitiesListeners: ((value: Qualities) => void)[] = [];
+  private readonly qualitiesListeners: ((value: Qualities) => void)[] = [];
 
   private volume = 1;
 
-  private volumeListeners: ((value: Volume) => void)[] = [];
+  private readonly volumeListeners: ((value: Volume) => void)[] = [];
 
   private zeroTimestamp = Date.now();
 
@@ -83,7 +86,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       }
 
       window.setTimeout(() => listener(`${arg}-test-token-2`), 3000);
-      window.setTimeout(() => listener(`${arg}-test-token-3`), 10000);
+      window.setTimeout(() => listener(`${arg}-test-token-3`), 10_000);
 
       return `${arg}-test-token-1`;
     });
@@ -156,7 +159,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     if (index === this.qualities.selected) {
       return;
     }
-    if (!(index === -1 || !!this.qualities.list[index])) {
+    if (!(index === -1 || Boolean(this.qualities.list[index]))) {
       throw new Error(`Invalid qualities index: ${index}`);
     }
     this.qualities.selected = index;

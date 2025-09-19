@@ -1,6 +1,8 @@
 /**
  * Recursion safe compact human readable stringify function.
  *
+ * TODO: Add multiline support to util/fmt.ts fmtObject() from player-web and use that and constants.ts here as well
+ *
  * @param obj - Object to stringify
  * @param multiline - If true then use multiple lines for object strings
  * @param stack - Stack of objects that have been stringified already

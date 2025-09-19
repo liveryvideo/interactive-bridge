@@ -7,6 +7,7 @@
  *   the surrounding Livery Player
  * - Class {@link AbstractPlayerBridge} is used by LiveryPlayer for the `PlayerBridge` implementation
  *   (in the past: {@link LiveryBridge})
+ * - Type {@link LiveryBridgeTarget} for the AbstractPlayerBridge (and LiveryBridge) constructor
  * - Class {@link MockPlayerBridge} is a player bridge that returns mock data for testing
  * - Element {@link LiveryBridgeLog} logs messages posted to specified bridge or the window
  * - Element {@link LiveryBridgeMock} mocks a LiveryPlayer with an interactive child element or iframe for testing
@@ -32,12 +33,12 @@ export const version = __VERSION__;
 // biome-ignore lint/performance/noBarrelFile: Required for compatibility and it should be fine with named exports
 export { AbstractPlayerBridge } from './src/AbstractPlayerBridge.ts';
 export { InteractiveBridge } from './src/InteractiveBridge.ts';
+export type { LiveryBridgeTarget } from './src/LiveryBridge.ts';
 export { LiveryBridge } from './src/LiveryBridge.ts';
-export { MockPlayerBridge } from './src/MockPlayerBridge.ts';
 export { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive.ts';
 export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog.ts';
 export { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock.ts';
-export { validateAuthClaims } from './src/util/schema.ts';
+export { MockPlayerBridge } from './src/MockPlayerBridge.ts';
 export type {
   AuthClaims,
   Config,
@@ -54,3 +55,4 @@ export type {
   UserFeedback,
   Volume,
 } from './src/util/schema.ts';
+export { validateAuthClaims } from './src/util/schema.ts';

@@ -1,5 +1,5 @@
 import type { PropertyValues } from 'lit';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import '../livery-bridge-log/LiveryBridgeLog.ts';
 import { MockPlayerBridge } from '../MockPlayerBridge.ts';

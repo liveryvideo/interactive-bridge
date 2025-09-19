@@ -1,5 +1,5 @@
 import type { PropertyValues } from 'lit';
-import { LitElement, css, html } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import type { LiveryBridge } from '../LiveryBridge.ts';
 import { defineVersionedElement } from '../util/defineVersionedElement.ts';
@@ -60,7 +60,7 @@ export class LiveryBridgeLog extends LitElement {
   maxMessages = 10;
 
   @query('#container')
-  private container?: HTMLElement;
+  private readonly container?: HTMLElement;
 
   private messages: string[] = [];
 
@@ -71,7 +71,7 @@ export class LiveryBridgeLog extends LitElement {
 
     if (this.bridge) {
       this.removeSpy = this.bridge.spy((message) => {
-        // biome-ignore lint/suspicious/noConsole lint/suspicious/noConsoleLog: Log to console as documented
+        // biome-ignore lint/suspicious/noConsole: Log to console as documented
         console.log(message);
         this.addMessage(humanStringify(message, true));
       });
@@ -107,8 +107,8 @@ export class LiveryBridgeLog extends LitElement {
     this.updateMessages();
   }
 
-  private handleWindowMessage = (event: MessageEvent) => {
-    // biome-ignore lint/suspicious/noConsole lint/suspicious/noConsoleLog: Log to console as documented
+  private readonly handleWindowMessage = (event: MessageEvent) => {
+    // biome-ignore lint/suspicious/noConsole: Log to console as documented
     console.log(event.origin, event.data);
 
     this.addMessage(`${event.origin}: ${humanStringify(event.data, true)}`);

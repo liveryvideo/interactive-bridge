@@ -4,6 +4,17 @@ import { uuid } from './util/uuid.ts';
 // TODO: Replace type validation code here by using Zod in schema?
 // TODO: At next major release add support for options to handshake protocol and use that to replace options command
 
+/**
+ * {@link LiveryBridge} target; either another LiveryBridge, or the origin and window of an iframe or undefined.
+ */
+export type LiveryBridgeTarget =
+  | LiveryBridge
+  | {
+      origin: string;
+      window: Window;
+    }
+  | undefined;
+
 interface CommandMessage extends LiveryMessage {
   arg: unknown;
   name: string;
@@ -25,14 +36,6 @@ interface HandshakeMessage extends LiveryMessage {
   type: 'handshake';
   version: string;
 }
-
-type LiveryBridgeTarget =
-  | LiveryBridge
-  | {
-      origin: string;
-      window: Window;
-    }
-  | undefined;
 
 interface LiveryMessage extends Record<string, unknown> {
   id: string;
@@ -60,7 +63,7 @@ function hasProperty<X extends {}, Y extends PropertyKey>(
   obj: X,
   prop: Y,
 ): obj is Record<Y, unknown> & X {
-  return Object.hasOwnProperty.call(obj, prop);
+  return Object.hasOwn(obj, prop);
 }
 
 /**
@@ -69,12 +72,12 @@ function hasProperty<X extends {}, Y extends PropertyKey>(
 export class LiveryBridge {
   static readonly isLiveryBridge = true;
 
-  private customCommandMap = new Map<
+  private readonly customCommandMap = new Map<
     string,
     (arg: unknown, listener: (value: unknown) => void) => unknown
   >();
 
-  private deferredMap = new Map<
+  private readonly deferredMap = new Map<
     string,
     {
       reject: (error: Error) => void;
@@ -82,14 +85,15 @@ export class LiveryBridge {
     }
   >();
 
-  private handshakePromise: Promise<unknown>;
+  private readonly handshakePromise: Promise<unknown>;
 
-  private listenerMap = new Map<string, (value: unknown) => void>();
+  private readonly listenerMap = new Map<string, (value: unknown) => void>();
 
-  private sourceId = uuid();
+  private readonly sourceId = uuid();
 
   private spies: Spy[] = [];
 
+  // eslint-disable-next-line @typescript-eslint/prefer-readonly -- It is reassigned indirectly from constructor
   private target: LiveryBridgeTarget;
 
   /**

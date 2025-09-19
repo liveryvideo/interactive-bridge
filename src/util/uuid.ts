@@ -1,8 +1,8 @@
-// Note: This is a copy from https://github.com/liveryvideo/player-web
+// biome-ignore-all lint/suspicious/noBitwiseOperators: This contains some proper bitwise logic
+// biome-ignore-all lint/style/noMagicNumbers: It's ok here; this is concise code serving a well known random function
 
 // Source: https://gist.github.com/jed/982883
 export function uuid(a?: number): string {
-  // prettier-ignore
   return a
     ? (a ^ ((Math.random() * 16) >> (a / 4))).toString(16)
     : // @ts-ignore

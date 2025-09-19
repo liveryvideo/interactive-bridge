@@ -1,4 +1,6 @@
-import { LitElement, css, html } from 'lit';
+/** biome-ignore-all lint/style/noMagicNumbers: This is a test element where these make sense */
+
+import { css, html, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import type { AbstractPlayerBridge } from '../AbstractPlayerBridge.ts';
 import { InteractiveBridge } from '../InteractiveBridge.ts';
@@ -444,6 +446,7 @@ export class LiveryBridgeInteractive extends LitElement {
 
   // See below, or actually we might want to refactor this element altogether; it has outgrown it's basic setup
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: reduce Tyler's complexity below, e.g: DRY
+  // biome-ignore lint/complexity/noExcessiveLinesPerFunction: same as above
   private handleGetSelectChange(event: Event) {
     const { target } = event;
 
@@ -540,6 +543,7 @@ export class LiveryBridgeInteractive extends LitElement {
     }
   }
 
+  // biome-ignore lint/complexity/noExcessiveLinesPerFunction: TODO: reduce Tyler's complexity below, e.g: DRY
   private handlePlayerCall(type: 'get' | 'subscribe', event: Event) {
     if (!(event.target && event.target instanceof HTMLFormElement)) {
       throw new Error('Unsupported event target');

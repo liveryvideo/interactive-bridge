@@ -1,4 +1,4 @@
-import { ZodError, z } from 'zod';
+import { ZodError, type ZodType, z } from 'zod';
 
 // Note: We can't use z.infer<typeof zSchema> because it results in ugly .d.ts typing that typedoc doesn't support
 // We do validate that our types match our schemas using the createValidate<T> template type argument
@@ -11,7 +11,7 @@ import { ZodError, z } from 'zod';
  * @param defaultValue - Default value to use; if this is an object it will be shallow merged
  */
 const createValidate =
-  <T>(schema: Zod.ZodSchema<T>, defaultValue?: T) =>
+  <T>(schema: ZodType<T>, defaultValue?: T) =>
   (value: unknown) => {
     if (defaultValue && value === undefined) {
       return defaultValue;

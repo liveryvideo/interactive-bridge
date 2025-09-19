@@ -1,3 +1,4 @@
 import configs from '@liveryvideo/biome-lit/eslint';
+import { defineConfig } from 'eslint/config';
 
-export default configs;
+export default defineConfig(configs);

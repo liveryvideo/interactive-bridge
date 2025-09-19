@@ -223,9 +223,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   private getLiveryParams(queryString = window.location.search) {
     const urlParams = new URLSearchParams(queryString);
     const result: Record<string, string> = {};
+    const prefix = 'livery_';
     for (const [name, value] of urlParams.entries()) {
-      if (name.startsWith('livery_')) {
-        const key = name.substring(7);
+      if (name.startsWith(prefix)) {
+        const key = name.substring(prefix.length);
         result[key] = result[key] ?? value;
       }
     }
