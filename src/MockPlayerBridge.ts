@@ -65,6 +65,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private readonly qualities: Qualities = {
     active: 0,
+    forced: -1,
     list: [buildQuality(1), buildQuality(2), buildQuality(3)],
     selected: 0,
   };
@@ -90,6 +91,19 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
       return `${arg}-test-token-1`;
     });
+  }
+
+  protected forceQuality(index: number) {
+    if (index === this.qualities.forced) {
+      return;
+    }
+    if (!(index === -1 || Boolean(this.qualities.list[index]))) {
+      throw new Error(`Invalid qualities index: ${index}`);
+    }
+    this.qualities.forced = index;
+    for (const listener of this.qualitiesListeners) {
+      listener(this.qualities);
+    }
   }
 
   protected getEndpointId() {

@@ -89,6 +89,16 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Force-select the quality at specified index of {@link subscribeQualities}.list and prevent ABR/user selection.
+   * -1 to disable and revert to ABR/user selection.
+   *
+   * @param index - Index of quality to force-select
+   */
+  forceQuality(index: number) {
+    return this.sendCommand('forceQuality', index);
+  }
+
+  /**
    * Returns promise of player application name.
    */
   getAppName() {
