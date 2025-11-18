@@ -86,8 +86,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     return this.unregisterCustomCommand(name);
   }
 
-  protected abstract forceQuality(index: number): void;
-
   protected abstract getEndpointId(): string;
 
   protected abstract getFeatures(): Features;
@@ -126,9 +124,6 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
     }
     if (name === 'selectQuality') {
       return this.selectQuality(validateNumber(arg));
-    }
-    if (name === 'forceQuality') {
-      return this.forceQuality(validateNumber(arg));
     }
     if (name === 'setDisplay') {
       return this.setDisplay(validateDisplayMode(arg));

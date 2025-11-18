@@ -93,19 +93,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     });
   }
 
-  protected forceQuality(index: number) {
-    if (index === this.qualities.forced) {
-      return;
-    }
-    if (!(index === -1 || Boolean(this.qualities.list[index]))) {
-      throw new Error(`Invalid qualities index: ${index}`);
-    }
-    this.qualities.forced = index;
-    for (const listener of this.qualitiesListeners) {
-      listener(this.qualities);
-    }
-  }
-
   protected getEndpointId() {
     return 'dummy-endpoint-id';
   }

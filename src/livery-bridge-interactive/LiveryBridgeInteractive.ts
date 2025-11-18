@@ -31,7 +31,6 @@ const BRIDGE_GET_NAMES = [
   'reload',
   'seek',
   'selectQuality',
-  'forceQuality',
   'setDisplay',
   'setMuted',
   'setVolume',
@@ -276,7 +275,6 @@ export class LiveryBridgeInteractive extends LitElement {
                     <option value="reload">reload</option>
                     <option value="seek">seek</option>
                     <option value="selectQuality">selectQuality</option>
-                    <option value="forceQuality">forceQuality</option>
                     <option value="setDisplay">setDisplay</option>
                     <option value="setMuted">setMuted</option>
                     <option value="setVolume">setVolume</option>
@@ -463,7 +461,6 @@ export class LiveryBridgeInteractive extends LitElement {
     }
 
     switch (methodName) {
-      case 'forceQuality':
       case 'seek':
       case 'selectQuality':
       case 'setVolume': {
@@ -581,7 +578,6 @@ export class LiveryBridgeInteractive extends LitElement {
       }
 
       switch (methodName) {
-        case 'forceQuality':
         case 'seek':
         case 'selectQuality':
         case 'setVolume': {

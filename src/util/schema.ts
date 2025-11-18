@@ -411,7 +411,7 @@ export type Qualities = {
   /** Index of quality that is being played, or -1 if no quality is active yet. */
   active: number;
   /** Index of the quality being forced by an outside source. */
-  forced: number;
+  forced?: number;
   /** List of qualities that can be played. */
   list: Quality[];
   /** Index of quality that is selected to be played, or -1 if ABR is used. */
@@ -443,7 +443,7 @@ export type Quality = {
 export const validateQualities = createValidate<Qualities>(
   z.object({
     active: zNumber,
-    forced: zNumber,
+    forced: zNumberOrUndefined,
     list: z.array(
       z.object({
         audio: z.union([
