@@ -23,7 +23,7 @@ executors:
   default:
     docker:
       # - image: cimg/node:18.12.1-browsers
-      # TODO: Also get slack notifications in here and update dependencies
+      # TODO: Also get slack notifications in here
       - image: cimg/node:24.11.1
 
 commands:
