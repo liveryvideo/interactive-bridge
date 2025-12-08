@@ -12,3 +12,5 @@ frontend:
   cache:
     paths:
       - '$HOME/.npm'
+settings:
+  nodeVersion: 24.11.1

@@ -1,74 +1,74 @@
 {
-  "name": "@liveryvideo/interactive-bridge",
-  "version": "1.14.2",
-  "publishConfig": {
-    "access": "public"
+  "author": "Livery Video",
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "dependencies": {
+    "lit": "^3.3.1",
+    "zod": "^4.1.13"
   },
   "description": "Livery Video Interactive Bridge.",
-  "author": "Livery Video",
-  "homepage": "https://www.liveryvideo.com/",
-  "license": "MIT",
-  "repository": "github:liveryvideo/interactive-bridge",
-  "main": "dist/index.umd.js",
-  "module": "dist/index.js",
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@liveryvideo/biome-lit": "^2.2.4",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "browserslist-to-esbuild": "^2.1.1",
+    "eslint": "^9.39.1",
+    "git-branch-is": "^4.0.0",
+    "happy-dom": "^20.0.11",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "semantic-release": "^25.0.2",
+    "typedoc": "^0.28.15",
+    "typedoc-plugin-markdown": "^4.9.0",
+    "typedoc-plugin-no-inherit": "^1.6.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.6",
+    "vite-plugin-dts": "4.5.0",
+    "vitest": "^4.0.15"
+  },
   "exports": {
     "import": "./dist/index.js",
     "require": "./dist/index.umd.js"
   },
-  "types": "dist/index.d.ts",
-  "type": "module",
   "files": [
     "CHANGELOG.md",
     "dist"
   ],
+  "homepage": "https://www.liveryvideo.com/",
+  "license": "MIT",
+  "lint-staged": {
+    "*": [
+      "biome check --fix --no-errors-on-unmatched",
+      "eslint --fix"
+    ]
+  },
+  "main": "dist/index.umd.js",
+  "module": "dist/index.js",
+  "name": "@liveryvideo/interactive-bridge",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "github:liveryvideo/interactive-bridge",
   "scripts": {
-    "build:lib:doc": "typedoc && mv dist/doc/* dist/ && rm -rf dist/doc",
-    "build:lib": "vite build -m lib:bundler && vite build -m lib:browser --emptyOutDir false && npm run build:lib:doc",
     "build": "vite build",
+    "build:lib": "vite build -m lib:bundler && vite build -m lib:browser --emptyOutDir false && npm run build:lib:doc",
+    "build:lib:doc": "typedoc && mv dist/doc/* dist/ && rm -rf dist/doc",
     "dev": "vite",
     "lint": "biome check && eslint && tsc",
     "lint:fix": "eslint --fix && biome check --fix",
     "prepare": "husky",
     "prepublishOnly": "npm run build:lib",
     "preview": "vite preview",
-    "test:watch": "vitest",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
-  "dependencies": {
-    "lit": "^3.3.1",
-    "zod": "^4.1.9"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.2.4",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@liveryvideo/biome-lit": "^2.0.0",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "browserslist-to-esbuild": "^2.1.1",
-    "eslint": "^9.36.0",
-    "git-branch-is": "^4.0.0",
-    "happy-dom": "^18.0.1",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.6",
-    "semantic-release": "^24.2.8",
-    "typedoc": "^0.28.13",
-    "typedoc-plugin-markdown": "^4.8.1",
-    "typedoc-plugin-no-inherit": "^1.6.1",
-    "typescript": "^5.9.2",
-    "vite": "^7.1.6",
-    "vite-plugin-dts": "4.5.0",
-    "vitest": "^3.2.4"
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
-  "lint-staged": {
-    "*": [
-      "biome check --fix --no-errors-on-unmatched",
-      "eslint --fix"
-    ]
-  }
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "version": "1.14.2"
 }
