@@ -39,9 +39,7 @@
         return interactive;
       }
 
-      if (!params.has('mock')) {
-        document.body.appendChild(createInteractive());
-      } else {
+      if (params.has('mock')) {
         const mock = document.createElement('livery-bridge-mock');
         document.body.appendChild(mock);
 
@@ -64,6 +62,8 @@
             mock.appendChild(interactive);
           }
         };
+      } else {
+        document.body.appendChild(createInteractive());
       }
     </script>
   </body>

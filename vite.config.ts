@@ -96,10 +96,7 @@ function patchDts() {
       .replace(/^ *\/\* Excluded from this release type: .* \*\/\n+/gm, '')
       .replace(/^ +private .*\n+/gm, '');
 
-    return {
-      content: `${pkgDoc}\n${stripped}\n${declare}`,
-      filePath,
-    };
+    return { content: `${pkgDoc}\n${stripped}\n${declare}`, filePath };
   };
 }
 

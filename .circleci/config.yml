@@ -23,7 +23,8 @@ executors:
   default:
     docker:
       # - image: cimg/node:18.12.1-browsers
-      - image: cimg/node:20.18.0
+      # TODO: Also get slack notifications in here and update dependencies
+      - image: cimg/node:24.11.1
 
 commands:
   npm_install:

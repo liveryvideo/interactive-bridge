@@ -1,32 +1,37 @@
 /* Based on config from create-vite template: lit-ts */
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-    "module": "ESNext",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    // TODO: Don't use this as it also skips checking our .d.ts files
-    // Instead we should try to fix the errors in various dependencies
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "noEmit": true,
-
-    /* Linting */
-    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true
+    "resolveJsonModule": true,
+    // TODO: Don't use this as it also skips checking our .d.ts files
+    // Instead we should try to fix the errors in various dependencies
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext",
+    "useDefineForClassFields": false
   },
-  "include": ["**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": [
+    "dist",
+    "node_modules"
+  ],
+  "include": [
+    "**/*.ts"
+  ]
 }

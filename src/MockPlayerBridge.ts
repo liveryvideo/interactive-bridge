@@ -12,15 +12,9 @@ import type {
 } from './util/schema.ts';
 
 const buildQuality = (index: number) => ({
-  audio: {
-    bandwidth: index,
-  },
+  audio: { bandwidth: index },
   label: `dummy-quality-${index}`,
-  video: {
-    bandwidth: index,
-    height: index,
-    width: index,
-  },
+  video: { bandwidth: index, height: index, width: index },
 });
 
 /**

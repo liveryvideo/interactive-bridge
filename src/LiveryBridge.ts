@@ -9,10 +9,7 @@ import { uuid } from './util/uuid.ts';
  */
 export type LiveryBridgeTarget =
   | LiveryBridge
-  | {
-      origin: string;
-      window: Window;
-    }
+  | { origin: string; window: Window }
   | undefined;
 
 interface CommandMessage extends LiveryMessage {
@@ -79,10 +76,7 @@ export class LiveryBridge {
 
   private readonly deferredMap = new Map<
     string,
-    {
-      reject: (error: Error) => void;
-      resolve: (value: unknown) => void;
-    }
+    { reject: (error: Error) => void; resolve: (value: unknown) => void }
   >();
 
   private readonly handshakePromise: Promise<unknown>;

@@ -25,6 +25,15 @@
  * @packageDocumentation
  */
 
+/** biome-ignore-all lint/style/noExportedImports: These imports are not just exported */
+
+import { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive.ts';
+import { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog.ts';
+import { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock.ts';
+
+// Custom elements
+export { LiveryBridgeInteractive, LiveryBridgeLog, LiveryBridgeMock };
+
 /**
  * Livery Interactive SDK version.
  */
@@ -35,9 +44,6 @@ export { AbstractPlayerBridge } from './src/AbstractPlayerBridge.ts';
 export { InteractiveBridge } from './src/InteractiveBridge.ts';
 export type { LiveryBridgeTarget } from './src/LiveryBridge.ts';
 export { LiveryBridge } from './src/LiveryBridge.ts';
-export { LiveryBridgeInteractive } from './src/livery-bridge-interactive/LiveryBridgeInteractive.ts';
-export { LiveryBridgeLog } from './src/livery-bridge-log/LiveryBridgeLog.ts';
-export { LiveryBridgeMock } from './src/livery-bridge-mock/LiveryBridgeMock.ts';
 export { MockPlayerBridge } from './src/MockPlayerBridge.ts';
 export type {
   AuthClaims,
@@ -56,3 +62,12 @@ export type {
   Volume,
 } from './src/util/schema.ts';
 export { validateAuthClaims } from './src/util/schema.ts';
+
+// Redeclare all exported public globals to be included in our bundle, see: vite.config.ts patchDts()
+declare global {
+  interface HTMLElementTagNameMap {
+    'livery-bridge-interactive': LiveryBridgeInteractive;
+    'livery-bridge-log': LiveryBridgeLog;
+    'livery-bridge-mock': LiveryBridgeMock;
+  }
+}

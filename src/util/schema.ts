@@ -200,7 +200,7 @@ export const validateStreamPhase = createValidate<StreamPhase>(zStreamPhase);
  * For detailed descriptions see:
  * https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
  */
-export type AuthClaims = {
+export interface AuthClaims {
   /** Unknown claims. */
   [claim: string]: unknown;
   /** End-User's birthday, represented as an ISO 8601-1 [ISO8601‑1] YYYY-MM-DD format. */
@@ -245,7 +245,7 @@ export type AuthClaims = {
   updated_at?: number;
   /** True if the user is verified, usually by email or phone number; otherwise false. */
   verified?: boolean;
-};
+}
 
 export const validateAuthClaims = createValidate<
   AuthClaims | string | undefined
@@ -284,7 +284,7 @@ export const validateAuthClaims = createValidate<
 /**
  * Public part of Livery stream config.
  */
-export type Config = {
+export interface Config {
   /** Registry of controls that should be shown to the user. */
   controls: {
     /** Enable toggling AirPlay and/or Chromecast display. */
@@ -314,7 +314,7 @@ export type Config = {
   streamPhases: [number, StreamPhase][];
   /** Livery tenant ID. */
   tenantId: string;
-};
+}
 
 export const validateConfig = createValidate<Config>(
   z.object({
@@ -339,7 +339,7 @@ export const validateConfig = createValidate<Config>(
 /**
  * Registry of features supported by the player in general and under given circumstances.
  */
-export type Features = {
+export interface Features {
   airplay: boolean;
   chromecast: boolean;
   contact: boolean;
@@ -347,7 +347,7 @@ export type Features = {
   pip: boolean;
   scrubber: boolean;
   volume: boolean;
-};
+}
 
 export const validateFeatures = createValidate<Features>(
   z.object({
@@ -366,25 +366,21 @@ export const validateFeatures = createValidate<Features>(
  */
 // !! NOTE: Make sure to copy any changes made here to the related options in InteractiveBridge !!
 // Unfortunately TypeDoc does not properly support just referencing `& InteractivePlayerOptions` from there
-export type InteractivePlayerOptions = {
+export interface InteractivePlayerOptions {
   /** True if default player controls should be disabled to use custom controls instead, false otherwise. */
   controlsDisabled: boolean;
-};
+}
 
 export const validateInteractivePlayerOptions =
   createValidate<InteractivePlayerOptions>(
-    z.object({
-      controlsDisabled: zBoolean,
-    }),
-    {
-      controlsDisabled: false,
-    },
+    z.object({ controlsDisabled: zBoolean }),
+    { controlsDisabled: false },
   );
 
 /**
  * Playback details, i.e: values that are continuously changing.
  */
-export type PlaybackDetails = {
+export interface PlaybackDetails {
   /** Current playback buffer in seconds ahead of current position. */
   buffer: number;
   /** Current playback duration in seconds from start to end of live stream or VOD. */
@@ -393,7 +389,7 @@ export type PlaybackDetails = {
   latency: number;
   /** Current playback position in seconds since start of live stream or VOD. */
   position: number;
-};
+}
 
 export const validatePlaybackDetails = createValidate<PlaybackDetails>(
   z.object({
@@ -407,19 +403,19 @@ export const validatePlaybackDetails = createValidate<PlaybackDetails>(
 /**
  * Stream qualities.
  */
-export type Qualities = {
+export interface Qualities {
   /** Index of quality that is being played, or -1 if no quality is active yet. */
   active: number;
   /** List of qualities that can be played. */
   list: Quality[];
   /** Index of quality that is selected to be played, or -1 if ABR is used. */
   selected: number;
-};
+}
 
 /**
  * Stream audio and video quality.
  */
-export type Quality = {
+export interface Quality {
   /** Audio quality. */
   audio?: {
     /** Audio bandwidth in bits per second. */
@@ -436,26 +432,17 @@ export type Quality = {
     /** Video width in pixels. */
     width: number;
   };
-};
+}
 
 export const validateQualities = createValidate<Qualities>(
   z.object({
     active: zNumber,
     list: z.array(
       z.object({
-        audio: z.union([
-          z.object({
-            bandwidth: zNumber,
-          }),
-          zUndefined,
-        ]),
+        audio: z.union([z.object({ bandwidth: zNumber }), zUndefined]),
         label: zString,
         video: z.union([
-          z.object({
-            bandwidth: zNumber,
-            height: zNumber,
-            width: zNumber,
-          }),
+          z.object({ bandwidth: zNumber, height: zNumber, width: zNumber }),
           zUndefined,
         ]),
       }),
@@ -467,12 +454,12 @@ export const validateQualities = createValidate<Qualities>(
 /**
  * Player volume state.
  */
-export type Volume = {
+export interface Volume {
   /** If true then audio is muted. */
   muted: boolean;
   /** Audio volume, from `0.0` (silent) to `1.0` (loudest). */
   volume: number;
-};
+}
 
 export const validateVolume = createValidate<Volume>(
   z.object({ muted: zBoolean, volume: zNumber }),
@@ -481,14 +468,14 @@ export const validateVolume = createValidate<Volume>(
 /**
  * User feedback.
  */
-export type UserFeedback = {
+export interface UserFeedback {
   /** User feedback comments. */
   comments: string;
   /** User email. */
   email: string;
   /** User name. */
   name: string;
-};
+}
 
 export const validateUserFeedback = createValidate<UserFeedback>(
   z.object({ comments: zString, email: zString, name: zString }),
