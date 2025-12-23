@@ -237,6 +237,10 @@ export class InteractiveBridge extends LiveryBridge {
    * Select quality at specified index of {@link subscribeQualities}.list or -1 to use ABR.
    *
    * @param index - Index of quality to select
+   * @throws Error "Player unconfigured" when config has not been loaded yet
+   * @throws Error "Qualities undefined" when stream qualities have not been loaded yet
+   * @throws Error "Cannot select quality when a quality is forced"
+   * @throws RangeError when index is not -1 or a valid quality index
    */
   selectQuality(index: number) {
     return this.sendCommand('selectQuality', index);
