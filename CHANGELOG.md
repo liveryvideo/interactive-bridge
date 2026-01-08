@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.14.2...v1.15.0) (2026-01-08)
+
+
+### Features
+
+* add optional forced property to Qualities type ([b5c45e9](https://github.com/liveryvideo/interactive-bridge/commit/b5c45e90f23d6767787ff5c32406c258f822f33c))
+
 ## [1.14.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.14.1...v1.14.2) (2024-10-21)
 
 
