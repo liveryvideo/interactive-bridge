@@ -406,6 +406,8 @@ export const validatePlaybackDetails = createValidate<PlaybackDetails>(
 export interface Qualities {
   /** Index of quality that is being played, or -1 if no quality is active yet. */
   active: number;
+  /** Whether or not a quality is being forced. */
+  forced?: boolean;
   /** List of qualities that can be played. */
   list: Quality[];
   /** Index of quality that is selected to be played, or -1 if ABR is used. */
@@ -437,6 +439,7 @@ export interface Quality {
 export const validateQualities = createValidate<Qualities>(
   z.object({
     active: zNumber,
+    forced: zBoolean,
     list: z.array(
       z.object({
         audio: z.union([z.object({ bandwidth: zNumber }), zUndefined]),
