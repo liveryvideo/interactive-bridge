@@ -406,8 +406,8 @@ export const validatePlaybackDetails = createValidate<PlaybackDetails>(
 export interface Qualities {
   /** Index of quality that is being played, or -1 if no quality is active yet. */
   active: number;
-  /** Whether or not a quality is being forced. */
-  forced?: boolean;
+  /** The Representation ID of the quality that is being forced, if any. */
+  forcedQuality?: string;
   /** List of qualities that can be played. */
   list: Quality[];
   /** Index of quality that is selected to be played, or -1 if ABR is used. */
@@ -425,6 +425,8 @@ export interface Quality {
   };
   /** Quality label. If video height is unique: ‘[height]p’ else ‘[bandwidth/1000]k’. */
   label: string;
+  /** Quality Representation ID. Currently optional for backwards compatibility. */
+  representationId?: string;
   /** Video quality. */
   video?: {
     /** Video andwidth in bits per second. */
@@ -439,11 +441,12 @@ export interface Quality {
 export const validateQualities = createValidate<Qualities>(
   z.object({
     active: zNumber,
-    forced: zBoolean,
+    forcedQuality: zStringOrUndefined,
     list: z.array(
       z.object({
         audio: z.union([z.object({ bandwidth: zNumber }), zUndefined]),
         label: zString,
+        representationId: zStringOrUndefined,
         video: z.union([
           z.object({ bandwidth: zNumber, height: zNumber, width: zNumber }),
           zUndefined,
