@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.15.0...v1.16.0) (2026-01-13)
+
+
+### Features
+
+* extend properties exposed via qualities ([b75bb4d](https://github.com/liveryvideo/interactive-bridge/commit/b75bb4dff6a7ea44f7fb0257339ac2134e580f71))
+
 # [1.15.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.14.2...v1.15.0) (2026-01-08)
 
 
