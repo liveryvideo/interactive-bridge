@@ -406,7 +406,7 @@ export const validatePlaybackDetails = createValidate<PlaybackDetails>(
 export interface Qualities {
   /** Index of quality that is being played, or -1 if no quality is active yet. */
   active: number;
-  /** The Representation ID of the quality that is being forced, if any. */
+  /** The Representation ID of the quality that is being forced. TODO: This will be non-nullable in next major release. */
   forced?: string;
   /** List of qualities that can be played. */
   list: Quality[];
