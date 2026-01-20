@@ -59,7 +59,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private readonly qualities: Qualities = {
     active: 0,
-    forced: undefined,
+    forced: -1,
     list: [buildQuality(1), buildQuality(2), buildQuality(3)],
     selected: 0,
   };
