@@ -425,7 +425,10 @@ export interface Quality {
   };
   /** Quality label. If video height is unique: ‘[height]p’ else ‘[bandwidth/1000]k’. */
   label: string;
-  /** Quality Representation ID. Currently optional for backwards compatibility. */
+  /**
+   * Quality Representation ID.
+   * TODO: Remove temporary backwards compatibility in v3.
+   */
   representationId?: string;
   /** Video quality. */
   video?: {
@@ -441,7 +444,7 @@ export interface Quality {
 export const validateQualities = createValidate<Qualities>(
   z.object({
     active: zNumber,
-    forced: zNumber,
+    forced: zNumber.default(-1),
     list: z.array(
       z.object({
         audio: z.union([z.object({ bandwidth: zNumber }), zUndefined]),
