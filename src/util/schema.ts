@@ -444,6 +444,7 @@ export interface Quality {
 export const validateQualities = createValidate<Qualities>(
   z.object({
     active: zNumber,
+    /** TODO: Remove backwards-compatible default in v3. */
     forced: zNumber.default(-1),
     list: z.array(
       z.object({
