@@ -1,3 +1,10 @@
+## [1.16.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.16.0...v1.16.1) (2026-01-20)
+
+
+### Bug Fixes
+
+* revert forced quality to indexed value ([76f9ef9](https://github.com/liveryvideo/interactive-bridge/commit/76f9ef9db604579a0dc1ca6a926cfba562504de4))
+
 # [1.16.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.15.0...v1.16.0) (2026-01-13)
 
 
