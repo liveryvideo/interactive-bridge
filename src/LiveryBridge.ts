@@ -55,14 +55,6 @@ type Spy = (message: LiveryMessage) => void;
 
 const version = __VERSION__;
 
-// Used to narrow down unknown object ({}) type
-function hasProperty<X extends {}, Y extends PropertyKey>(
-  obj: X,
-  prop: Y,
-): obj is Record<Y, unknown> & X {
-  return Object.hasOwn(obj, prop);
-}
-
 /**
  * Base Livery bridge class, to be extended by {@link InteractiveBridge} and {@link AbstractPlayerBridge}.
  */
@@ -447,6 +439,14 @@ export class LiveryBridge {
   private sendResolve(id: string, value: unknown) {
     this.sendMessage('resolve', id, { value });
   }
+}
+
+// Used to narrow down unknown object ({}) type
+function hasProperty<X extends {}, Y extends PropertyKey>(
+  obj: X,
+  prop: Y,
+): obj is Record<Y, unknown> & X {
+  return Object.hasOwn(obj, prop);
 }
 
 /**
