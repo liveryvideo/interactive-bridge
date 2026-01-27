@@ -1,3 +1,10 @@
+## [1.16.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.16.1...v1.16.2) (2026-01-27)
+
+
+### Bug Fixes
+
+* update dependencies and fix audit issues ([0783c39](https://github.com/liveryvideo/interactive-bridge/commit/0783c3953795175ee565a350a5ca7e6fd10467a9))
+
 ## [1.16.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.16.0...v1.16.1) (2026-01-20)
 
 
