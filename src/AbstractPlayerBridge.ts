@@ -142,6 +142,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       'subscribeConfig',
       'subscribeDisplay',
       'subscribeError',
+      'subscribeFeatures',
       'subscribeFullscreen',
       'subscribeMode',
       'subscribeOrientation',
@@ -185,6 +186,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeError(
     listener: (error: string | undefined) => void,
   ): string | undefined;
+
+  protected abstract subscribeFeatures(
+    listener: (features: Features) => void,
+  ): Features;
 
   protected abstract subscribeMode(
     listener: (mode: PlaybackMode) => void,
