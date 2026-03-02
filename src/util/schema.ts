@@ -117,6 +117,7 @@ export const validateOrientation = createValidate<Orientation>(
  *
  * - `'low'` for low performance mode with reduced CPU/GPU usage
  * - `'normal'` for normal performance mode
+ * - `undefined` when performance mode has yet to be determined, i.e. initial page load
  */
 export type PerformanceMode = 'low' | 'normal' | undefined;
 
