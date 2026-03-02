@@ -113,6 +113,18 @@ export const validateOrientation = createValidate<Orientation>(
 );
 
 /**
+ * Player Performance Mode, i.e.
+ *
+ * - `'low'` for low performance mode with reduced CPU/GPU usage
+ * - `'normal'` for normal performance mode
+ */
+export type PerformanceMode = 'low' | 'normal' | undefined;
+
+export const validatePerformanceMode = createValidate<PerformanceMode>(
+  z.union([z.literal('low'), z.literal('normal'), zUndefined]),
+);
+
+/**
  * Mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
  *
  * - `'CATCHUP'` stream at increased live latency, i.e. after seeking to catch up to missed content
