@@ -128,6 +128,7 @@ export default defineConfig(({ command, mode }) => ({
           ? (id) => Object.keys(dependencies).includes(id.replace(/\/.*/, ''))
           : undefined,
     },
+    sourcemap: true,
     target: mode === 'lib:bundler' ? 'es2019' : browserslistToEsbuild(),
   },
 
