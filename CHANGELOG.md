@@ -1,3 +1,10 @@
+## [1.16.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.16.2...v1.16.3) (2026-03-09)
+
+
+### Bug Fixes
+
+* **vite:** generate sourcemaps ([b744ac8](https://github.com/liveryvideo/interactive-bridge/commit/b744ac8e7e9f99b39eb6cf70d41403962a61e1f5))
+
 ## [1.16.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.16.1...v1.16.2) (2026-01-27)
 
 
