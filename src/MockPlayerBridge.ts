@@ -4,6 +4,7 @@ import { AbstractPlayerBridge } from './AbstractPlayerBridge.ts';
 import type {
   Config,
   DisplayMode,
+  Features,
   PlaybackMode,
   PlaybackState,
   Qualities,
@@ -47,6 +48,18 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   private display: DisplayMode = 'DEFAULT';
 
   private readonly displayListeners: ((value: DisplayMode) => void)[] = [];
+
+  private readonly features: Features = {
+    airplay: false,
+    chromecast: false,
+    contact: false,
+    fullscreen: false,
+    pip: false,
+    scrubber: false,
+    volume: false,
+  };
+
+  private readonly featuresListeners: ((value: Features) => void)[] = [];
 
   private muted = true;
 
@@ -226,6 +239,11 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   protected subscribeError(listener: (error: string | undefined) => void) {
     setTimeout(() => listener(''), 1500);
     return 'dummy-error';
+  }
+
+  protected subscribeFeatures(listener: (features: Features) => void) {
+    this.featuresListeners.push(listener);
+    return this.features;
   }
 
   protected subscribeMode(listener: (mode: PlaybackMode) => void) {

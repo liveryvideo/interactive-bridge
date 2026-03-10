@@ -5,6 +5,7 @@ import type {
   AuthClaims,
   Config,
   DisplayMode,
+  Features,
   Orientation,
   PlaybackMode,
   PlaybackState,
@@ -365,6 +366,17 @@ export class InteractiveBridge extends LiveryBridge {
     return this.sendCommand('subscribeError', undefined, (value) =>
       listener(validateStringOrUndefined(value)),
     ).then(validateStringOrUndefined);
+  }
+
+  /**
+   * TODO:
+   *
+   * @param listener - Listener to call when value is changed
+   */
+  subscribeFeatures(listener: (value: Features) => void): Promise<Features> {
+    return this.sendCommand('subscribeFeatures', undefined, (value) =>
+      listener(validateFeatures(value)),
+    ).then(validateFeatures);
   }
 
   /**
