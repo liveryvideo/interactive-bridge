@@ -44,6 +44,7 @@ const BRIDGE_SUBSCRIBE_NAMES = [
   'subscribeMode',
   'subscribeOrientation',
   'subscribePaused',
+  'subscribePerformance',
   'subscribePlaybackState',
   'subscribePlaying',
   'subscribeQualities',
@@ -340,6 +341,9 @@ export class LiveryBridgeInteractive extends LitElement {
                       subscribeOrientation
                     </option>
                     <option value="subscribePaused">subscribePaused</option>
+                    <option value="subscribePerformance">
+                      subscribePerformance
+                    </option>
                     <option value="subscribePlaybackState">
                       subscribePlaybackState
                     </option>

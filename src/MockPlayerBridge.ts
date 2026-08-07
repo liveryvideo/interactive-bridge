@@ -4,6 +4,7 @@ import { AbstractPlayerBridge } from './AbstractPlayerBridge.ts';
 import type {
   Config,
   DisplayMode,
+  PerformanceMode,
   PlaybackMode,
   PlaybackState,
   Qualities,
@@ -49,6 +50,8 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   private readonly displayListeners: ((value: DisplayMode) => void)[] = [];
 
   private muted = true;
+
+  private performanceMode: PerformanceMode = undefined;
 
   private playbackMode: PlaybackMode = 'LIVE';
 
@@ -247,6 +250,19 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     }, 6000);
 
     return this.playbackMode;
+  }
+
+  protected subscribePerformance(listener: (mode: PerformanceMode) => void) {
+    setTimeout(() => {
+      this.performanceMode = 'LOW';
+      listener(this.performanceMode);
+    }, 2000);
+    setTimeout(() => {
+      this.performanceMode = 'HIGH';
+      listener(this.performanceMode);
+    }, 12_000);
+
+    return this.performanceMode;
   }
 
   protected subscribePlaybackState(

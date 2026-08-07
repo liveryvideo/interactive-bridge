@@ -6,6 +6,7 @@ import type {
   Config,
   DisplayMode,
   Orientation,
+  PerformanceMode,
   PlaybackMode,
   PlaybackState,
   Qualities,
@@ -22,6 +23,7 @@ import {
   validateInteractivePlayerOptions,
   validateNumberOrNan,
   validateOrientation,
+  validatePerformanceMode,
   validatePlaybackDetails,
   validatePlaybackMode,
   validatePlaybackState,
@@ -419,6 +421,20 @@ export class InteractiveBridge extends LiveryBridge {
       (value) => ['ENDED', 'PAUSED'].includes(value),
       listener,
     );
+  }
+
+  /**
+   * Returns promise of current player performance mode
+   * and calls back `listener` with any subsequent mode changes.
+   *
+   * @param listener - Listener to call when value is changed
+   */
+  subscribePerformance(
+    listener: (value: PerformanceMode) => void,
+  ): Promise<PerformanceMode> {
+    return this.sendCommand('subscribePerformance', undefined, (value) =>
+      listener(validatePerformanceMode(value)),
+    ).then(validatePerformanceMode);
   }
 
   /**

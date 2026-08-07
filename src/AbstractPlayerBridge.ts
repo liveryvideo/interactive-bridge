@@ -6,6 +6,7 @@ import type {
   DisplayMode,
   Features,
   Orientation,
+  PerformanceMode,
   PlaybackDetails,
   PlaybackMode,
   PlaybackState,
@@ -145,6 +146,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       'subscribeFullscreen',
       'subscribeMode',
       'subscribeOrientation',
+      'subscribePerformance',
       'subscribePlaybackState',
       'subscribeQualities',
       'subscribeQuality',
@@ -189,6 +191,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeMode(
     listener: (mode: PlaybackMode) => void,
   ): PlaybackMode;
+
+  protected abstract subscribePerformance(
+    listener: (mode: PerformanceMode) => void,
+  ): PerformanceMode;
 
   protected abstract subscribePlaybackState(
     listener: (playbackState: PlaybackState) => void,
