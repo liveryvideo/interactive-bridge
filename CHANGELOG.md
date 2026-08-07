@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.16.3...v1.17.0) (2026-08-07)
+
+
+### Features
+
+* add performance mode support ([#43](https://github.com/liveryvideo/interactive-bridge/issues/43)) ([1b31111](https://github.com/liveryvideo/interactive-bridge/commit/1b3111174d78abf7f70c14a3a26c7578c414be06))
+
 ## [1.16.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.16.2...v1.16.3) (2026-03-09)
 
 
