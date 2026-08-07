@@ -77,7 +77,6 @@ export const validateStringParams =
 
 /**
  * Mode of display for player and/or video, i.e:
- *
  * - `'DEFAULT'` for default display in the web page
  * - `'FULLSCREEN'` for fullscreen display
  * - `'PIP'` for picture-in-picture display of the video (the interactive layer remains in the page)
@@ -113,21 +112,19 @@ export const validateOrientation = createValidate<Orientation>(
 );
 
 /**
- * Player Performance Mode, i.e.
- *
- * - `'low'` for low performance mode with reduced CPU/GPU usage
- * - `'normal'` for normal performance mode
- * - `undefined` when performance mode has yet to be determined, i.e. initial page load
+ * Livery performance mode, i.e:
+ * - `undefined` if still unknown, e.g: on first page load
+ * - `'LOW'` if degraded and resource usage should be restricted
+ * - `'HIGH'` if confirmed to function well
  */
-export type PerformanceMode = 'low' | 'normal' | undefined;
+export type PerformanceMode = 'HIGH' | 'LOW' | undefined;
 
 export const validatePerformanceMode = createValidate<PerformanceMode>(
-  z.union([z.literal('low'), z.literal('normal'), zUndefined]),
+  z.union([z.literal('LOW'), z.literal('HIGH'), zUndefined]),
 );
 
 /**
- * Mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc.
- *
+ * Mode of playback, e.g. how to buffer, sync, adapt quality, manage stalls, etc. i.e:
  * - `'CATCHUP'` stream at increased live latency, i.e. after seeking to catch up to missed content
  * - `'LIVE'` stream at default live target latency
  * - `'UNKNOWN'` while state is unknown, e.g: during startup
@@ -146,7 +143,6 @@ export const validatePlaybackMode = createValidate<PlaybackMode>(
 
 /**
  * Playback state, i.e:
- *
  * - `'BUFFERING'` while waiting for buffer to fill before being able to play
  * - `'ENDED'` after video has ended
  * - `'FAST_FORWARD'` while playing at an increased rate
@@ -180,7 +176,10 @@ export const validatePlaybackState = createValidate<PlaybackState>(
 );
 
 /**
- * Livery stream phase, e.g: PRE/LIVE/POST before/while/after streaming to viewers.
+ * Livery stream phase, i.e:
+ * - `'PRE'` before live stream
+ * - `'LIVE'` while live streaming
+ * - `'POST'` after live stream
  */
 export type StreamPhase = 'LIVE' | 'POST' | 'PRE';
 

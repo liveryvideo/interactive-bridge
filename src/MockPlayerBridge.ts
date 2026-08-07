@@ -51,10 +51,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private muted = true;
 
-  private readonly performance: PerformanceMode = 'normal';
-
-  private readonly performanceListeners: ((value: PerformanceMode) => void)[] =
-    [];
+  private performanceMode: PerformanceMode = undefined;
 
   private playbackMode: PlaybackMode = 'LIVE';
 
@@ -256,8 +253,16 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   }
 
   protected subscribePerformance(listener: (mode: PerformanceMode) => void) {
-    this.performanceListeners.push(listener);
-    return this.performance;
+    setTimeout(() => {
+      this.performanceMode = 'LOW';
+      listener(this.performanceMode);
+    }, 2000);
+    setTimeout(() => {
+      this.performanceMode = 'HIGH';
+      listener(this.performanceMode);
+    }, 12_000);
+
+    return this.performanceMode;
   }
 
   protected subscribePlaybackState(
