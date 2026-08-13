@@ -115,7 +115,7 @@ export const validateOrientation = createValidate<Orientation>(
  * Livery performance mode, i.e:
  * - `undefined` if still unknown, e.g: on first page load
  * - `'LOW'` if degraded and resource usage should be restricted
- * - `'HIGH'` if confirmed to function well
+ * - `'HIGH'` if confirmed to function well and resources can be used freely
  */
 export type PerformanceMode = 'HIGH' | 'LOW' | undefined;
 
