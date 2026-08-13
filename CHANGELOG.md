@@ -1,3 +1,10 @@
+## [1.17.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.17.0...v1.17.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* export PerformanceMode type with updated description ([9df4ed6](https://github.com/liveryvideo/interactive-bridge/commit/9df4ed650b3c881255d94118536f512d7cc87978))
+
 # [1.17.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.16.3...v1.17.0) (2026-08-07)
 
 
