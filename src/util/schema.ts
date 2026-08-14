@@ -53,7 +53,12 @@ const createValidate =
 
 const zBoolean = z.boolean();
 const zNumber = z.number();
-const zNumberOrNan = z.union([z.number(), z.nan()]);
+const zNumberInfOrNan = z.union([
+  z.number(),
+  z.nan(),
+  z.literal(Number.POSITIVE_INFINITY),
+  z.literal(Number.NEGATIVE_INFINITY),
+]);
 const zString = z.string();
 const zUndefined = z.undefined();
 const zBooleanOrUndefined = z.union([zBoolean, zUndefined]);
@@ -63,7 +68,7 @@ const zStringParams = z.record(zString, zString);
 
 export const validateBoolean = createValidate(zBoolean);
 export const validateNumber = createValidate(zNumber);
-export const validateNumberOrNan = createValidate(zNumberOrNan);
+export const validateNumberInfOrNan = createValidate(zNumberInfOrNan);
 export const validateString = createValidate(zString);
 export const validateStringOrUndefined = createValidate(zStringOrUndefined);
 export const validateStringParams =
@@ -405,10 +410,10 @@ export interface PlaybackDetails {
 
 export const validatePlaybackDetails = createValidate<PlaybackDetails>(
   z.object({
-    buffer: zNumberOrNan,
-    duration: zNumberOrNan,
-    latency: zNumberOrNan,
-    position: zNumberOrNan,
+    buffer: zNumberInfOrNan,
+    duration: zNumberInfOrNan,
+    latency: zNumberInfOrNan,
+    position: zNumberInfOrNan,
   }),
 );
 
