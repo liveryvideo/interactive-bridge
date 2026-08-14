@@ -1,3 +1,10 @@
+## [1.17.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.17.1...v1.17.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* accept Infinity values like with Zod v3 for PlaybackDetails etc ([eb76026](https://github.com/liveryvideo/interactive-bridge/commit/eb760269de229d32991c33088cc41b4b10078f69))
+
 ## [1.17.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.17.0...v1.17.1) (2026-08-13)
 
 
