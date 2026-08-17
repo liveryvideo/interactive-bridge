@@ -1,3 +1,10 @@
+## [1.17.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.17.2...v1.17.3) (2026-08-17)
+
+
+### Bug Fixes
+
+* add performance to Features and doc subscribePerformance requires that ([f752b0d](https://github.com/liveryvideo/interactive-bridge/commit/f752b0d1ea6710de744828cd34cb98745f89a0a8))
+
 ## [1.17.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.17.1...v1.17.2) (2026-08-14)
 
 
