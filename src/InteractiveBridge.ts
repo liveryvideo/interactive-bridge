@@ -427,6 +427,8 @@ export class InteractiveBridge extends LiveryBridge {
    * Returns promise of current player performance mode
    * and calls back `listener` with any subsequent mode changes.
    *
+   * Requires: {@link getFeatures}.performance.
+   *
    * @param listener - Listener to call when value is changed
    */
   subscribePerformance(

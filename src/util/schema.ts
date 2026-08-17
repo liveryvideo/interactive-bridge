@@ -361,6 +361,7 @@ export interface Features {
   chromecast: boolean;
   contact: boolean;
   fullscreen: boolean;
+  performance?: boolean;
   pip: boolean;
   scrubber: boolean;
   volume: boolean;
@@ -372,6 +373,7 @@ export const validateFeatures = createValidate<Features>(
     chromecast: zBoolean,
     contact: zBoolean,
     fullscreen: zBoolean,
+    performance: zBooleanOrUndefined,
     pip: zBoolean,
     scrubber: zBoolean,
     volume: zBoolean,

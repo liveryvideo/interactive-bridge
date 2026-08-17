@@ -100,6 +100,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       chromecast: true,
       contact: true,
       fullscreen: true,
+      performance: true,
       pip: true,
       scrubber: true,
       volume: true,

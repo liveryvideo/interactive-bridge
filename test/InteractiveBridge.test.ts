@@ -56,6 +56,7 @@ describe('InteractiveBridge with MockPlayerBridge', () => {
         chromecast: true,
         contact: true,
         fullscreen: true,
+        performance: true,
         pip: true,
         scrubber: true,
         volume: true,
