@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.17.3...v1.18.0) (2026-08-17)
+
+
+### Features
+
+* add config properties: autoplay, fit, interactive, position, sources and targetLatency ([aaf7eff](https://github.com/liveryvideo/interactive-bridge/commit/aaf7eff30a49195946a67b2bbba0fa0e67475fa3))
+
 ## [1.17.3](https://github.com/liveryvideo/interactive-bridge/compare/v1.17.2...v1.17.3) (2026-08-17)
 
 
