@@ -61,9 +61,9 @@ const zNumberInfOrNan = z.union([
 ]);
 const zString = z.string();
 const zUndefined = z.undefined();
-const zBooleanOrUndefined = z.union([zBoolean, zUndefined]);
-const zNumberOrUndefined = z.union([zNumber, zUndefined]);
-const zStringOrUndefined = z.union([zString, zUndefined]);
+const zBooleanOrUndefined = zBoolean.or(zUndefined);
+const zNumberOrUndefined = zNumber.or(zUndefined);
+const zStringOrUndefined = zString.or(zUndefined);
 const zStringParams = z.record(zString, zString);
 
 export const validateBoolean = createValidate(zBoolean);
@@ -302,6 +302,8 @@ export const validateAuthClaims = createValidate<
  * Public part of Livery stream config.
  */
 export interface Config {
+  /** Whether to automatically start playback by default. */
+  autoplay?: boolean;
   /** Registry of controls that should be shown to the user. */
   controls: {
     /** Enable toggling AirPlay and/or Chromecast display. */
@@ -325,16 +327,48 @@ export interface Config {
   };
   /** Livery customer ID. */
   customerId: string;
+  /** Determines how the video and posters will be scaled and cropped. */
+  fit?: 'CONTAIN' | 'COVER' | 'FILL' | 'SCALE_DOWN';
+  /**
+   * Interactive layer, i.e:
+   * - `''` disable interactive layer
+   * - `'test'` use player interactive-bridge's livery-bridge-interactive element
+   * - `'http*'` load specified interactive layer url in iframe
+   * - `'version'`, p.e: `'1.0.0'` \@liveryvideo/interactive version to use livery-interactive element from
+   */
+  interactive?: string;
+  /** Determines how the video and posters will be positioned within the player. */
+  position?: 'BOTTOM' | 'CENTER' | 'LEFT' | 'RIGHT' | 'TOP';
+  /** Array of video source URLs from which the first that can be played will be selected. */
+  sources?: string[];
   /** Livery stream phase, i.e: PRE/LIVE/POST before/while/after streaming to viewers. */
   streamPhase: StreamPhase;
   /** Array of [unixTimestamp, streamPhase] tuples listing the times at which those phases started. */
   streamPhases: [number, StreamPhase][];
+  /** Target live latency in seconds. If 0 then syncing is disabled. */
+  targetLatency?: number;
   /** Livery tenant ID. */
   tenantId: string;
 }
 
+const zFit = z.union([
+  z.literal('CONTAIN'),
+  z.literal('COVER'),
+  z.literal('FILL'),
+  z.literal('SCALE_DOWN'),
+]);
+
+const zPosition = z.union([
+  z.literal('BOTTOM'),
+  z.literal('CENTER'),
+  z.literal('LEFT'),
+  z.literal('RIGHT'),
+  z.literal('TOP'),
+]);
+
 export const validateConfig = createValidate<Config>(
   z.object({
+    autoplay: zBooleanOrUndefined,
     controls: z.object({
       cast: zBoolean,
       contact: zBoolean,
@@ -347,8 +381,13 @@ export const validateConfig = createValidate<Config>(
       scrubber: zBoolean,
     }),
     customerId: zString,
+    fit: zFit.or(zUndefined),
+    interactive: zStringOrUndefined,
+    position: zPosition.or(zUndefined),
+    sources: z.array(zString).or(zUndefined),
     streamPhase: zStreamPhase,
     streamPhases: z.array(z.tuple([zNumber, zStreamPhase])),
+    targetLatency: zNumberOrUndefined,
     tenantId: zString,
   }),
 );
@@ -451,7 +490,7 @@ export interface Quality {
   representationId?: string;
   /** Video quality. */
   video?: {
-    /** Video andwidth in bits per second. */
+    /** Video bandwidth in bits per second. */
     bandwidth: number;
     /** Video height in pixels. */
     height: number;
@@ -467,13 +506,12 @@ export const validateQualities = createValidate<Qualities>(
     forced: zNumber.default(-1),
     list: z.array(
       z.object({
-        audio: z.union([z.object({ bandwidth: zNumber }), zUndefined]),
+        audio: z.object({ bandwidth: zNumber }).or(zUndefined),
         label: zString,
         representationId: zStringOrUndefined,
-        video: z.union([
-          z.object({ bandwidth: zNumber, height: zNumber, width: zNumber }),
-          zUndefined,
-        ]),
+        video: z
+          .object({ bandwidth: zNumber, height: zNumber, width: zNumber })
+          .or(zUndefined),
       }),
     ),
     selected: zNumber,

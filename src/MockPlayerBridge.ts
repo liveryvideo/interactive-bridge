@@ -24,6 +24,7 @@ const buildQuality = (index: number) => ({
  */
 export class MockPlayerBridge extends AbstractPlayerBridge {
   config: Config = {
+    autoplay: true,
     controls: {
       cast: true,
       contact: true,
@@ -36,8 +37,13 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       scrubber: true,
     },
     customerId: 'dummy-customer-id',
+    fit: 'CONTAIN',
+    interactive: 'test',
+    position: 'CENTER',
+    sources: ['dummy-source-url'],
     streamPhase: 'LIVE',
     streamPhases: [[Date.now(), 'LIVE']],
+    targetLatency: 3,
     tenantId: 'dummy-tenant-id',
   };
 

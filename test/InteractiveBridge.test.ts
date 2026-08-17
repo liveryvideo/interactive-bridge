@@ -270,8 +270,14 @@ describe('InteractiveBridge with MockPlayerBridge', () => {
       const initial = await interactiveBridge.subscribeConfig((value) =>
         streamPhases.push(value.streamPhase),
       );
-      expect(initial.streamPhase).to.equal('POST');
+      expect(initial.autoplay).to.equal(true);
       expect(initial.customerId).to.equal('dummy-customer-id');
+      expect(initial.fit).to.equal('CONTAIN');
+      expect(initial.interactive).to.equal('test');
+      expect(initial.position).to.equal('CENTER');
+      expect(initial.sources).to.deep.equal(['dummy-source-url']);
+      expect(initial.streamPhase).to.equal('POST');
+      expect(initial.targetLatency).to.equal(3);
 
       await vi.advanceTimersByTimeAsync(3000);
       expect(streamPhases).to.deep.equal(['PRE']);
