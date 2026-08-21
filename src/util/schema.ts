@@ -331,14 +331,16 @@ export interface Config {
   fit?: 'CONTAIN' | 'COVER' | 'FILL' | 'SCALE_DOWN';
   /**
    * Interactive layer, i.e:
-   * - `''` disable interactive layer
-   * - `'test'` use player interactive-bridge's livery-bridge-interactive element
-   * - `'http*'` load specified interactive layer url in iframe
-   * - `'version'`, p.e: `'1.0.0'` \@liveryvideo/interactive version to use livery-interactive element from
+   * - `''` i.e: empty string, to disable the interactive layer
+   * - `'test'` to use the test livery-bridge-interactive element included in the player
+   * - `'http{*}'` to load specified interactive layer url in iframe
+   * - `'{version}'` p.e: `'1.0.0'`, \@liveryvideo/interactive version to use livery-interactive element from
    */
   interactive?: string;
   /** Determines how the video and posters will be positioned within the player. */
   position?: 'BOTTOM' | 'CENTER' | 'LEFT' | 'RIGHT' | 'TOP';
+  /** Livery server region, e.g. used by the interactive layer. */
+  region?: string;
   /** Array of video source URLs from which the first that can be played will be selected. */
   sources?: string[];
   /** Livery stream phase, i.e: PRE/LIVE/POST before/while/after streaming to viewers. */
@@ -347,7 +349,7 @@ export interface Config {
   streamPhases: [number, StreamPhase][];
   /** Target live latency in seconds. If 0 then syncing is disabled. */
   targetLatency?: number;
-  /** Livery tenant ID. */
+  /** Livery tenant ID, e.g. used by the interactive layer. */
   tenantId: string;
 }
 
@@ -384,6 +386,7 @@ export const validateConfig = createValidate<Config>(
     fit: zFit.or(zUndefined),
     interactive: zStringOrUndefined,
     position: zPosition.or(zUndefined),
+    region: zStringOrUndefined,
     sources: z.array(zString).or(zUndefined),
     streamPhase: zStreamPhase,
     streamPhases: z.array(z.tuple([zNumber, zStreamPhase])),

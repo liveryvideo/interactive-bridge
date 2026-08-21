@@ -40,6 +40,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     fit: 'CONTAIN',
     interactive: 'test',
     position: 'CENTER',
+    region: 'dummy-region',
     sources: ['dummy-source-url'],
     streamPhase: 'LIVE',
     streamPhases: [[Date.now(), 'LIVE']],

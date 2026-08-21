@@ -271,13 +271,27 @@ describe('InteractiveBridge with MockPlayerBridge', () => {
         streamPhases.push(value.streamPhase),
       );
       expect(initial.autoplay).to.equal(true);
+      expect(initial.controls).to.deep.equal({
+        cast: true,
+        contact: true,
+        error: true,
+        fullscreen: true,
+        mute: true,
+        pip: true,
+        play: true,
+        quality: true,
+        scrubber: true,
+      });
       expect(initial.customerId).to.equal('dummy-customer-id');
       expect(initial.fit).to.equal('CONTAIN');
       expect(initial.interactive).to.equal('test');
       expect(initial.position).to.equal('CENTER');
+      expect(initial.region).to.equal('dummy-region');
       expect(initial.sources).to.deep.equal(['dummy-source-url']);
       expect(initial.streamPhase).to.equal('POST');
+      // TODO: add initial and subsequent streamPhases testing
       expect(initial.targetLatency).to.equal(3);
+      expect(initial.tenantId).to.equal('dummy-tenant-id');
 
       await vi.advanceTimersByTimeAsync(3000);
       expect(streamPhases).to.deep.equal(['PRE']);
