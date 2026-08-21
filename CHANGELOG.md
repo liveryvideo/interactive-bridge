@@ -1,3 +1,10 @@
+## [1.18.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.18.0...v1.18.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* add missing region property to Config ([839908d](https://github.com/liveryvideo/interactive-bridge/commit/839908d922c0de97bfd8aa180c2a4edfcfd9660d))
+
 # [1.18.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.17.3...v1.18.0) (2026-08-17)
 
 
