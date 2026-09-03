@@ -465,6 +465,8 @@ export const validatePlaybackDetails = createValidate<PlaybackDetails>(
  * Stream qualities.
  */
 export interface Qualities {
+  /** Index of quality that is selected by ABR to be played. */
+  abr?: number;
   /** Index of quality that is being played, or -1 if no quality is active yet. */
   active: number;
   /** Index of the quality that is being actively forced. */
@@ -486,10 +488,8 @@ export interface Quality {
   };
   /** Quality label. If video height is unique: ‘[height]p’ else ‘[bandwidth/1000]k’. */
   label: string;
-  /**
-   * Quality Representation ID.
-   * TODO: Remove temporary backwards compatibility in v3.
-   */
+  // TODO: Remove temporary backwards compatibility in v3
+  /** Quality Representation ID. */
   representationId?: string;
   /** Video quality. */
   video?: {
@@ -505,7 +505,7 @@ export interface Quality {
 export const validateQualities = createValidate<Qualities>(
   z.object({
     active: zNumber,
-    /** TODO: Remove backwards-compatible default in v3. */
+    // TODO: Remove backwards-compatible default in v3
     forced: zNumber.default(-1),
     list: z.array(
       z.object({
