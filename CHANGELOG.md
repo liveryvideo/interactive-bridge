@@ -1,3 +1,10 @@
+## [1.18.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.18.1...v1.18.2) (2026-09-03)
+
+
+### Bug Fixes
+
+* **tsdoc:** remove TODO comments from exported Quality type ([a2f490b](https://github.com/liveryvideo/interactive-bridge/commit/a2f490bb802e4a02c541889d96162e8cdd879566))
+
 ## [1.18.1](https://github.com/liveryvideo/interactive-bridge/compare/v1.18.0...v1.18.1) (2026-08-21)
 
 
