@@ -145,6 +145,7 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
       'subscribeError',
       'subscribeFullscreen',
       'subscribeMode',
+      'subscribeOnline',
       'subscribeOrientation',
       'subscribePerformance',
       'subscribePlaybackState',
@@ -191,6 +192,10 @@ export abstract class AbstractPlayerBridge extends LiveryBridge {
   protected abstract subscribeMode(
     listener: (mode: PlaybackMode) => void,
   ): PlaybackMode;
+
+  protected abstract subscribeOnline(
+    listener: (online: boolean) => void,
+  ): boolean;
 
   protected abstract subscribePerformance(
     listener: (mode: PerformanceMode) => void,

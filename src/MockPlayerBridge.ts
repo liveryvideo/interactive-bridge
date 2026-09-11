@@ -58,6 +58,10 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private muted = true;
 
+  private online = true;
+
+  private readonly onlineListeners: ((value: boolean) => void)[] = [];
+
   private performanceMode: PerformanceMode = undefined;
 
   private playbackMode: PlaybackMode = 'LIVE';
@@ -107,6 +111,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       chromecast: true,
       contact: true,
       fullscreen: true,
+      online: true,
       performance: true,
       pip: true,
       scrubber: true,
@@ -260,6 +265,13 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return this.playbackMode;
   }
 
+  protected subscribeOnline(listener: (value: boolean) => void) {
+    this.onlineListeners.push(listener);
+    setTimeout(() => this.setOnline(false), 3000);
+    setTimeout(() => this.setOnline(true), 6000);
+    return this.online;
+  }
+
   protected subscribePerformance(listener: (mode: PerformanceMode) => void) {
     setTimeout(() => {
       this.performanceMode = 'LOW';
@@ -288,6 +300,16 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   protected subscribeVolume(listener: (value: Volume) => void) {
     this.volumeListeners.push(listener);
     return { muted: this.muted, volume: this.volume };
+  }
+
+  private setOnline(online: boolean) {
+    if (online === this.online) {
+      return;
+    }
+    this.online = online;
+    for (const listener of this.onlineListeners) {
+      listener(online);
+    }
   }
 
   private setPlaybackState(playbackState: PlaybackState) {

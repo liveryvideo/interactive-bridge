@@ -56,6 +56,7 @@ describe('InteractiveBridge with MockPlayerBridge', () => {
         chromecast: true,
         contact: true,
         fullscreen: true,
+        online: true,
         performance: true,
         pip: true,
         scrubber: true,
@@ -334,6 +335,20 @@ describe('InteractiveBridge with MockPlayerBridge', () => {
 
       await vi.advanceTimersByTimeAsync(6000);
       expect(values).to.deep.equal(['CATCHUP', 'LIVE', 'UNKNOWN', 'VOD']);
+    });
+
+    it('subscribeOnline() resolves initial online state and notifies listener of subsequent states', async () => {
+      const values: boolean[] = [];
+      const initial = await interactiveBridge.subscribeOnline((value) =>
+        values.push(value),
+      );
+      expect(initial).to.equal(true);
+
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(values).to.deep.equal([false]);
+
+      await vi.advanceTimersByTimeAsync(6000);
+      expect(values).to.deep.equal([false, true]);
     });
 
     it('subscribeOrientation() (deprecated) resolves current orientation', async () => {
