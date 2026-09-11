@@ -331,10 +331,16 @@ describe('InteractiveBridge with MockPlayerBridge', () => {
       const initial = await interactiveBridge.subscribeMode((value) =>
         values.push(value),
       );
-      expect(initial).to.equal('LIVE');
+      expect(initial).to.equal('UNKNOWN');
 
-      await vi.advanceTimersByTimeAsync(6000);
-      expect(values).to.deep.equal(['CATCHUP', 'LIVE', 'UNKNOWN', 'VOD']);
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(values).to.deep.equal(['VOD']);
+
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(values).to.deep.equal(['VOD', 'CATCHUP']);
+
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(values).to.deep.equal(['VOD', 'CATCHUP', 'LIVE']);
     });
 
     it('subscribeOnline() resolves initial online state and notifies listener of subsequent states', async () => {
@@ -342,13 +348,10 @@ describe('InteractiveBridge with MockPlayerBridge', () => {
       const initial = await interactiveBridge.subscribeOnline((value) =>
         values.push(value),
       );
-      expect(initial).to.equal(true);
+      expect(initial).to.equal(false);
 
       await vi.advanceTimersByTimeAsync(3000);
-      expect(values).to.deep.equal([false]);
-
-      await vi.advanceTimersByTimeAsync(6000);
-      expect(values).to.deep.equal([false, true]);
+      expect(values).to.deep.equal([true]);
     });
 
     it('subscribeOrientation() (deprecated) resolves current orientation', async () => {
@@ -377,10 +380,10 @@ describe('InteractiveBridge with MockPlayerBridge', () => {
       );
       expect(initial).to.equal(undefined);
 
-      await vi.advanceTimersByTimeAsync(2000);
+      await vi.advanceTimersByTimeAsync(3000);
       expect(values).to.deep.equal(['LOW']);
 
-      await vi.advanceTimersByTimeAsync(10_000);
+      await vi.advanceTimersByTimeAsync(3000);
       expect(values).to.deep.equal(['LOW', 'HIGH']);
     });
 
