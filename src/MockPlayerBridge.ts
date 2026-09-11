@@ -58,14 +58,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   private muted = true;
 
-  private online = true;
-
-  private readonly onlineListeners: ((value: boolean) => void)[] = [];
-
-  private performanceMode: PerformanceMode = undefined;
-
-  private playbackMode: PlaybackMode = 'LIVE';
-
   private playbackState: PlaybackState = 'PLAYING';
 
   private readonly playbackStateListeners: ((value: PlaybackState) => void)[] =
@@ -215,22 +207,17 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
 
   protected subscribeConfig(listener: (value: Config) => void) {
     const changeConfig = (streamPhase: Config['streamPhase']) => {
-      if (streamPhase !== this.config.streamPhase) {
-        this.config.streamPhase = streamPhase;
-        this.config.streamPhases.push([Date.now(), streamPhase]);
+      if (streamPhase === this.config.streamPhase) {
+        return;
       }
+      this.config.streamPhase = streamPhase;
+      this.config.streamPhases.push([Date.now(), streamPhase]);
+      listener(this.config);
     };
 
     changeConfig('POST');
-    setTimeout(() => {
-      changeConfig('PRE');
-      listener(this.config);
-    }, 3000);
-    setTimeout(() => {
-      changeConfig('LIVE');
-      listener(this.config);
-    }, 6000);
-
+    setTimeout(() => changeConfig('PRE'), 3000);
+    setTimeout(() => changeConfig('LIVE'), 6000);
     return this.config;
   }
 
@@ -244,45 +231,24 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
     return 'dummy-error';
   }
 
-  protected subscribeMode(listener: (mode: PlaybackMode) => void) {
-    setTimeout(() => {
-      this.playbackMode = 'CATCHUP';
-      listener(this.playbackMode);
-    }, 1500);
-    setTimeout(() => {
-      this.playbackMode = 'LIVE';
-      listener(this.playbackMode);
-    }, 3000);
-    setTimeout(() => {
-      this.playbackMode = 'UNKNOWN';
-      listener(this.playbackMode);
-    }, 4500);
-    setTimeout(() => {
-      this.playbackMode = 'VOD';
-      listener(this.playbackMode);
-    }, 6000);
-
-    return this.playbackMode;
+  protected subscribeMode(
+    listener: (mode: PlaybackMode) => void,
+  ): PlaybackMode {
+    setTimeout(() => listener('VOD'), 1500);
+    setTimeout(() => listener('CATCHUP'), 3000);
+    setTimeout(() => listener('LIVE'), 4500);
+    return 'UNKNOWN';
   }
 
   protected subscribeOnline(listener: (value: boolean) => void) {
-    this.onlineListeners.push(listener);
-    setTimeout(() => this.setOnline(false), 3000);
-    setTimeout(() => this.setOnline(true), 6000);
-    return this.online;
+    setTimeout(() => listener(true), 3000);
+    return false;
   }
 
   protected subscribePerformance(listener: (mode: PerformanceMode) => void) {
-    setTimeout(() => {
-      this.performanceMode = 'LOW';
-      listener(this.performanceMode);
-    }, 2000);
-    setTimeout(() => {
-      this.performanceMode = 'HIGH';
-      listener(this.performanceMode);
-    }, 12_000);
-
-    return this.performanceMode;
+    setTimeout(() => listener('LOW'), 3000);
+    setTimeout(() => listener('HIGH'), 6000);
+    return undefined;
   }
 
   protected subscribePlaybackState(
@@ -300,16 +266,6 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
   protected subscribeVolume(listener: (value: Volume) => void) {
     this.volumeListeners.push(listener);
     return { muted: this.muted, volume: this.volume };
-  }
-
-  private setOnline(online: boolean) {
-    if (online === this.online) {
-      return;
-    }
-    this.online = online;
-    for (const listener of this.onlineListeners) {
-      listener(online);
-    }
   }
 
   private setPlaybackState(playbackState: PlaybackState) {
