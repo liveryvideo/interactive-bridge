@@ -215,7 +215,7 @@ export class MockPlayerBridge extends AbstractPlayerBridge {
       listener(this.config);
     };
 
-    changeConfig('POST');
+    this.config.streamPhase = 'POST';
     setTimeout(() => changeConfig('PRE'), 3000);
     setTimeout(() => changeConfig('LIVE'), 6000);
     return this.config;
