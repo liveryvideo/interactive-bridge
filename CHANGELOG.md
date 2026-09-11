@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/liveryvideo/interactive-bridge/compare/v1.18.2...v1.19.0) (2026-09-11)
+
+
+### Features
+
+* **interactive-bridge:** add subscribeOnline; feature: online ([#59](https://github.com/liveryvideo/interactive-bridge/issues/59)) ([60ab2ae](https://github.com/liveryvideo/interactive-bridge/commit/60ab2ae73bddb41dbb70f367ab0aee942d755888))
+
 ## [1.18.2](https://github.com/liveryvideo/interactive-bridge/compare/v1.18.1...v1.18.2) (2026-09-03)
 
 
