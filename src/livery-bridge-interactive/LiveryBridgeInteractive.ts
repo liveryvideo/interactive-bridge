@@ -42,6 +42,7 @@ const BRIDGE_SUBSCRIBE_NAMES = [
   'subscribeError',
   'subscribeFullscreen',
   'subscribeMode',
+  'subscribeOnline',
   'subscribeOrientation',
   'subscribePaused',
   'subscribePerformance',
@@ -337,6 +338,7 @@ export class LiveryBridgeInteractive extends LitElement {
                       subscribeFullscreen
                     </option>
                     <option value="subscribeMode">subscribeMode</option>
+                    <option value="subscribeOnline">subscribeOnline</option>
                     <option value="subscribeOrientation">
                       subscribeOrientation
                     </option>

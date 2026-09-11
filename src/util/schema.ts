@@ -403,6 +403,7 @@ export interface Features {
   chromecast: boolean;
   contact: boolean;
   fullscreen: boolean;
+  online?: boolean;
   performance?: boolean;
   pip: boolean;
   scrubber: boolean;
@@ -415,6 +416,7 @@ export const validateFeatures = createValidate<Features>(
     chromecast: zBoolean,
     contact: zBoolean,
     fullscreen: zBoolean,
+    online: zBooleanOrUndefined,
     performance: zBooleanOrUndefined,
     pip: zBoolean,
     scrubber: zBoolean,

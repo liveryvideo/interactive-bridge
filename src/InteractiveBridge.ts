@@ -394,6 +394,22 @@ export class InteractiveBridge extends LiveryBridge {
   }
 
   /**
+   * Returns promise of current player online state
+   * and calls back `listener` with any subsequent state changes.
+   *
+   * Where `online` is true if the player is able to reach the network, false otherwise.
+   *
+   * Requires: {@link getFeatures}.online.
+   *
+   * @param listener - Listener to call when value is changed
+   */
+  subscribeOnline(listener: (value: boolean) => void) {
+    return this.sendCommand('subscribeOnline', undefined, (value) =>
+      listener(validateBoolean(value)),
+    ).then(validateBoolean);
+  }
+
+  /**
    * Returns promise of current player window orientation (`'landscape' \| 'portrait'`)
    * and calls back `listener` with any subsequent orientations.
    *
